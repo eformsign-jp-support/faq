@@ -1713,6 +1713,13 @@ function updateClock() {
   document.getElementById('current-date').textContent = formatDateDisplay(now.getFullYear(), now.getMonth()+1, now.getDate(), days[now.getDay()]);
   document.getElementById('current-time').textContent =
     String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+
+  // 자정이 지나면 currentDate를 오늘로 자동 전환
+  const today = getTodayStr();
+  if (currentDate !== today) {
+    currentDate = today;
+    renderAll();
+  }
 }
 
 function formatDateDisplay(y, m, d, dayName) {
