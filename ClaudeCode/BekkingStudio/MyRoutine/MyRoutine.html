@@ -2273,10 +2273,10 @@ function renderDesiredList(dd, stats) {
   }
 
   container.innerHTML = flexActivities.map(a => {
-    const entry = dd.entries.find(e => e.activity === a.activity);
+    const entry = dd.entries.find(e => e.id === a.id);
     const checked = entry ? entry.isDesiredLife : false;
     return `
-      <div class="desired-item ${checked ? 'checked' : ''}" onclick="toggleDesired('${entry ? entry.id : ''}')">
+      <div class="desired-item ${checked ? 'checked' : ''}" onclick="toggleDesired('${a.id}')">
         <div class="desired-check">${checked ? '✓' : ''}</div>
         <div style="flex:1">
           <div style="font-weight:600;font-size:14px">${getIcon(a.activity)} ${escHtml(displayActivity(a.activity))}</div>
