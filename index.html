@@ -1146,6 +1146,35 @@ body {
   animation-delay: 0.2s;
 }
 
+/* Record Status Badge */
+.record-status {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 4px 0 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.record-status .pulse-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+.record-status.recording { color: var(--coral); }
+.record-status.recording .pulse-dot {
+  background: var(--coral);
+  animation: pulse 1.5s infinite;
+}
+.record-status.completed { color: var(--success); }
+.record-status.completed .pulse-dot {
+  background: var(--success);
+  animation: none;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 /* Print hide */
 @media print {
   .tab-bar, .header-actions, .btn, .delete-btn, .pwa-install-banner { display: none !important; }
@@ -1170,6 +1199,7 @@ body {
     <div class="card">
       <div class="date-display">
         <div class="date" id="current-date"></div>
+        <div id="record-status" class="record-status"></div>
         <div class="date-time-row">
           <div class="time" id="current-time"></div>
           <input type="date" id="record-date" class="date-picker-mini" onchange="switchDate(this.value)">
@@ -1360,6 +1390,7 @@ const TRANSLATIONS = {
     'record.placeholder': '글쓰기, 명상, 산책...', 'record.record': '기록',
     'record.todayTimeline': '오늘의 타임라인',
     'record.emptyMsg': '아직 기록이 없어요<br>지금 하고 있는 활동을 기록해보세요!',
+    'record.statusRecording': '기록 중', 'record.statusCompleted': '완료',
     'record.closeDay': '하루 마감하기', 'record.reopenDay': '마감 취소 (다시 기록하기)',
     'classify.guide': '<strong>고정 시간</strong>: 반드시 해야 하는 것 (업무, 출퇴근, 식사, 수면 등)<br><strong>유동 시간</strong>: 내가 스스로 선택하는 시간 (영화, 산책, SNS 등)',
     'classify.analyze': '분석하기', 'classify.fixed': '고정', 'classify.flexible': '유동',
@@ -1428,6 +1459,7 @@ const TRANSLATIONS = {
     'record.placeholder': '執筆、瞑想、散歩...', 'record.record': '記録',
     'record.todayTimeline': '今日のタイムライン',
     'record.emptyMsg': 'まだ記録がありません<br>今している活動を記録してみましょう！',
+    'record.statusRecording': '記録中', 'record.statusCompleted': '完了',
     'record.closeDay': '一日を締める', 'record.reopenDay': '締め取消（再記録する）',
     'classify.guide': '<strong>固定時間</strong>：必ずやるべきこと（仕事、通勤、食事、睡眠など）<br><strong>自由時間</strong>：自分で選べる時間（映画、散歩、SNSなど）',
     'classify.analyze': '分析する', 'classify.fixed': '固定', 'classify.flexible': '自由',
@@ -1496,6 +1528,7 @@ const TRANSLATIONS = {
     'record.placeholder': 'Writing, meditation, walking...', 'record.record': 'Record',
     'record.todayTimeline': "Today's Timeline",
     'record.emptyMsg': 'No records yet<br>Start recording your current activity!',
+    'record.statusRecording': 'Recording', 'record.statusCompleted': 'Completed',
     'record.closeDay': 'Close the Day', 'record.reopenDay': 'Cancel Close (Resume Recording)',
     'classify.guide': '<strong>Fixed Time</strong>: Things you must do (work, commute, meals, sleep, etc.)<br><strong>Flexible Time</strong>: Time you choose yourself (movies, walks, SNS, etc.)',
     'classify.analyze': 'Analyze', 'classify.fixed': 'Fixed', 'classify.flexible': 'Flexible',
@@ -1905,7 +1938,17 @@ function reopenDay() {
   showToast(t('toast.reopened'));
 }
 
+function updateRecordStatus() {
+  const el = document.getElementById('record-status');
+  const dd = getDateData(currentDate);
+  const isCompleted = dd.status === 'completed';
+  el.className = 'record-status ' + (isCompleted ? 'completed' : 'recording');
+  el.innerHTML = '<span class="pulse-dot"></span>' +
+    t(isCompleted ? 'record.statusCompleted' : 'record.statusRecording');
+}
+
 function renderTimeline() {
+  updateRecordStatus();
   const dd = getDateData(currentDate);
   const container = document.getElementById('timeline');
   const emptyState = document.getElementById('timeline-empty');
