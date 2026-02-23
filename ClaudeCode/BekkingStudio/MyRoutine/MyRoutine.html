@@ -260,17 +260,18 @@ body {
 .preset-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid rgba(128,128,128,0.12); }
 .preset-icon-btn { font-size: 24px; width: 40px; height: 40px; border: none; background: none; cursor: pointer; border-radius: 8px; transition: background 0.2s; }
 .preset-icon-btn:hover { background: var(--mint-bg); }
+.preset-color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; cursor: pointer; }
 .preset-name { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
 .preset-cat { font-size: 12px; padding: 3px 8px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; }
 .preset-cat.fixed { background: var(--mint-bg); color: var(--mint); }
 .preset-cat.flexible { background: var(--coral-bg); color: var(--coral); }
 .preset-del-btn { width: 32px; height: 32px; border: none; background: none; cursor: pointer; font-size: 18px; color: var(--text-light); border-radius: 50%; transition: all 0.2s; }
 .preset-del-btn:hover { background: var(--coral-bg); color: var(--danger); }
-.icon-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 12px 0; }
+.icon-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 6px 0 12px; }
 .icon-grid button { font-size: 22px; padding: 6px; border: 2px solid transparent; border-radius: 8px; background: var(--card); cursor: pointer; transition: all 0.15s; }
 .icon-grid button:hover { background: var(--mint-bg); }
 .icon-grid button.selected { border-color: var(--mint); background: var(--mint-bg); }
-.color-grid { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
+.color-grid { display: flex; gap: 8px; margin: 6px 0 12px; flex-wrap: wrap; }
 .color-grid button { width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: all 0.15s; }
 .color-grid button:hover { transform: scale(1.1); }
 .color-grid button.selected { border-color: var(--text); transform: scale(1.15); }
@@ -1805,6 +1806,7 @@ const TRANSLATIONS = {
     'toast.invalidFile': '올바른 MyRoutine 백업 파일이 아닙니다',
     'toast.readError': '파일을 읽을 수 없습니다',
     'toast.enterName': '이름을 입력하세요', 'toast.duplicateName': '이미 같은 이름이 있습니다', 'toast.cannotDelete': '기상/취침은 삭제할 수 없습니다',
+    'toast.recorded': '✓ {0} 기록했습니다',
     'day.sun': '일', 'day.mon': '월', 'day.tue': '화', 'day.wed': '수',
     'day.thu': '목', 'day.fri': '금', 'day.sat': '토',
     'month.1': '1월', 'month.2': '2월', 'month.3': '3월', 'month.4': '4월',
@@ -1887,6 +1889,7 @@ const TRANSLATIONS = {
     'toast.invalidFile': '正しいMyRoutineバックアップファイルではありません',
     'toast.readError': 'ファイルを読み取れません',
     'toast.enterName': '名前を入力してください', 'toast.duplicateName': '同じ名前がすでにあります', 'toast.cannotDelete': '起床/就寝は削除できません',
+    'toast.recorded': '✓ {0} 記録しました',
     'day.sun': '日', 'day.mon': '月', 'day.tue': '火', 'day.wed': '水',
     'day.thu': '木', 'day.fri': '金', 'day.sat': '土',
     'month.1': '1月', 'month.2': '2月', 'month.3': '3月', 'month.4': '4月',
@@ -1969,6 +1972,7 @@ const TRANSLATIONS = {
     'toast.invalidFile': 'Not a valid MyRoutine backup file',
     'toast.readError': 'Cannot read the file',
     'toast.enterName': 'Please enter a name', 'toast.duplicateName': 'This name already exists', 'toast.cannotDelete': 'Wake Up/Bedtime cannot be deleted',
+    'toast.recorded': '✓ Recorded {0}',
     'day.sun': 'Sun', 'day.mon': 'Mon', 'day.tue': 'Tue', 'day.wed': 'Wed',
     'day.thu': 'Thu', 'day.fri': 'Fri', 'day.sat': 'Sat',
     'month.1': 'Jan', 'month.2': 'Feb', 'month.3': 'Mar', 'month.4': 'Apr',
@@ -2068,7 +2072,10 @@ const ICON_CANDIDATES = [
   '👨‍👩‍👧','🧹','🧼','😴','☕','🏃','🎵','✏️','📱','🛒',
   '🧘','🎨','📷','🏠','💻','📞','🐕','🌿','✈️','🎓',
   '🏥','💊','🛏️','🧳','🎤','🎬','🏊','⚽','🍺','🙏',
-  '💰','📝','🎁','🔧','🚿','👔','🤝','🧑‍💻','🎹','🏋️'
+  '💰','📝','🎁','🔧','🚿','👔','🤝','🧑‍💻','🎹','🏋️',
+  '🧑‍🍳','🎧','📚','🖥️','🚴','🏕️','🎭','🍳','🧪','🗣️',
+  '🎶','🌍','🧑‍🎨','💡','🛠️','📦','🧑‍🏫','🏖️','🌙','⏰',
+  '🧩','🎪','🍵','📮','🪴','🛍️','🧑‍💼','📐','🧑‍⚕️','💤'
 ];
 const COLOR_PALETTE = [
   { id: 'default', value: null,      label: '기본' },
@@ -2729,6 +2736,7 @@ function addEntry(activityName) {
   }
 
   saveData();
+  showToast(t('toast.recorded').replace('{0}', displayActivity(activity)), 1200);
   renderTimeline();
   renderChips();
 }
@@ -3807,9 +3815,12 @@ function renderPresetList() {
   }
   container.innerHTML = data.customPresets.map((p, i) => {
     const isProtected = isSleepPreset(p.name);
+    const color = p.color || null;
+    const dotStyle = color ? `background:${color}` : 'background:var(--mint)';
     return `
     <div class="preset-item">
       <button class="preset-icon-btn" onclick="showPresetEditor(${i})">${p.icon}</button>
+      <span class="preset-color-dot" style="${dotStyle}" onclick="showPresetEditor(${i})"></span>
       <span class="preset-name" onclick="showPresetEditor(${i})" style="cursor:pointer">${escHtml(p.name)}</span>
       <button class="preset-cat ${p.category}" onclick="togglePresetCat(${i})">${p.category === 'fixed' ? t('classify.fixed') : t('classify.flexible')}</button>
       ${isProtected ? '' : `<button class="preset-del-btn" onclick="deletePreset(${i})">✕</button>`}
@@ -3961,7 +3972,7 @@ function closeModal() {
 }
 
 // ============== Toast ==============
-function showToast(msg) {
+function showToast(msg, duration) {
   let toast = document.getElementById('toast');
   if (!toast) {
     toast = document.createElement('div');
@@ -3971,7 +3982,7 @@ function showToast(msg) {
   }
   toast.textContent = msg;
   toast.style.opacity = '1';
-  setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+  setTimeout(() => { toast.style.opacity = '0'; }, duration || 2000);
 }
 
 // ============== Monthly Calendar ==============
