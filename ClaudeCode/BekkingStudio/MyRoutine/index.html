@@ -251,7 +251,7 @@ body {
 }
 
 .chip:active {
-  background: var(--mint);
+  background: var(--chip-active, var(--mint));
   color: white;
 }
 
@@ -260,16 +260,21 @@ body {
 .preset-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid rgba(128,128,128,0.12); }
 .preset-icon-btn { font-size: 24px; width: 40px; height: 40px; border: none; background: none; cursor: pointer; border-radius: 8px; transition: background 0.2s; }
 .preset-icon-btn:hover { background: var(--mint-bg); }
+.preset-color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; cursor: pointer; }
 .preset-name { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
 .preset-cat { font-size: 12px; padding: 3px 8px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; }
 .preset-cat.fixed { background: var(--mint-bg); color: var(--mint); }
 .preset-cat.flexible { background: var(--coral-bg); color: var(--coral); }
 .preset-del-btn { width: 32px; height: 32px; border: none; background: none; cursor: pointer; font-size: 18px; color: var(--text-light); border-radius: 50%; transition: all 0.2s; }
 .preset-del-btn:hover { background: var(--coral-bg); color: var(--danger); }
-.icon-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 12px 0; }
+.icon-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 6px 0 12px; }
 .icon-grid button { font-size: 22px; padding: 6px; border: 2px solid transparent; border-radius: 8px; background: var(--card); cursor: pointer; transition: all 0.15s; }
 .icon-grid button:hover { background: var(--mint-bg); }
 .icon-grid button.selected { border-color: var(--mint); background: var(--mint-bg); }
+.color-grid { display: flex; gap: 8px; margin: 6px 0 12px; flex-wrap: wrap; }
+.color-grid button { width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: all 0.15s; }
+.color-grid button:hover { transform: scale(1.1); }
+.color-grid button.selected { border-color: var(--text); transform: scale(1.15); }
 
 /* Timeline */
 .timeline {
@@ -1489,6 +1494,33 @@ body {
   color: var(--mint);
   background: var(--mint-bg);
 }
+
+/* Goal Cards */
+.goal-section { margin: 0 0 12px; }
+.goal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.goal-header-title { font-size:14px; font-weight:700; color:var(--text-sub); }
+.goal-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 12px 14px; margin-bottom: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.goal-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.goal-activity { font-size:14px; font-weight:600; }
+.goal-status { font-size:12px; color:var(--text-sub); }
+.goal-bar { height:8px; background:var(--bg); border-radius:4px; overflow:hidden; }
+.goal-bar-fill { height:100%; border-radius:4px; transition:width 0.3s; }
+.goal-streak { font-size:11px; color:var(--text-sub); margin-top:4px; }
+.goal-reminder {
+  background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+  border-radius: var(--radius); padding: 10px 14px;
+  font-size: 13px; color: #E65100; margin-bottom: 8px;
+}
+[data-theme="dark"] .goal-reminder {
+  background: linear-gradient(135deg, #3E2723, #4E342E);
+  color: #FFB74D;
+}
+.goal-empty { text-align:center; padding:12px; color:var(--text-sub); font-size:13px; }
+.goal-achieved-badge { color:var(--success); font-weight:700; font-size:12px; }
 </style>
 </head>
 <body>
@@ -1516,6 +1548,9 @@ body {
         </div>
       </div>
     </div>
+
+    <!-- Goals -->
+    <div id="goal-section" class="goal-section"></div>
 
     <!-- Quick chips -->
     <div class="chips-header">
@@ -1681,7 +1716,13 @@ body {
       </div>
 
       <div class="card" id="stats-ranking-card">
-        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.activityRanking">활동 TOP 5</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h3 style="font-size:15px;margin:0" data-i18n="stats.activityRanking">활동 TOP 5</h3>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-sub);cursor:pointer">
+            <input type="checkbox" id="stats-exclude-fixed" onchange="toggleStatsExcludeFixed()" style="accent-color:var(--coral)">
+            <span data-i18n="stats.excludeFixed">고정 활동 제외</span>
+          </label>
+        </div>
         <div id="stats-ranking-list"></div>
       </div>
 
@@ -1691,6 +1732,10 @@ body {
         <div class="stats-chart-container"><canvas id="stats-activity-chart"></canvas></div>
       </div>
     </div>
+
+    <button class="btn btn-coral btn-block" onclick="exportStatsPDF()" style="margin-top:16px" id="stats-export-pdf-btn">
+      📄 <span data-i18n="stats.exportPdf">PDF로 내보내기</span>
+    </button>
   </div>
 </div>
 
@@ -1780,7 +1825,7 @@ const TRANSLATIONS = {
     'modal.exportJson': 'JSON 내보내기', 'modal.importJson': 'JSON 가져오기', 'modal.close': '닫기',
     'preset.manage': '프리셋 관리', 'preset.addNew': '+ 새 프리셋 추가', 'preset.done': '완료',
     'preset.edit': '프리셋 편집', 'preset.name': '프리셋 이름',
-    'preset.selectIcon': '아이콘 선택', 'preset.save': '저장',
+    'preset.selectIcon': '아이콘 선택', 'preset.selectColor': '버튼 색상', 'preset.save': '저장',
     'preset.newPreset': '새 프리셋 추가', 'preset.category': '카테고리',
     'preset.add': '추가', 'preset.empty': '프리셋이 없습니다',
     'toast.alreadyClosed': '이미 마감된 날짜입니다', 'toast.noEntries': '기록이 없습니다',
@@ -1790,7 +1835,9 @@ const TRANSLATIONS = {
     'toast.backupSaved': '백업 파일이 저장되었습니다', 'toast.dataLoaded': '데이터를 불러왔습니다',
     'toast.invalidFile': '올바른 MyRoutine 백업 파일이 아닙니다',
     'toast.readError': '파일을 읽을 수 없습니다',
+    'toast.confirmDelete': '이 기록을 삭제할까요?',
     'toast.enterName': '이름을 입력하세요', 'toast.duplicateName': '이미 같은 이름이 있습니다', 'toast.cannotDelete': '기상/취침은 삭제할 수 없습니다',
+    'toast.recorded': '✓ {0} 기록했습니다',
     'day.sun': '일', 'day.mon': '월', 'day.tue': '화', 'day.wed': '수',
     'day.thu': '목', 'day.fri': '금', 'day.sat': '토',
     'month.1': '1월', 'month.2': '2월', 'month.3': '3월', 'month.4': '4월',
@@ -1819,6 +1866,15 @@ const TRANSLATIONS = {
     'stats.fixedFlexTrend': '고정/유동 시간 비율', 'stats.activityTrend': '활동별 시간 추이',
     'stats.totalTime': '총 시간', 'stats.avgDesired': '평균 달성률', 'stats.avgFlex': '평균 유동 비율',
     'stats.selectActivity': '활동을 선택하세요',
+    'stats.excludeFixed': '고정 활동 제외', 'stats.exportPdf': 'PDF로 내보내기', 'stats.pdfTitle': 'MyRoutine - 기간별 통계',
+    'goals.title': '오늘의 목표', 'goals.manage': '목표 관리', 'goals.add': '새 목표 추가',
+    'goals.selectActivity': '활동 선택', 'goals.targetTime': '목표 시간',
+    'goals.hours': '시간', 'goals.minutes': '분',
+    'goals.streak': '{n}일 연속 달성 🔥', 'goals.achieved': '달성!',
+    'goals.remaining': '남은 시간: {t}', 'goals.noGoals': '목표를 설정하면 여기에 진행률이 표시됩니다',
+    'goals.reminder': '오늘 아직 {activity} 기록이 없어요',
+    'goals.delete': '이 목표를 삭제할까요?', 'goals.saved': '목표가 저장되었습니다',
+    'goals.deleted': '목표가 삭제되었습니다', 'goals.active': '활성', 'goals.inactive': '비활성',
   },
   ja: {
     'app.subtitle': '一日の分析',
@@ -1861,7 +1917,7 @@ const TRANSLATIONS = {
     'modal.exportJson': 'JSONエクスポート', 'modal.importJson': 'JSONインポート', 'modal.close': '閉じる',
     'preset.manage': 'プリセット管理', 'preset.addNew': '+ 新しいプリセット追加', 'preset.done': '完了',
     'preset.edit': 'プリセット編集', 'preset.name': 'プリセット名',
-    'preset.selectIcon': 'アイコン選択', 'preset.save': '保存',
+    'preset.selectIcon': 'アイコン選択', 'preset.selectColor': 'ボタン色', 'preset.save': '保存',
     'preset.newPreset': '新しいプリセット追加', 'preset.category': 'カテゴリ',
     'preset.add': '追加', 'preset.empty': 'プリセットがありません',
     'toast.alreadyClosed': 'すでに締められた日です', 'toast.noEntries': '記録がありません',
@@ -1871,7 +1927,9 @@ const TRANSLATIONS = {
     'toast.backupSaved': 'バックアップファイルが保存されました', 'toast.dataLoaded': 'データを読み込みました',
     'toast.invalidFile': '正しいMyRoutineバックアップファイルではありません',
     'toast.readError': 'ファイルを読み取れません',
+    'toast.confirmDelete': 'この記録を削除しますか？',
     'toast.enterName': '名前を入力してください', 'toast.duplicateName': '同じ名前がすでにあります', 'toast.cannotDelete': '起床/就寝は削除できません',
+    'toast.recorded': '✓ {0} 記録しました',
     'day.sun': '日', 'day.mon': '月', 'day.tue': '火', 'day.wed': '水',
     'day.thu': '木', 'day.fri': '金', 'day.sat': '土',
     'month.1': '1月', 'month.2': '2月', 'month.3': '3月', 'month.4': '4月',
@@ -1900,6 +1958,15 @@ const TRANSLATIONS = {
     'stats.fixedFlexTrend': '固定/自由時間の割合', 'stats.activityTrend': '活動別時間の推移',
     'stats.totalTime': '合計時間', 'stats.avgDesired': '平均達成率', 'stats.avgFlex': '平均自由比率',
     'stats.selectActivity': '活動を選択してください',
+    'stats.excludeFixed': '固定活動を除外', 'stats.exportPdf': 'PDFにエクスポート', 'stats.pdfTitle': 'MyRoutine - 期間統計',
+    'goals.title': '今日の目標', 'goals.manage': '目標管理', 'goals.add': '新しい目標を追加',
+    'goals.selectActivity': 'アクティビティ選択', 'goals.targetTime': '目標時間',
+    'goals.hours': '時間', 'goals.minutes': '分',
+    'goals.streak': '{n}日連続達成 🔥', 'goals.achieved': '達成！',
+    'goals.remaining': '残り: {t}', 'goals.noGoals': '目標を設定すると進捗が表示されます',
+    'goals.reminder': '今日まだ{activity}の記録がありません',
+    'goals.delete': 'この目標を削除しますか？', 'goals.saved': '目標が保存されました',
+    'goals.deleted': '目標が削除されました', 'goals.active': '有効', 'goals.inactive': '無効',
   },
   en: {
     'app.subtitle': 'Daily Analysis',
@@ -1942,7 +2009,7 @@ const TRANSLATIONS = {
     'modal.exportJson': 'Export JSON', 'modal.importJson': 'Import JSON', 'modal.close': 'Close',
     'preset.manage': 'Preset Manager', 'preset.addNew': '+ Add New Preset', 'preset.done': 'Done',
     'preset.edit': 'Edit Preset', 'preset.name': 'Preset Name',
-    'preset.selectIcon': 'Select Icon', 'preset.save': 'Save',
+    'preset.selectIcon': 'Select Icon', 'preset.selectColor': 'Button color', 'preset.save': 'Save',
     'preset.newPreset': 'Add New Preset', 'preset.category': 'Category',
     'preset.add': 'Add', 'preset.empty': 'No presets',
     'toast.alreadyClosed': 'This day is already closed', 'toast.noEntries': 'No entries recorded',
@@ -1952,7 +2019,9 @@ const TRANSLATIONS = {
     'toast.backupSaved': 'Backup file has been saved', 'toast.dataLoaded': 'Data has been loaded',
     'toast.invalidFile': 'Not a valid MyRoutine backup file',
     'toast.readError': 'Cannot read the file',
+    'toast.confirmDelete': 'Delete this record?',
     'toast.enterName': 'Please enter a name', 'toast.duplicateName': 'This name already exists', 'toast.cannotDelete': 'Wake Up/Bedtime cannot be deleted',
+    'toast.recorded': '✓ Recorded {0}',
     'day.sun': 'Sun', 'day.mon': 'Mon', 'day.tue': 'Tue', 'day.wed': 'Wed',
     'day.thu': 'Thu', 'day.fri': 'Fri', 'day.sat': 'Sat',
     'month.1': 'Jan', 'month.2': 'Feb', 'month.3': 'Mar', 'month.4': 'Apr',
@@ -1981,6 +2050,15 @@ const TRANSLATIONS = {
     'stats.fixedFlexTrend': 'Fixed/Flexible Ratio', 'stats.activityTrend': 'Activity Time Trend',
     'stats.totalTime': 'Total Time', 'stats.avgDesired': 'Avg Achievement', 'stats.avgFlex': 'Avg Flexible',
     'stats.selectActivity': 'Select an activity',
+    'stats.excludeFixed': 'Exclude fixed', 'stats.exportPdf': 'Export as PDF', 'stats.pdfTitle': 'MyRoutine - Period Stats',
+    'goals.title': "Today's Goals", 'goals.manage': 'Manage Goals', 'goals.add': 'Add New Goal',
+    'goals.selectActivity': 'Select Activity', 'goals.targetTime': 'Target Time',
+    'goals.hours': 'hours', 'goals.minutes': 'minutes',
+    'goals.streak': '{n} day streak 🔥', 'goals.achieved': 'Done!',
+    'goals.remaining': '{t} remaining', 'goals.noGoals': 'Set goals to see progress here',
+    'goals.reminder': 'No {activity} recorded today yet',
+    'goals.delete': 'Delete this goal?', 'goals.saved': 'Goal saved',
+    'goals.deleted': 'Goal deleted', 'goals.active': 'Active', 'goals.inactive': 'Inactive',
   }
 };
 
@@ -2051,7 +2129,20 @@ const ICON_CANDIDATES = [
   '👨‍👩‍👧','🧹','🧼','😴','☕','🏃','🎵','✏️','📱','🛒',
   '🧘','🎨','📷','🏠','💻','📞','🐕','🌿','✈️','🎓',
   '🏥','💊','🛏️','🧳','🎤','🎬','🏊','⚽','🍺','🙏',
-  '💰','📝','🎁','🔧','🚿','👔','🤝','🧑‍💻','🎹','🏋️'
+  '💰','📝','🎁','🔧','🚿','👔','🤝','🧑‍💻','🎹','🏋️',
+  '🧑‍🍳','🎧','📚','🖥️','🚴','🏕️','🎭','🍳','🧪','🗣️',
+  '🎶','🌍','🧑‍🎨','💡','🛠️','📦','🧑‍🏫','🏖️','🌙','⏰',
+  '🧩','🎪','🍵','📮','🪴','🛍️','🧑‍💼','📐','🧑‍⚕️','💤'
+];
+const COLOR_PALETTE = [
+  { id: 'default', value: null,      label: '기본' },
+  { id: 'purple',  value: '#8B5CF6', label: '보라' },
+  { id: 'red',     value: '#EF4444', label: '빨강' },
+  { id: 'blue',    value: '#3B82F6', label: '파랑' },
+  { id: 'green',   value: '#22C55E', label: '초록' },
+  { id: 'orange',  value: '#F59E0B', label: '주황' },
+  { id: 'pink',    value: '#EC4899', label: '분홍' },
+  { id: 'gray',    value: '#9CA3AF', label: '회색' },
 ];
 function isWakeActivity(name) {
   if (name === '기상') return true;
@@ -2078,7 +2169,14 @@ function getIcon(activity) {
   }
   return DEFAULT_ICONS[activity] || '📌';
 }
-let data = { dates: {}, activityPresets: {}, customPresets: null, settings: {} };
+function getPresetColor(activity) {
+  if (data.customPresets) {
+    const cp = data.customPresets.find(p => p.name === activity);
+    if (cp && cp.color) return cp.color;
+  }
+  return null;
+}
+let data = { dates: {}, activityPresets: {}, customPresets: null, settings: {}, goals: [] };
 let currentDate = getTodayStr();
 let donutChart = null;
 let calendarMonth = null;
@@ -2089,6 +2187,9 @@ let statsDesiredChart = null;
 let statsRatioChart = null;
 let statsActivityChart = null;
 let statsSelectedActivity = null;
+let statsExcludeFixed = false;
+let statsCachedDays = [];
+let statsCachedDates = [];
 
 // ============== Init ==============
 function init() {
@@ -2168,6 +2269,7 @@ function loadData() {
       const parsed = JSON.parse(raw);
       data = { ...data, ...parsed };
     }
+    if (!data.goals) data.goals = [];
   } catch(e) { console.warn('localStorage load error', e); }
 }
 
@@ -2303,20 +2405,25 @@ function renderStats() {
 
   const dates = getStatsPeriodDates();
   const days = aggregateStatsData(dates);
+  statsCachedDays = days;
+  statsCachedDates = dates;
 
   const chartsArea = document.getElementById('stats-charts-area');
   const emptyEl = document.getElementById('stats-empty');
   const summaryRow = document.getElementById('stats-summary-row');
+  const pdfBtn = document.getElementById('stats-export-pdf-btn');
 
   if (days.length === 0) {
     chartsArea.style.display = 'none';
     summaryRow.style.display = 'none';
     emptyEl.style.display = '';
+    if (pdfBtn) pdfBtn.style.display = 'none';
     return;
   }
   chartsArea.style.display = '';
   summaryRow.style.display = '';
   emptyEl.style.display = 'none';
+  if (pdfBtn) pdfBtn.style.display = '';
 
   renderStatsSummaryCards(days);
   renderStatsDesiredChart(days, dates);
@@ -2425,6 +2532,7 @@ function renderStatsRanking(days) {
   const actMap = {};
   days.forEach(d => {
     d.activities.forEach(a => {
+      if (statsExcludeFixed && a.category === 'fixed') return;
       if (!actMap[a.activity]) actMap[a.activity] = 0;
       actMap[a.activity] += a.minutes;
     });
@@ -2516,6 +2624,118 @@ function selectStatsActivity(activity) {
   renderStatsActivityTrend(days, dates);
 }
 
+function toggleStatsExcludeFixed() {
+  statsExcludeFixed = document.getElementById('stats-exclude-fixed').checked;
+  renderStatsRanking(statsCachedDays);
+}
+
+function exportStatsPDF() {
+  const days = statsCachedDays;
+  const dates = statsCachedDates;
+  if (!days || days.length === 0) return;
+
+  const periodLabel = formatStatsPeriodLabel();
+
+  // Summary stats
+  const totalMin = days.reduce((s, d) => s + d.totalMin, 0);
+  const avgDesired = days.length > 0
+    ? Math.round(days.reduce((s, d) => s + (d.flexMin > 0 ? (d.desiredMin / d.flexMin * 100) : 0), 0) / days.length)
+    : 0;
+  const avgFlex = days.length > 0
+    ? Math.round(days.reduce((s, d) => s + (d.totalMin > 0 ? (d.flexMin / d.totalMin * 100) : 0), 0) / days.length)
+    : 0;
+
+  // Chart images
+  const desiredImg = document.getElementById('stats-desired-chart').toDataURL('image/png');
+  const ratioImg = document.getElementById('stats-ratio-chart').toDataURL('image/png');
+  const activityImg = statsActivityChart ? document.getElementById('stats-activity-chart').toDataURL('image/png') : null;
+
+  // TOP 5 ranking (respects current filter)
+  const actMap = {};
+  days.forEach(d => {
+    d.activities.forEach(a => {
+      if (statsExcludeFixed && a.category === 'fixed') return;
+      if (!actMap[a.activity]) actMap[a.activity] = 0;
+      actMap[a.activity] += a.minutes;
+    });
+  });
+  const sorted = Object.entries(actMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const medals = ['🥇', '🥈', '🥉', '4', '5'];
+
+  const rankingRows = sorted.map(([name, mins], i) =>
+    `<tr>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:14px;text-align:center;">${medals[i]}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:14px;font-weight:600;">${escHtml(name)}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:14px;text-align:right;">${formatMin(mins)}</td>
+    </tr>`
+  ).join('');
+
+  const filterNote = statsExcludeFixed ? `<p style="font-size:11px;color:#aaa;margin-top:4px;">* ${t('stats.excludeFixed')}</p>` : '';
+
+  const htmlString = `
+    <div style="padding:30px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#333;width:700px;">
+      <h1 style="text-align:center;color:#7ECEC1;margin-bottom:4px;font-size:24px;">${t('stats.pdfTitle')}</h1>
+      <p style="text-align:center;color:#888;margin-bottom:24px;font-size:14px;">${escHtml(periodLabel)} (${days.length} ${t('stats.recordedDays')})</p>
+
+      <table style="width:100%;margin-bottom:24px;background:#f9f9f9;border-radius:12px;">
+        <tr>
+          <td style="text-align:center;padding:20px;">
+            <div style="font-size:28px;font-weight:800;color:#8E9AAF;">${formatMin(totalMin)}</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;">${t('stats.totalTime')}</div>
+          </td>
+          <td style="text-align:center;padding:20px;">
+            <div style="font-size:28px;font-weight:800;color:#FF7F7F;">${avgDesired}%</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;">${t('stats.avgDesired')}</div>
+          </td>
+          <td style="text-align:center;padding:20px;">
+            <div style="font-size:28px;font-weight:800;color:#7ECEC1;">${avgFlex}%</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;">${t('stats.avgFlex')}</div>
+          </td>
+        </tr>
+      </table>
+
+      <h3 style="font-size:14px;color:#888;margin-bottom:8px;">${t('stats.desiredTrend')}</h3>
+      <img src="${desiredImg}" style="width:100%;margin-bottom:24px;border-radius:8px;">
+
+      <h3 style="font-size:14px;color:#888;margin-bottom:8px;">${t('stats.fixedFlexTrend')}</h3>
+      <img src="${ratioImg}" style="width:100%;margin-bottom:24px;border-radius:8px;">
+
+      <h3 style="font-size:14px;color:#888;margin-bottom:8px;">${t('stats.activityRanking')}</h3>
+      ${filterNote}
+      <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+        <thead>
+          <tr style="background:#f7f7f7;">
+            <th style="padding:8px 12px;border-bottom:2px solid #ddd;text-align:center;font-size:13px;width:40px;">#</th>
+            <th style="padding:8px 12px;border-bottom:2px solid #ddd;text-align:left;font-size:13px;">${t('pdf.activity')}</th>
+            <th style="padding:8px 12px;border-bottom:2px solid #ddd;text-align:right;font-size:13px;">${t('pdf.duration')}</th>
+          </tr>
+        </thead>
+        <tbody>${rankingRows}</tbody>
+      </table>
+
+      ${activityImg && statsSelectedActivity ? `
+        <h3 style="font-size:14px;color:#888;margin-bottom:8px;">${t('stats.activityTrend')} - ${escHtml(statsSelectedActivity)}</h3>
+        <img src="${activityImg}" style="width:100%;margin-bottom:24px;border-radius:8px;">
+      ` : ''}
+    </div>
+  `;
+
+  const safePeriod = periodLabel.replace(/[\/\\:*?"<>|]/g, '_');
+  const opt = {
+    margin: 10,
+    filename: `MyRoutine_Stats_${safePeriod}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(htmlString, 'string').save().then(() => {
+    showToast(t('toast.pdfSaved'));
+  }).catch(() => {
+    showToast(t('toast.pdfFailed'));
+  });
+}
+
 // ============== Tab Navigation ==============
 function switchTab(tab) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -2524,6 +2744,7 @@ function switchTab(tab) {
   const bottomTab = document.querySelector(`.tab[data-tab="${tab}"]`);
   if (bottomTab) bottomTab.classList.add('active');
 
+  if (tab === 'record') renderGoalCards();
   if (tab === 'classify') renderClassify();
   if (tab === 'analysis') renderAnalysis();
   if (tab === 'history') renderHistory();
@@ -2574,15 +2795,19 @@ function addEntry(activityName) {
   }
 
   saveData();
+  showToast(t('toast.recorded').replace('{0}', displayActivity(activity)), 1200);
   renderTimeline();
   renderChips();
+  renderGoalCards();
 }
 
 function deleteEntry(id) {
+  if (!confirm(t('toast.confirmDelete'))) return;
   const dd = getDateData(currentDate);
   dd.entries = dd.entries.filter(e => e.id !== id);
   saveData();
   renderTimeline();
+  renderGoalCards();
 }
 
 function toggleTimelineMemo(entryId, event) {
@@ -2833,9 +3058,11 @@ function renderChips() {
     return;
   }
 
-  container.innerHTML = chips.map(c =>
-    `<button class="chip" onmousedown="event.preventDefault()" onclick="addEntry('${escAttr(c)}')">${getIcon(c)} ${escHtml(displayActivity(c))}</button>`
-  ).join('');
+  container.innerHTML = chips.map(c => {
+    const color = getPresetColor(c);
+    const style = color ? `background:${color}20;color:${color};--chip-active:${color};` : '';
+    return `<button class="chip" style="${style}" onmousedown="event.preventDefault()" onclick="addEntry('${escAttr(c)}')">${getIcon(c)} ${escHtml(displayActivity(c))}</button>`;
+  }).join('');
 }
 
 // ============== Mission 2: Classify ==============
@@ -3621,7 +3848,8 @@ function initCustomPresets() {
   data.customPresets = DEFAULT_PRESETS.map(name => ({
     name: currentLang !== 'ko' ? (PRESET_TRANSLATIONS[currentLang]?.[name] || name) : name,
     icon: DEFAULT_ICONS[name] || '📌',
-    category: DEFAULT_CATEGORIES[name] || 'flexible'
+    category: DEFAULT_CATEGORIES[name] || 'flexible',
+    color: null
   }));
   saveData();
 }
@@ -3649,9 +3877,12 @@ function renderPresetList() {
   }
   container.innerHTML = data.customPresets.map((p, i) => {
     const isProtected = isSleepPreset(p.name);
+    const color = p.color || null;
+    const dotStyle = color ? `background:${color}` : 'background:var(--mint)';
     return `
     <div class="preset-item">
       <button class="preset-icon-btn" onclick="showPresetEditor(${i})">${p.icon}</button>
+      <span class="preset-color-dot" style="${dotStyle}" onclick="showPresetEditor(${i})"></span>
       <span class="preset-name" onclick="showPresetEditor(${i})" style="cursor:pointer">${escHtml(p.name)}</span>
       <button class="preset-cat ${p.category}" onclick="togglePresetCat(${i})">${p.category === 'fixed' ? t('classify.fixed') : t('classify.flexible')}</button>
       ${isProtected ? '' : `<button class="preset-del-btn" onclick="deletePreset(${i})">✕</button>`}
@@ -3667,6 +3898,14 @@ function togglePresetCat(index) {
   renderPresetList();
 }
 
+function buildColorGrid(selectedColor) {
+  return COLOR_PALETTE.map(c => {
+    const bg = c.value || 'var(--mint)';
+    const sel = (selectedColor || null) === c.value ? 'selected' : '';
+    return `<button class="${sel}" style="background:${bg}" onclick="selectPresetColor(this, ${c.value ? "'" + c.value + "'" : 'null'})" title="${c.label}"></button>`;
+  }).join('');
+}
+
 function showPresetEditor(index) {
   const p = data.customPresets[index];
   const isProtected = isSleepPreset(p.name);
@@ -3676,6 +3915,10 @@ function showPresetEditor(index) {
     <div style="font-size:13px;color:var(--text-sub);margin-bottom:6px;">${t('preset.selectIcon')}</div>
     <div class="icon-grid" id="icon-grid">
       ${ICON_CANDIDATES.map(ic => `<button class="${ic === p.icon ? 'selected' : ''}" onclick="selectPresetIcon(this, '${ic}')">${ic}</button>`).join('')}
+    </div>
+    <div style="font-size:13px;color:var(--text-sub);margin-bottom:6px;">${t('preset.selectColor')}</div>
+    <div class="color-grid" id="color-grid">
+      ${buildColorGrid(p.color || null)}
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="showPresetManager()">${t('modal.cancel')}</button>
@@ -3691,6 +3934,12 @@ function selectPresetIcon(btn, icon) {
   btn.dataset.icon = icon;
 }
 
+function selectPresetColor(btn, color) {
+  document.querySelectorAll('#color-grid button').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  btn.dataset.color = color || '';
+}
+
 function savePreset(index) {
   const nameInput = document.getElementById('preset-edit-name');
   const name = nameInput.value.trim();
@@ -3699,9 +3948,13 @@ function savePreset(index) {
   const selectedBtn = document.querySelector('#icon-grid button.selected');
   const icon = selectedBtn ? selectedBtn.textContent.trim() : data.customPresets[index].icon;
 
+  const colorBtn = document.querySelector('#color-grid button.selected');
+  const color = colorBtn ? (colorBtn.dataset.color || null) : (data.customPresets[index].color || null);
+
   const oldName = data.customPresets[index].name;
   data.customPresets[index].name = name;
   data.customPresets[index].icon = icon;
+  data.customPresets[index].color = color;
 
   // Update activityPresets key if name changed
   if (oldName !== name && data.activityPresets[oldName]) {
@@ -3720,6 +3973,10 @@ function addNewPreset() {
     <div style="font-size:13px;color:var(--text-sub);margin-bottom:6px;">${t('preset.selectIcon')}</div>
     <div class="icon-grid" id="icon-grid">
       ${ICON_CANDIDATES.map((ic, i) => `<button class="${i === 0 ? 'selected' : ''}" onclick="selectPresetIcon(this, '${ic}')">${ic}</button>`).join('')}
+    </div>
+    <div style="font-size:13px;color:var(--text-sub);margin-bottom:6px;">${t('preset.selectColor')}</div>
+    <div class="color-grid" id="color-grid">
+      ${buildColorGrid(null)}
     </div>
     <div style="margin:12px 0;">
       <label style="font-size:13px;color:var(--text-sub);">${t('preset.category')}</label>
@@ -3747,7 +4004,10 @@ function confirmAddPreset() {
   const flexBtn = document.getElementById('new-cat-flexible');
   const category = (flexBtn && flexBtn.dataset.sel === 'flexible') ? 'flexible' : 'fixed';
 
-  data.customPresets.push({ name, icon, category });
+  const colorBtn = document.querySelector('#color-grid button.selected');
+  const color = colorBtn ? (colorBtn.dataset.color || null) : null;
+
+  data.customPresets.push({ name, icon, category, color });
   saveData();
   showPresetManager();
 }
@@ -3758,6 +4018,281 @@ function deletePreset(index) {
   data.customPresets.splice(index, 1);
   saveData();
   renderPresetList();
+}
+
+// ============== Goals ==============
+function calcGoalProgress(goal, dateStr) {
+  const dd = data.dates[dateStr];
+  if (!dd || !dd.entries.length) return { currentMin: 0, targetMin: goal.targetMin, percent: 0 };
+  let totalMin = 0;
+  const today = getTodayStr();
+  for (let i = 0; i < dd.entries.length; i++) {
+    if (dd.entries[i].activity !== goal.activity) continue;
+    const start = timeToMin(dd.entries[i].time);
+    let end;
+    if (i < dd.entries.length - 1) {
+      end = timeToMin(dd.entries[i + 1].time);
+    } else if (dd.closedAt) {
+      end = timeToMin(dd.closedAt);
+    } else if (dateStr === today) {
+      const now = new Date();
+      end = now.getHours() * 60 + now.getMinutes();
+    } else {
+      end = start;
+    }
+    totalMin += Math.max(0, end - start);
+  }
+  const pct = goal.targetMin > 0 ? Math.min(Math.round(totalMin / goal.targetMin * 100), 999) : 0;
+  return { currentMin: totalMin, targetMin: goal.targetMin, percent: pct };
+}
+
+function calcGoalStreak(goal) {
+  let streak = 0;
+  const d = new Date();
+  d.setDate(d.getDate() - 1); // start from yesterday
+  while (true) {
+    const ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if (!data.dates[ds] || !data.dates[ds].entries.length) break;
+    const prog = calcGoalProgress(goal, ds);
+    if (prog.percent < 100) break;
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
+function renderGoalCards() {
+  const sec = document.getElementById('goal-section');
+  if (!sec) return;
+  const activeGoals = (data.goals || []).filter(g => g.active);
+  if (activeGoals.length === 0) {
+    sec.innerHTML = `
+      <div class="goal-header">
+        <span class="goal-header-title">🎯 ${t('goals.title')}</span>
+        <button class="icon-btn" onclick="showGoalManager()" style="width:28px;height:28px;font-size:14px;">⚙️</button>
+      </div>
+      <div class="goal-empty">${t('goals.noGoals')}<br><button class="btn btn-primary" onclick="showGoalManager()" style="margin-top:8px;padding:6px 16px;font-size:12px;">+ ${t('goals.add')}</button></div>
+    `;
+    return;
+  }
+
+  const today = getTodayStr();
+  const reminderActivities = [];
+  let cardsHtml = '';
+
+  for (const goal of activeGoals) {
+    const prog = calcGoalProgress(goal, today);
+    const streak = calcGoalStreak(goal);
+    const icon = getIcon(goal.activity);
+    const name = displayActivity(goal.activity);
+    const presetColor = getPresetColor(goal.activity) || '#7ECEC1';
+    const barColor = prog.percent >= 100 ? 'var(--success)' : presetColor;
+    const barWidth = Math.min(prog.percent, 100);
+
+    let statusHtml;
+    if (prog.percent >= 100) {
+      statusHtml = `<span class="goal-achieved-badge">✓ ${t('goals.achieved')}</span>`;
+    } else {
+      const remaining = Math.max(0, prog.targetMin - prog.currentMin);
+      statusHtml = `<span class="goal-status">${t('goals.remaining', { t: formatMin(remaining) })}</span>`;
+    }
+
+    const streakHtml = streak >= 2 ? `<div class="goal-streak">${t('goals.streak', { n: streak })}</div>` : '';
+
+    if (prog.currentMin === 0) {
+      reminderActivities.push(name);
+    }
+
+    cardsHtml += `
+      <div class="goal-card">
+        <div class="goal-card-top">
+          <span class="goal-activity">${icon} ${name}</span>
+          ${statusHtml}
+        </div>
+        <div class="goal-bar"><div class="goal-bar-fill" style="width:${barWidth}%;background:${barColor}"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;">
+          <span style="font-size:11px;color:var(--text-sub)">${formatMin(prog.currentMin)} / ${formatMin(prog.targetMin)}</span>
+          <span style="font-size:11px;font-weight:700;color:${prog.percent >= 100 ? 'var(--success)' : 'var(--text-sub)'}">${prog.percent}%</span>
+        </div>
+        ${streakHtml}
+      </div>
+    `;
+  }
+
+  let reminderHtml = '';
+  if (reminderActivities.length > 0) {
+    const msgs = reminderActivities.map(a => t('goals.reminder', { activity: a })).join('<br>');
+    reminderHtml = `<div class="goal-reminder">⏰ ${msgs}</div>`;
+  }
+
+  sec.innerHTML = `
+    <div class="goal-header">
+      <span class="goal-header-title">🎯 ${t('goals.title')}</span>
+      <button class="icon-btn" onclick="showGoalManager()" style="width:28px;height:28px;font-size:14px;">⚙️</button>
+    </div>
+    ${reminderHtml}
+    ${cardsHtml}
+  `;
+}
+
+function showGoalManager() {
+  const goals = data.goals || [];
+  let listHtml = '';
+  if (goals.length === 0) {
+    listHtml = `<div style="text-align:center;padding:16px;color:var(--text-sub);font-size:13px;">${t('goals.noGoals')}</div>`;
+  } else {
+    for (const g of goals) {
+      const icon = getIcon(g.activity);
+      const name = displayActivity(g.activity);
+      const hrs = Math.floor(g.targetMin / 60);
+      const mins = g.targetMin % 60;
+      const timeStr = hrs > 0 ? `${hrs}${t('goals.hours')} ${mins > 0 ? mins + t('goals.minutes') : ''}` : `${mins}${t('goals.minutes')}`;
+      const activeLabel = g.active ? t('goals.active') : t('goals.inactive');
+      const activeColor = g.active ? 'var(--success)' : 'var(--text-light)';
+      listHtml += `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bg);">
+          <div style="flex:1;">
+            <span style="font-size:14px;font-weight:600;">${icon} ${name}</span>
+            <span style="font-size:12px;color:var(--text-sub);margin-left:8px;">${timeStr}</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button onclick="toggleGoalActive('${g.id}')" style="padding:4px 10px;border-radius:12px;border:none;font-size:11px;font-weight:600;cursor:pointer;color:#fff;background:${activeColor};">${activeLabel}</button>
+            <button onclick="showAddGoalModal('${g.id}')" style="background:none;border:none;cursor:pointer;font-size:16px;">✏️</button>
+            <button onclick="deleteGoal('${g.id}')" style="background:none;border:none;cursor:pointer;font-size:16px;">🗑️</button>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  const html = `
+    <h3>${t('goals.manage')}</h3>
+    <div style="max-height:300px;overflow-y:auto;margin:12px 0;">${listHtml}</div>
+    <button class="btn btn-primary btn-block" onclick="showAddGoalModal()" style="margin-top:8px;">+ ${t('goals.add')}</button>
+    <button class="btn btn-block" onclick="closeModal()" style="margin-top:8px;">${t('modal.close')}</button>
+  `;
+  showModal(html);
+}
+
+function showAddGoalModal(editGoalId) {
+  const editGoal = editGoalId ? (data.goals || []).find(g => g.id === editGoalId) : null;
+  const presets = data.customPresets || [];
+  const defaultPresets = Object.keys(PRESET_TRANSLATIONS.en).map(k => k); // Korean preset names
+
+  // Build activity grid
+  let activityGridHtml = '';
+  const allActivities = [];
+  for (const p of presets) {
+    if (isSleepPreset(p.name)) continue;
+    allActivities.push({ name: p.name, icon: p.icon || getIcon(p.name) });
+  }
+  // If no custom presets, use defaults
+  if (allActivities.length === 0) {
+    for (const k of defaultPresets) {
+      if (k === '수면') continue;
+      allActivities.push({ name: k, icon: getIcon(k) });
+    }
+  }
+
+  for (const a of allActivities) {
+    const selected = editGoal && editGoal.activity === a.name ? 'border-color:var(--mint);background:var(--mint-bg);' : '';
+    activityGridHtml += `<button class="goal-activity-option" data-activity="${escHtml(a.name)}" onclick="selectGoalActivity(this)" style="padding:8px;border-radius:var(--radius-sm);border:2px solid var(--bg);background:var(--card);cursor:pointer;text-align:center;font-size:12px;${selected}"><div style="font-size:20px;">${a.icon}</div><div style="margin-top:2px;color:var(--text);font-weight:500;">${displayActivity(a.name)}</div></button>`;
+  }
+
+  const curH = editGoal ? Math.floor(editGoal.targetMin / 60) : 1;
+  const curM = editGoal ? editGoal.targetMin % 60 : 0;
+
+  let hoursOptions = '';
+  for (let h = 0; h <= 8; h++) {
+    hoursOptions += `<option value="${h}" ${h === curH ? 'selected' : ''}>${h}</option>`;
+  }
+  let minsOptions = '';
+  for (const m of [0, 15, 30, 45]) {
+    minsOptions += `<option value="${m}" ${m === curM ? 'selected' : ''}>${m}</option>`;
+  }
+
+  const html = `
+    <h3>${editGoal ? '✏️' : '+'} ${t('goals.add')}</h3>
+    <div style="margin:12px 0;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px;">${t('goals.selectActivity')}</div>
+      <div id="goal-activity-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:200px;overflow-y:auto;">
+        ${activityGridHtml}
+      </div>
+    </div>
+    <div style="margin:12px 0;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px;">${t('goals.targetTime')}</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select id="goal-hours" style="flex:1;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--text-light);background:var(--card);color:var(--text);font-size:14px;">${hoursOptions}</select>
+        <span style="font-size:13px;color:var(--text-sub);">${t('goals.hours')}</span>
+        <select id="goal-minutes" style="flex:1;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--text-light);background:var(--card);color:var(--text);font-size:14px;">${minsOptions}</select>
+        <span style="font-size:13px;color:var(--text-sub);">${t('goals.minutes')}</span>
+      </div>
+    </div>
+    <input type="hidden" id="goal-selected-activity" value="${editGoal ? escHtml(editGoal.activity) : ''}">
+    <input type="hidden" id="goal-edit-id" value="${editGoalId || ''}">
+    <button class="btn btn-primary btn-block" onclick="saveGoal()" style="margin-top:12px;">${t('preset.save')}</button>
+    <button class="btn btn-block" onclick="showGoalManager()" style="margin-top:6px;">${t('modal.cancel')}</button>
+  `;
+  showModal(html);
+}
+
+function selectGoalActivity(btn) {
+  document.querySelectorAll('.goal-activity-option').forEach(b => {
+    b.style.borderColor = 'var(--bg)';
+    b.style.background = 'var(--card)';
+  });
+  btn.style.borderColor = 'var(--mint)';
+  btn.style.background = 'var(--mint-bg)';
+  document.getElementById('goal-selected-activity').value = btn.dataset.activity;
+}
+
+function saveGoal() {
+  const activity = document.getElementById('goal-selected-activity').value;
+  if (!activity) { showToast(t('goals.selectActivity')); return; }
+  const hours = parseInt(document.getElementById('goal-hours').value) || 0;
+  const minutes = parseInt(document.getElementById('goal-minutes').value) || 0;
+  const targetMin = hours * 60 + minutes;
+  if (targetMin <= 0) { showToast(t('goals.targetTime')); return; }
+
+  const editId = document.getElementById('goal-edit-id').value;
+  if (editId) {
+    const goal = data.goals.find(g => g.id === editId);
+    if (goal) {
+      goal.activity = activity;
+      goal.targetMin = targetMin;
+    }
+  } else {
+    data.goals.push({
+      id: generateId(),
+      activity: activity,
+      targetMin: targetMin,
+      active: true,
+      createdAt: getTodayStr()
+    });
+  }
+  saveData();
+  renderGoalCards();
+  showToast(t('goals.saved'));
+  showGoalManager();
+}
+
+function deleteGoal(goalId) {
+  if (!confirm(t('goals.delete'))) return;
+  data.goals = data.goals.filter(g => g.id !== goalId);
+  saveData();
+  renderGoalCards();
+  showToast(t('goals.deleted'));
+  showGoalManager();
+}
+
+function toggleGoalActive(goalId) {
+  const goal = data.goals.find(g => g.id === goalId);
+  if (goal) {
+    goal.active = !goal.active;
+    saveData();
+    renderGoalCards();
+    showGoalManager();
+  }
 }
 
 // ============== Modal ==============
@@ -3774,7 +4309,7 @@ function closeModal() {
 }
 
 // ============== Toast ==============
-function showToast(msg) {
+function showToast(msg, duration) {
   let toast = document.getElementById('toast');
   if (!toast) {
     toast = document.createElement('div');
@@ -3784,7 +4319,7 @@ function showToast(msg) {
   }
   toast.textContent = msg;
   toast.style.opacity = '1';
-  setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+  setTimeout(() => { toast.style.opacity = '0'; }, duration || 2000);
 }
 
 // ============== Monthly Calendar ==============
@@ -3908,6 +4443,7 @@ function changeCalendarMonth(delta) {
 function renderAll() {
   renderTimeline();
   renderChips();
+  renderGoalCards();
 }
 
 // ============== PWA Service Worker & Install ==============
