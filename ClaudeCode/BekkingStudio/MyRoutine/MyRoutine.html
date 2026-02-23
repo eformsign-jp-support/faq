@@ -700,6 +700,73 @@ body {
   color: var(--coral);
 }
 
+/* History Accordion */
+.history-year, .history-month {
+  margin-bottom: 4px;
+}
+
+.history-year-header, .history-month-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+
+.history-year-header {
+  font-weight: 700;
+  font-size: 16px;
+  background: var(--mint-bg);
+}
+
+.history-month-header {
+  font-weight: 600;
+  font-size: 14px;
+  padding-left: 20px;
+  color: var(--text-sub);
+}
+
+.history-year-header:active, .history-month-header:active {
+  background: var(--bg);
+}
+
+.history-toggle {
+  font-size: 10px;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.history-year.collapsed .history-toggle,
+.history-month.collapsed .history-toggle {
+  transform: rotate(-90deg);
+}
+
+.history-year-header .history-count,
+.history-month-header .history-count {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-left: auto;
+}
+
+.history-year-body, .history-month-body {
+  overflow: hidden;
+  max-height: 5000px;
+  transition: max-height 0.3s ease;
+}
+
+.history-year.collapsed > .history-year-body,
+.history-month.collapsed > .history-month-body {
+  max-height: 0;
+}
+
+.history-month-body {
+  padding-left: 8px;
+}
+
 /* Bottom Tab Bar */
 .tab-bar {
   position: fixed;
@@ -1396,7 +1463,7 @@ body {
   <div id="sec-history" class="section">
     <div class="card">
       <h3 style="font-size:16px;margin-bottom:16px" data-i18n="history.title">기록 히스토리</h3>
-      <ul class="history-list" id="history-list"></ul>
+      <div class="history-list" id="history-list"></div>
       <div class="empty-state" id="history-empty" style="display:none">
         <div class="emoji">📅</div>
         <p data-i18n-html="history.emptyMsg">아직 기록된 날이 없어요<br>'기록' 탭에서 하루를 시작해보세요!</p>
@@ -1497,7 +1564,7 @@ const TRANSLATIONS = {
     'analysis.saveAndReturn': '저장 완료',
     'history.title': '기록 히스토리',
     'history.emptyMsg': '아직 기록된 날이 없어요<br>\'기록\' 탭에서 하루를 시작해보세요!',
-    'history.completed': '완료', 'history.recording': '기록중',
+    'history.completed': '완료', 'history.recording': '기록중', 'history.days': '{n}일', 'history.year': '{y}년',
     'settings.categoryColor': '카테고리 색상', 'settings.fixedTime': '고정 시간', 'settings.flexibleTime': '유동 시간',
     'modal.editTime': '시간 수정', 'modal.hourLabel': '{h}시',
     'modal.cancel': '취소', 'modal.confirm': '확인',
@@ -1571,7 +1638,7 @@ const TRANSLATIONS = {
     'analysis.saveAndReturn': '保存完了',
     'history.title': '記録履歴',
     'history.emptyMsg': 'まだ記録された日がありません<br>「記録」タブで一日を始めましょう！',
-    'history.completed': '完了', 'history.recording': '記録中',
+    'history.completed': '完了', 'history.recording': '記録中', 'history.days': '{n}日', 'history.year': '{y}年',
     'settings.categoryColor': 'カテゴリ色', 'settings.fixedTime': '固定時間', 'settings.flexibleTime': '自由時間',
     'modal.editTime': '時間修正', 'modal.hourLabel': '{h}時',
     'modal.cancel': 'キャンセル', 'modal.confirm': '確認',
@@ -1645,7 +1712,7 @@ const TRANSLATIONS = {
     'analysis.saveAndReturn': 'Save & Return',
     'history.title': 'Record History',
     'history.emptyMsg': "No recorded days yet<br>Start your day in the 'Record' tab!",
-    'history.completed': 'Done', 'history.recording': 'Recording',
+    'history.completed': 'Done', 'history.recording': 'Recording', 'history.days': '{n} days', 'history.year': '{y}',
     'settings.categoryColor': 'Category Colors', 'settings.fixedTime': 'Fixed Time', 'settings.flexibleTime': 'Flexible Time',
     'modal.editTime': 'Edit Time', 'modal.hourLabel': '{h}:00',
     'modal.cancel': 'Cancel', 'modal.confirm': 'OK',
@@ -2602,21 +2669,70 @@ function renderHistory() {
   }
 
   emptyState.style.display = 'none';
-  container.innerHTML = dates.map(d => {
-    const dd = data.dates[d];
-    const preview = dd.entries.slice(0, 3).map(e => displayActivity(e.activity)).join(', ');
-    const statusClass = dd.status === 'completed' ? 'completed' : 'recording';
-    const statusText = dd.status === 'completed' ? t('history.completed') : t('history.recording');
-    return `
-      <li class="history-item" onclick="loadHistoryDate('${d}')">
-        <div>
-          <div class="history-date">${formatDateKr(d)}</div>
-          <div class="history-preview">${escHtml(preview)}${dd.entries.length > 3 ? '...' : ''}</div>
-        </div>
-        <span class="history-status ${statusClass}">${statusText}</span>
-      </li>
-    `;
-  }).join('');
+
+  // Group dates by year → month
+  const groups = new Map();
+  dates.forEach(d => {
+    const [y, m] = d.split('-');
+    if (!groups.has(y)) groups.set(y, new Map());
+    const yearMap = groups.get(y);
+    if (!yearMap.has(m)) yearMap.set(m, []);
+    yearMap.get(m).push(d);
+  });
+
+  let isFirstYear = true;
+  let html = '';
+
+  groups.forEach((months, year) => {
+    const yearDayCount = Array.from(months.values()).reduce((sum, days) => sum + days.length, 0);
+    const yearCollapsed = !isFirstYear ? ' collapsed' : '';
+    html += `<div class="history-year${yearCollapsed}">`;
+    html += `<div class="history-year-header" onclick="toggleHistoryGroup(this)">`;
+    html += `<span class="history-toggle">▼</span> ${t('history.year').replace('{y}', year)}`;
+    html += `<span class="history-count">${t('history.days').replace('{n}', yearDayCount)}</span>`;
+    html += `</div>`;
+    html += `<div class="history-year-body">`;
+
+    let isFirstMonth = isFirstYear;
+    months.forEach((days, month) => {
+      const monthCollapsed = !isFirstMonth ? ' collapsed' : '';
+      const monthNum = parseInt(month);
+      html += `<div class="history-month${monthCollapsed}">`;
+      html += `<div class="history-month-header" onclick="toggleHistoryGroup(this)">`;
+      html += `<span class="history-toggle">▼</span> ${t('month.' + monthNum)}`;
+      html += `<span class="history-count">${t('history.days').replace('{n}', days.length)}</span>`;
+      html += `</div>`;
+      html += `<div class="history-month-body">`;
+
+      days.forEach(d => {
+        const dd = data.dates[d];
+        const preview = dd.entries.slice(0, 3).map(e => displayActivity(e.activity)).join(', ');
+        const statusClass = dd.status === 'completed' ? 'completed' : 'recording';
+        const statusText = dd.status === 'completed' ? t('history.completed') : t('history.recording');
+        html += `
+          <div class="history-item" onclick="loadHistoryDate('${d}')">
+            <div>
+              <div class="history-date">${formatDateKr(d)}</div>
+              <div class="history-preview">${escHtml(preview)}${dd.entries.length > 3 ? '...' : ''}</div>
+            </div>
+            <span class="history-status ${statusClass}">${statusText}</span>
+          </div>`;
+      });
+
+      html += `</div></div>`;
+      isFirstMonth = false;
+    });
+
+    html += `</div></div>`;
+    isFirstYear = false;
+  });
+
+  container.innerHTML = html;
+}
+
+function toggleHistoryGroup(headerEl) {
+  const group = headerEl.parentElement;
+  group.classList.toggle('collapsed');
 }
 
 function loadHistoryDate(d) {
