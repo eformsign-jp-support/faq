@@ -251,7 +251,7 @@ body {
 }
 
 .chip:active {
-  background: var(--mint);
+  background: var(--chip-active, var(--mint));
   color: white;
 }
 
@@ -270,6 +270,10 @@ body {
 .icon-grid button { font-size: 22px; padding: 6px; border: 2px solid transparent; border-radius: 8px; background: var(--card); cursor: pointer; transition: all 0.15s; }
 .icon-grid button:hover { background: var(--mint-bg); }
 .icon-grid button.selected { border-color: var(--mint); background: var(--mint-bg); }
+.color-grid { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
+.color-grid button { width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: all 0.15s; }
+.color-grid button:hover { transform: scale(1.1); }
+.color-grid button.selected { border-color: var(--text); transform: scale(1.15); }
 
 /* Timeline */
 .timeline {
@@ -1790,7 +1794,7 @@ const TRANSLATIONS = {
     'modal.exportJson': 'JSON 내보내기', 'modal.importJson': 'JSON 가져오기', 'modal.close': '닫기',
     'preset.manage': '프리셋 관리', 'preset.addNew': '+ 새 프리셋 추가', 'preset.done': '완료',
     'preset.edit': '프리셋 편집', 'preset.name': '프리셋 이름',
-    'preset.selectIcon': '아이콘 선택', 'preset.save': '저장',
+    'preset.selectIcon': '아이콘 선택', 'preset.selectColor': '버튼 색상', 'preset.save': '저장',
     'preset.newPreset': '새 프리셋 추가', 'preset.category': '카테고리',
     'preset.add': '추가', 'preset.empty': '프리셋이 없습니다',
     'toast.alreadyClosed': '이미 마감된 날짜입니다', 'toast.noEntries': '기록이 없습니다',
@@ -1872,7 +1876,7 @@ const TRANSLATIONS = {
     'modal.exportJson': 'JSONエクスポート', 'modal.importJson': 'JSONインポート', 'modal.close': '閉じる',
     'preset.manage': 'プリセット管理', 'preset.addNew': '+ 新しいプリセット追加', 'preset.done': '完了',
     'preset.edit': 'プリセット編集', 'preset.name': 'プリセット名',
-    'preset.selectIcon': 'アイコン選択', 'preset.save': '保存',
+    'preset.selectIcon': 'アイコン選択', 'preset.selectColor': 'ボタン色', 'preset.save': '保存',
     'preset.newPreset': '新しいプリセット追加', 'preset.category': 'カテゴリ',
     'preset.add': '追加', 'preset.empty': 'プリセットがありません',
     'toast.alreadyClosed': 'すでに締められた日です', 'toast.noEntries': '記録がありません',
@@ -1954,7 +1958,7 @@ const TRANSLATIONS = {
     'modal.exportJson': 'Export JSON', 'modal.importJson': 'Import JSON', 'modal.close': 'Close',
     'preset.manage': 'Preset Manager', 'preset.addNew': '+ Add New Preset', 'preset.done': 'Done',
     'preset.edit': 'Edit Preset', 'preset.name': 'Preset Name',
-    'preset.selectIcon': 'Select Icon', 'preset.save': 'Save',
+    'preset.selectIcon': 'Select Icon', 'preset.selectColor': 'Button color', 'preset.save': 'Save',
     'preset.newPreset': 'Add New Preset', 'preset.category': 'Category',
     'preset.add': 'Add', 'preset.empty': 'No presets',
     'toast.alreadyClosed': 'This day is already closed', 'toast.noEntries': 'No entries recorded',
@@ -2066,6 +2070,16 @@ const ICON_CANDIDATES = [
   '🏥','💊','🛏️','🧳','🎤','🎬','🏊','⚽','🍺','🙏',
   '💰','📝','🎁','🔧','🚿','👔','🤝','🧑‍💻','🎹','🏋️'
 ];
+const COLOR_PALETTE = [
+  { id: 'default', value: null,      label: '기본' },
+  { id: 'purple',  value: '#8B5CF6', label: '보라' },
+  { id: 'red',     value: '#EF4444', label: '빨강' },
+  { id: 'blue',    value: '#3B82F6', label: '파랑' },
+  { id: 'green',   value: '#22C55E', label: '초록' },
+  { id: 'orange',  value: '#F59E0B', label: '주황' },
+  { id: 'pink',    value: '#EC4899', label: '분홍' },
+  { id: 'gray',    value: '#9CA3AF', label: '회색' },
+];
 function isWakeActivity(name) {
   if (name === '기상') return true;
   for (const lang of Object.keys(PRESET_TRANSLATIONS)) {
@@ -2090,6 +2104,13 @@ function getIcon(activity) {
     if (cp) return cp.icon;
   }
   return DEFAULT_ICONS[activity] || '📌';
+}
+function getPresetColor(activity) {
+  if (data.customPresets) {
+    const cp = data.customPresets.find(p => p.name === activity);
+    if (cp && cp.color) return cp.color;
+  }
+  return null;
 }
 let data = { dates: {}, activityPresets: {}, customPresets: null, settings: {} };
 let currentDate = getTodayStr();
@@ -2967,9 +2988,11 @@ function renderChips() {
     return;
   }
 
-  container.innerHTML = chips.map(c =>
-    `<button class="chip" onmousedown="event.preventDefault()" onclick="addEntry('${escAttr(c)}')">${getIcon(c)} ${escHtml(displayActivity(c))}</button>`
-  ).join('');
+  container.innerHTML = chips.map(c => {
+    const color = getPresetColor(c);
+    const style = color ? `background:${color}20;color:${color};--chip-active:${color};` : '';
+    return `<button class="chip" style="${style}" onmousedown="event.preventDefault()" onclick="addEntry('${escAttr(c)}')">${getIcon(c)} ${escHtml(displayActivity(c))}</button>`;
+  }).join('');
 }
 
 // ============== Mission 2: Classify ==============
@@ -3755,7 +3778,8 @@ function initCustomPresets() {
   data.customPresets = DEFAULT_PRESETS.map(name => ({
     name: currentLang !== 'ko' ? (PRESET_TRANSLATIONS[currentLang]?.[name] || name) : name,
     icon: DEFAULT_ICONS[name] || '📌',
-    category: DEFAULT_CATEGORIES[name] || 'flexible'
+    category: DEFAULT_CATEGORIES[name] || 'flexible',
+    color: null
   }));
   saveData();
 }
@@ -3801,6 +3825,14 @@ function togglePresetCat(index) {
   renderPresetList();
 }
 
+function buildColorGrid(selectedColor) {
+  return COLOR_PALETTE.map(c => {
+    const bg = c.value || 'var(--mint)';
+    const sel = (selectedColor || null) === c.value ? 'selected' : '';
+    return `<button class="${sel}" style="background:${bg}" onclick="selectPresetColor(this, ${c.value ? "'" + c.value + "'" : 'null'})" title="${c.label}"></button>`;
+  }).join('');
+}
+
 function showPresetEditor(index) {
   const p = data.customPresets[index];
   const isProtected = isSleepPreset(p.name);
@@ -3810,6 +3842,10 @@ function showPresetEditor(index) {
     <div style="font-size:13px;color:var(--text-sub);margin-bottom:6px;">${t('preset.selectIcon')}</div>
     <div class="icon-grid" id="icon-grid">
       ${ICON_CANDIDATES.map(ic => `<button class="${ic === p.icon ? 'selected' : ''}" onclick="selectPresetIcon(this, '${ic}')">${ic}</button>`).join('')}
+    </div>
+    <div style="font-size:13px;color:var(--text-sub);margin-bottom:6px;">${t('preset.selectColor')}</div>
+    <div class="color-grid" id="color-grid">
+      ${buildColorGrid(p.color || null)}
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="showPresetManager()">${t('modal.cancel')}</button>
@@ -3825,6 +3861,12 @@ function selectPresetIcon(btn, icon) {
   btn.dataset.icon = icon;
 }
 
+function selectPresetColor(btn, color) {
+  document.querySelectorAll('#color-grid button').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  btn.dataset.color = color || '';
+}
+
 function savePreset(index) {
   const nameInput = document.getElementById('preset-edit-name');
   const name = nameInput.value.trim();
@@ -3833,9 +3875,13 @@ function savePreset(index) {
   const selectedBtn = document.querySelector('#icon-grid button.selected');
   const icon = selectedBtn ? selectedBtn.textContent.trim() : data.customPresets[index].icon;
 
+  const colorBtn = document.querySelector('#color-grid button.selected');
+  const color = colorBtn ? (colorBtn.dataset.color || null) : (data.customPresets[index].color || null);
+
   const oldName = data.customPresets[index].name;
   data.customPresets[index].name = name;
   data.customPresets[index].icon = icon;
+  data.customPresets[index].color = color;
 
   // Update activityPresets key if name changed
   if (oldName !== name && data.activityPresets[oldName]) {
@@ -3854,6 +3900,10 @@ function addNewPreset() {
     <div style="font-size:13px;color:var(--text-sub);margin-bottom:6px;">${t('preset.selectIcon')}</div>
     <div class="icon-grid" id="icon-grid">
       ${ICON_CANDIDATES.map((ic, i) => `<button class="${i === 0 ? 'selected' : ''}" onclick="selectPresetIcon(this, '${ic}')">${ic}</button>`).join('')}
+    </div>
+    <div style="font-size:13px;color:var(--text-sub);margin-bottom:6px;">${t('preset.selectColor')}</div>
+    <div class="color-grid" id="color-grid">
+      ${buildColorGrid(null)}
     </div>
     <div style="margin:12px 0;">
       <label style="font-size:13px;color:var(--text-sub);">${t('preset.category')}</label>
@@ -3881,7 +3931,10 @@ function confirmAddPreset() {
   const flexBtn = document.getElementById('new-cat-flexible');
   const category = (flexBtn && flexBtn.dataset.sel === 'flexible') ? 'flexible' : 'fixed';
 
-  data.customPresets.push({ name, icon, category });
+  const colorBtn = document.querySelector('#color-grid button.selected');
+  const color = colorBtn ? (colorBtn.dataset.color || null) : null;
+
+  data.customPresets.push({ name, icon, category, color });
   saveData();
   showPresetManager();
 }
