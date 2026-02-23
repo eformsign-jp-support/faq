@@ -1344,6 +1344,151 @@ body {
 @media print {
   .tab-bar, .header-actions, .btn, .delete-btn, .pwa-install-banner { display: none !important; }
 }
+
+/* Stats Dashboard */
+.stats-mode-toggle {
+  display: flex;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  margin-bottom: 16px;
+}
+.stats-mode-btn {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-sub);
+  transition: all var(--transition);
+}
+.stats-mode-btn.active {
+  background: var(--card);
+  color: var(--mint);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+[data-theme="dark"] .stats-mode-btn.active {
+  background: var(--mint);
+  color: #fff;
+}
+.stats-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.stats-period-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 160px;
+  text-align: center;
+}
+.stats-summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stats-summary-card {
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 14px 8px;
+  text-align: center;
+}
+.stats-summary-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--mint);
+  margin-bottom: 4px;
+}
+.stats-summary-label {
+  font-size: 11px;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+.stats-chart-container {
+  position: relative;
+  width: 100%;
+  max-height: 220px;
+}
+.stats-chart-container canvas {
+  width: 100% !important;
+  max-height: 220px;
+}
+.stats-ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.stats-ranking-medal {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+.stats-ranking-medal.gold { background: linear-gradient(135deg, #FFD700, #FFA500); }
+.stats-ranking-medal.silver { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); }
+.stats-ranking-medal.bronze { background: linear-gradient(135deg, #CD7F32, #A0522D); }
+.stats-ranking-medal.default { background: var(--blue-gray-light); }
+.stats-ranking-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.stats-ranking-bar-bg {
+  flex: 2;
+  height: 20px;
+  background: var(--bg);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.stats-ranking-bar {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+.stats-ranking-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+  min-width: 50px;
+  text-align: right;
+}
+.stats-activity-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.stats-activity-chip {
+  padding: 5px 12px;
+  border-radius: 16px;
+  background: var(--bg);
+  color: var(--text-sub);
+  font-size: 12px;
+  font-weight: 600;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.stats-activity-chip.active {
+  border-color: var(--mint);
+  color: var(--mint);
+  background: var(--mint-bg);
+}
 </style>
 </head>
 <body>
@@ -1354,6 +1499,7 @@ body {
     <h1>MyRoutine</h1>
     <div class="header-actions">
       <button class="icon-btn" onclick="switchTab('history')" data-i18n-title="header.history" title="히스토리">📅</button>
+      <button class="icon-btn" onclick="switchTab('stats')" data-i18n-title="header.stats" title="통계">📈</button>
       <button class="icon-btn" onclick="toggleDarkMode()" data-i18n-title="header.darkMode" title="다크 모드">🌙</button>
       <button class="icon-btn" onclick="showBackupModal()" data-i18n-title="header.backup" title="백업/복원">💾</button>
     </div>
@@ -1488,6 +1634,64 @@ body {
       </div>
     </div>
   </div>
+
+  <!-- Section: Stats Dashboard -->
+  <div id="sec-stats" class="section">
+    <div class="card">
+      <div class="stats-mode-toggle">
+        <button class="stats-mode-btn active" onclick="setStatsMode('weekly')" data-mode="weekly" data-i18n="stats.weekly">주간</button>
+        <button class="stats-mode-btn" onclick="setStatsMode('monthly')" data-mode="monthly" data-i18n="stats.monthly">월간</button>
+      </div>
+      <div class="stats-nav">
+        <button class="icon-btn" onclick="navigateStatsPeriod(-1)">◀</button>
+        <span class="stats-period-label" id="stats-period-label"></span>
+        <button class="icon-btn" onclick="navigateStatsPeriod(1)">▶</button>
+      </div>
+    </div>
+
+    <div class="stats-summary-row" id="stats-summary-row">
+      <div class="stats-summary-card">
+        <div class="stats-summary-value" id="stats-total-time">-</div>
+        <div class="stats-summary-label" data-i18n="stats.totalTime">총 시간</div>
+      </div>
+      <div class="stats-summary-card">
+        <div class="stats-summary-value" id="stats-avg-desired">-</div>
+        <div class="stats-summary-label" data-i18n="stats.avgDesired">평균 달성률</div>
+      </div>
+      <div class="stats-summary-card">
+        <div class="stats-summary-value" id="stats-avg-flex">-</div>
+        <div class="stats-summary-label" data-i18n="stats.avgFlex">평균 유동 비율</div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="stats-empty" style="display:none">
+      <div class="emoji">📈</div>
+      <p data-i18n="stats.noData">이 기간에는 기록이 없어요</p>
+    </div>
+
+    <div id="stats-charts-area">
+      <div class="card" id="stats-desired-card">
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.desiredTrend">원하는 삶 달성률 추이</h3>
+        <div class="stats-chart-container"><canvas id="stats-desired-chart"></canvas></div>
+      </div>
+
+      <div class="card" id="stats-ratio-card">
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.fixedFlexTrend">고정/유동 시간 비율</h3>
+        <div class="stats-chart-container"><canvas id="stats-ratio-chart"></canvas></div>
+      </div>
+
+      <div class="card" id="stats-ranking-card">
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.activityRanking">활동 TOP 5</h3>
+        <div id="stats-ranking-list"></div>
+      </div>
+
+      <div class="card" id="stats-activity-card">
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.activityTrend">활동별 시간 추이</h3>
+        <div class="stats-activity-chips" id="stats-activity-chips"></div>
+        <div class="stats-chart-container"><canvas id="stats-activity-chart"></canvas></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Bottom Tab Bar -->
@@ -1608,6 +1812,13 @@ const TRANSLATIONS = {
     'pdf.activityMemo': '메모',
     'calendar.achievement': '{total}일 중 {stars}일 달성',
     'activityMemo.placeholder': '이 활동에 대한 메모...',
+    'header.stats': '통계', 'stats.weekly': '주간', 'stats.monthly': '월간',
+    'stats.period': '기간', 'stats.recordedDays': '기록일',
+    'stats.noData': '이 기간에는 기록이 없어요',
+    'stats.activityRanking': '활동 TOP 5', 'stats.desiredTrend': '원하는 삶 달성률 추이',
+    'stats.fixedFlexTrend': '고정/유동 시간 비율', 'stats.activityTrend': '활동별 시간 추이',
+    'stats.totalTime': '총 시간', 'stats.avgDesired': '평균 달성률', 'stats.avgFlex': '평균 유동 비율',
+    'stats.selectActivity': '활동을 선택하세요',
   },
   ja: {
     'app.subtitle': '一日の分析',
@@ -1682,6 +1893,13 @@ const TRANSLATIONS = {
     'pdf.activityMemo': 'メモ',
     'calendar.achievement': '{total}日中 {stars}日達成',
     'activityMemo.placeholder': 'この活動についてメモ...',
+    'header.stats': '統計', 'stats.weekly': '週間', 'stats.monthly': '月間',
+    'stats.period': '期間', 'stats.recordedDays': '記録日',
+    'stats.noData': 'この期間には記録がありません',
+    'stats.activityRanking': '活動 TOP 5', 'stats.desiredTrend': '理想達成率の推移',
+    'stats.fixedFlexTrend': '固定/自由時間の割合', 'stats.activityTrend': '活動別時間の推移',
+    'stats.totalTime': '合計時間', 'stats.avgDesired': '平均達成率', 'stats.avgFlex': '平均自由比率',
+    'stats.selectActivity': '活動を選択してください',
   },
   en: {
     'app.subtitle': 'Daily Analysis',
@@ -1756,6 +1974,13 @@ const TRANSLATIONS = {
     'pdf.activityMemo': 'Memo',
     'calendar.achievement': '{stars} of {total} days achieved',
     'activityMemo.placeholder': 'Leave a note about this activity...',
+    'header.stats': 'Stats', 'stats.weekly': 'Weekly', 'stats.monthly': 'Monthly',
+    'stats.period': 'Period', 'stats.recordedDays': 'Recorded',
+    'stats.noData': 'No records for this period',
+    'stats.activityRanking': 'Top 5 Activities', 'stats.desiredTrend': 'Desired Life Achievement Trend',
+    'stats.fixedFlexTrend': 'Fixed/Flexible Ratio', 'stats.activityTrend': 'Activity Time Trend',
+    'stats.totalTime': 'Total Time', 'stats.avgDesired': 'Avg Achievement', 'stats.avgFlex': 'Avg Flexible',
+    'stats.selectActivity': 'Select an activity',
   }
 };
 
@@ -1858,6 +2083,12 @@ let currentDate = getTodayStr();
 let donutChart = null;
 let calendarMonth = null;
 let viewingPastDate = false;
+let statsMode = 'weekly';
+let statsPeriod = null;
+let statsDesiredChart = null;
+let statsRatioChart = null;
+let statsActivityChart = null;
+let statsSelectedActivity = null;
 
 // ============== Init ==============
 function init() {
@@ -1979,6 +2210,312 @@ function applyCustomColors(fixedColor, flexColor) {
   document.documentElement.style.setProperty('--mint-light', flexColor + '99');
 }
 
+// ============== Stats Dashboard ==============
+function initStatsPeriod() {
+  const today = new Date();
+  if (statsMode === 'weekly') {
+    const day = today.getDay();
+    const diff = day === 0 ? 6 : day - 1; // Monday start
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - diff);
+    statsPeriod = { year: monday.getFullYear(), month: monday.getMonth(), day: monday.getDate() };
+  } else {
+    statsPeriod = { year: today.getFullYear(), month: today.getMonth() };
+  }
+}
+
+function getStatsPeriodDates() {
+  if (!statsPeriod) initStatsPeriod();
+  const dates = [];
+  if (statsMode === 'weekly') {
+    const start = new Date(statsPeriod.year, statsPeriod.month, statsPeriod.day);
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      dates.push(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'));
+    }
+  } else {
+    const year = statsPeriod.year;
+    const month = statsPeriod.month;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    for (let i = 1; i <= daysInMonth; i++) {
+      dates.push(year + '-' + String(month+1).padStart(2,'0') + '-' + String(i).padStart(2,'0'));
+    }
+  }
+  return dates;
+}
+
+function aggregateStatsData(dates) {
+  const days = [];
+  dates.forEach(dateStr => {
+    const dd = data.dates[dateStr];
+    if (!dd || !dd.entries || dd.entries.length === 0) return;
+    const allClassified = dd.entries.every(e => e.category);
+    if (!allClassified) return;
+    const stats = calcStats(dd);
+    days.push({ date: dateStr, ...stats });
+  });
+  return days;
+}
+
+function setStatsMode(mode) {
+  statsMode = mode;
+  document.querySelectorAll('.stats-mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
+  });
+  initStatsPeriod();
+  renderStats();
+}
+
+function navigateStatsPeriod(dir) {
+  if (!statsPeriod) initStatsPeriod();
+  if (statsMode === 'weekly') {
+    const d = new Date(statsPeriod.year, statsPeriod.month, statsPeriod.day);
+    d.setDate(d.getDate() + dir * 7);
+    statsPeriod = { year: d.getFullYear(), month: d.getMonth(), day: d.getDate() };
+  } else {
+    let m = statsPeriod.month + dir;
+    let y = statsPeriod.year;
+    if (m > 11) { m = 0; y++; }
+    if (m < 0) { m = 11; y--; }
+    statsPeriod = { year: y, month: m };
+  }
+  renderStats();
+}
+
+function formatStatsPeriodLabel() {
+  if (!statsPeriod) initStatsPeriod();
+  if (statsMode === 'weekly') {
+    const start = new Date(statsPeriod.year, statsPeriod.month, statsPeriod.day);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+    return `${start.getFullYear()} ${fmt(start)} ~ ${fmt(end)}`;
+  } else {
+    const monthName = t('month.' + (statsPeriod.month + 1));
+    return `${statsPeriod.year} ${monthName}`;
+  }
+}
+
+function renderStats() {
+  if (!statsPeriod) initStatsPeriod();
+  document.getElementById('stats-period-label').textContent = formatStatsPeriodLabel();
+
+  const dates = getStatsPeriodDates();
+  const days = aggregateStatsData(dates);
+
+  const chartsArea = document.getElementById('stats-charts-area');
+  const emptyEl = document.getElementById('stats-empty');
+  const summaryRow = document.getElementById('stats-summary-row');
+
+  if (days.length === 0) {
+    chartsArea.style.display = 'none';
+    summaryRow.style.display = 'none';
+    emptyEl.style.display = '';
+    return;
+  }
+  chartsArea.style.display = '';
+  summaryRow.style.display = '';
+  emptyEl.style.display = 'none';
+
+  renderStatsSummaryCards(days);
+  renderStatsDesiredChart(days, dates);
+  renderStatsRatioChart(days, dates);
+  renderStatsRanking(days);
+  renderStatsActivityTrend(days, dates);
+}
+
+function renderStatsSummaryCards(days) {
+  const totalMin = days.reduce((s, d) => s + d.totalMin, 0);
+  const avgDesired = days.length > 0
+    ? Math.round(days.reduce((s, d) => s + (d.flexMin > 0 ? (d.desiredMin / d.flexMin * 100) : 0), 0) / days.length)
+    : 0;
+  const avgFlex = days.length > 0
+    ? Math.round(days.reduce((s, d) => s + (d.totalMin > 0 ? (d.flexMin / d.totalMin * 100) : 0), 0) / days.length)
+    : 0;
+
+  document.getElementById('stats-total-time').textContent = formatMin(totalMin);
+  document.getElementById('stats-avg-desired').textContent = avgDesired + '%';
+  document.getElementById('stats-avg-flex').textContent = avgFlex + '%';
+}
+
+function renderStatsDesiredChart(days, dates) {
+  const ctx = document.getElementById('stats-desired-chart').getContext('2d');
+  if (statsDesiredChart) statsDesiredChart.destroy();
+
+  const labels = dates.map(d => {
+    const parts = d.split('-');
+    return parseInt(parts[1]) + '/' + parseInt(parts[2]);
+  });
+  const values = dates.map(dateStr => {
+    const day = days.find(d => d.date === dateStr);
+    if (!day || day.flexMin === 0) return null;
+    return Math.round(day.desiredMin / day.flexMin * 100);
+  });
+
+  statsDesiredChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        borderColor: 'rgba(255,127,127,0.9)',
+        backgroundColor: 'rgba(255,127,127,0.15)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointBackgroundColor: 'rgba(255,127,127,1)',
+        spanGaps: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y + '%' } } },
+      scales: {
+        y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } },
+        x: { ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderStatsRatioChart(days, dates) {
+  const ctx = document.getElementById('stats-ratio-chart').getContext('2d');
+  if (statsRatioChart) statsRatioChart.destroy();
+
+  const labels = dates.map(d => {
+    const parts = d.split('-');
+    return parseInt(parts[1]) + '/' + parseInt(parts[2]);
+  });
+  const fixedData = dates.map(dateStr => {
+    const day = days.find(d => d.date === dateStr);
+    return day ? day.fixedMin : 0;
+  });
+  const flexData = dates.map(dateStr => {
+    const day = days.find(d => d.date === dateStr);
+    return day ? day.flexMin : 0;
+  });
+
+  statsRatioChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: t('analysis.fixedTime'), data: fixedData, backgroundColor: 'rgba(142,154,175,0.7)', borderRadius: 3 },
+        { label: t('analysis.flexibleTime'), data: flexData, backgroundColor: 'rgba(126,206,193,0.7)', borderRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, usePointStyle: true, pointStyleWidth: 10, padding: 12 } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + formatMin(ctx.parsed.y) } }
+      },
+      scales: {
+        x: { stacked: true, ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }, grid: { display: false } },
+        y: { stacked: true, ticks: { callback: v => Math.floor(v/60) + 'h', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } }
+      }
+    }
+  });
+}
+
+function renderStatsRanking(days) {
+  const actMap = {};
+  days.forEach(d => {
+    d.activities.forEach(a => {
+      if (!actMap[a.activity]) actMap[a.activity] = 0;
+      actMap[a.activity] += a.minutes;
+    });
+  });
+  const sorted = Object.entries(actMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const maxMin = sorted.length > 0 ? sorted[0][1] : 1;
+
+  const medals = ['gold', 'silver', 'bronze', 'default', 'default'];
+  const colors = ['#FFD700', '#C0C0C0', '#CD7F32', 'var(--mint)', 'var(--blue-gray-light)'];
+
+  const container = document.getElementById('stats-ranking-list');
+  container.innerHTML = sorted.map(([ name, mins ], i) => `
+    <div class="stats-ranking-item">
+      <div class="stats-ranking-medal ${medals[i]}">${i + 1}</div>
+      <span class="stats-ranking-name">${name}</span>
+      <div class="stats-ranking-bar-bg">
+        <div class="stats-ranking-bar" style="width:${Math.round(mins/maxMin*100)}%;background:${colors[i]}"></div>
+      </div>
+      <span class="stats-ranking-time">${formatMin(mins)}</span>
+    </div>
+  `).join('');
+}
+
+function renderStatsActivityTrend(days, dates) {
+  // Collect all activities
+  const actSet = new Set();
+  days.forEach(d => d.activities.forEach(a => actSet.add(a.activity)));
+  const allActivities = [...actSet].sort();
+
+  const chipsEl = document.getElementById('stats-activity-chips');
+  if (!statsSelectedActivity || !actSet.has(statsSelectedActivity)) {
+    statsSelectedActivity = allActivities[0] || null;
+  }
+
+  chipsEl.innerHTML = allActivities.map(a =>
+    `<button class="stats-activity-chip${a === statsSelectedActivity ? ' active' : ''}" onclick="selectStatsActivity('${a.replace(/'/g, "\\'")}')">${a}</button>`
+  ).join('');
+
+  if (!statsSelectedActivity) {
+    const ctx = document.getElementById('stats-activity-chart').getContext('2d');
+    if (statsActivityChart) { statsActivityChart.destroy(); statsActivityChart = null; }
+    return;
+  }
+
+  const ctx = document.getElementById('stats-activity-chart').getContext('2d');
+  if (statsActivityChart) statsActivityChart.destroy();
+
+  const labels = dates.map(d => {
+    const parts = d.split('-');
+    return parseInt(parts[1]) + '/' + parseInt(parts[2]);
+  });
+  const values = dates.map(dateStr => {
+    const day = days.find(d => d.date === dateStr);
+    if (!day) return 0;
+    return day.activities.filter(a => a.activity === statsSelectedActivity).reduce((s, a) => s + a.minutes, 0);
+  });
+
+  statsActivityChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: 'rgba(126,206,193,0.6)',
+        borderColor: 'rgba(126,206,193,1)',
+        borderWidth: 1,
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => formatMin(ctx.parsed.y) } } },
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: v => Math.floor(v/60) > 0 ? Math.floor(v/60) + 'h' : v + 'm', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } },
+        x: { ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function selectStatsActivity(activity) {
+  statsSelectedActivity = activity;
+  document.querySelectorAll('.stats-activity-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.textContent === activity);
+  });
+  const dates = getStatsPeriodDates();
+  const days = aggregateStatsData(dates);
+  renderStatsActivityTrend(days, dates);
+}
+
 // ============== Tab Navigation ==============
 function switchTab(tab) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -1990,6 +2527,7 @@ function switchTab(tab) {
   if (tab === 'classify') renderClassify();
   if (tab === 'analysis') renderAnalysis();
   if (tab === 'history') renderHistory();
+  if (tab === 'stats') renderStats();
 }
 
 function switchDate(d) {

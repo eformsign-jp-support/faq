@@ -322,6 +322,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  cursor: pointer;
 }
 
 .timeline-info {
@@ -448,6 +450,55 @@ body {
 
 .guide strong {
   color: var(--text);
+}
+
+/* Past date editing banner */
+.past-date-banner {
+  background: linear-gradient(135deg, var(--coral-bg), #FFF5EE);
+  border: 1px solid var(--coral-light);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+[data-theme="dark"] .past-date-banner {
+  background: linear-gradient(135deg, var(--coral-bg), #2A1515);
+}
+
+.past-date-banner .banner-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--coral);
+}
+
+.past-date-banner .btn-back {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--coral);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Bar chart category toggle (analysis editing) */
+.bar-chart-toggle {
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1.5px solid var(--blue-gray-light);
+  margin-top: 6px;
+}
+
+.bar-chart-toggle .toggle-btn {
+  padding: 4px 10px;
+  font-size: 11px;
 }
 
 /* Analysis */
@@ -647,6 +698,73 @@ body {
 .history-status.recording {
   background: var(--coral-bg);
   color: var(--coral);
+}
+
+/* History Accordion */
+.history-year, .history-month {
+  margin-bottom: 4px;
+}
+
+.history-year-header, .history-month-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+
+.history-year-header {
+  font-weight: 700;
+  font-size: 16px;
+  background: var(--mint-bg);
+}
+
+.history-month-header {
+  font-weight: 600;
+  font-size: 14px;
+  padding-left: 20px;
+  color: var(--text-sub);
+}
+
+.history-year-header:active, .history-month-header:active {
+  background: var(--bg);
+}
+
+.history-toggle {
+  font-size: 10px;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.history-year.collapsed .history-toggle,
+.history-month.collapsed .history-toggle {
+  transform: rotate(-90deg);
+}
+
+.history-year-header .history-count,
+.history-month-header .history-count {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-left: auto;
+}
+
+.history-year-body, .history-month-body {
+  overflow: hidden;
+  max-height: 5000px;
+  transition: max-height 0.3s ease;
+}
+
+.history-year.collapsed > .history-year-body,
+.history-month.collapsed > .history-month-body {
+  max-height: 0;
+}
+
+.history-month-body {
+  padding-left: 8px;
 }
 
 /* Bottom Tab Bar */
@@ -905,6 +1023,55 @@ body {
   color: var(--text-light);
 }
 
+/* Activity Memo (Timeline accordion) */
+.timeline-memo-area {
+  width: 100%;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, margin-top 0.3s ease;
+  margin-top: 0;
+}
+.timeline-item.memo-expanded .timeline-memo-area {
+  max-height: 120px;
+  margin-top: 8px;
+}
+.timeline-memo-input {
+  width: 100%;
+  min-height: 50px;
+  padding: 8px 10px;
+  border: 1.5px solid var(--mint-light);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  resize: none;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+.timeline-memo-input:focus {
+  border-color: var(--mint);
+}
+.timeline-memo-input::placeholder {
+  color: var(--text-light);
+}
+.timeline-memo-badge {
+  font-size: 11px;
+  margin-left: 4px;
+  opacity: 0.7;
+}
+.activity-memo-list {
+  margin-top: 4px;
+  padding-left: 4px;
+}
+.activity-memo-item {
+  font-size: 12px;
+  color: var(--text-sub);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1089,6 +1256,10 @@ body {
   font-weight: 600;
 }
 
+.day-desired.needs-review {
+  color: var(--coral);
+}
+
 .calendar-summary {
   text-align: center;
   margin-top: 12px;
@@ -1173,6 +1344,151 @@ body {
 @media print {
   .tab-bar, .header-actions, .btn, .delete-btn, .pwa-install-banner { display: none !important; }
 }
+
+/* Stats Dashboard */
+.stats-mode-toggle {
+  display: flex;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  margin-bottom: 16px;
+}
+.stats-mode-btn {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-sub);
+  transition: all var(--transition);
+}
+.stats-mode-btn.active {
+  background: var(--card);
+  color: var(--mint);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+[data-theme="dark"] .stats-mode-btn.active {
+  background: var(--mint);
+  color: #fff;
+}
+.stats-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.stats-period-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 160px;
+  text-align: center;
+}
+.stats-summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stats-summary-card {
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 14px 8px;
+  text-align: center;
+}
+.stats-summary-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--mint);
+  margin-bottom: 4px;
+}
+.stats-summary-label {
+  font-size: 11px;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+.stats-chart-container {
+  position: relative;
+  width: 100%;
+  max-height: 220px;
+}
+.stats-chart-container canvas {
+  width: 100% !important;
+  max-height: 220px;
+}
+.stats-ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.stats-ranking-medal {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+.stats-ranking-medal.gold { background: linear-gradient(135deg, #FFD700, #FFA500); }
+.stats-ranking-medal.silver { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); }
+.stats-ranking-medal.bronze { background: linear-gradient(135deg, #CD7F32, #A0522D); }
+.stats-ranking-medal.default { background: var(--blue-gray-light); }
+.stats-ranking-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.stats-ranking-bar-bg {
+  flex: 2;
+  height: 20px;
+  background: var(--bg);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.stats-ranking-bar {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+.stats-ranking-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+  min-width: 50px;
+  text-align: right;
+}
+.stats-activity-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.stats-activity-chip {
+  padding: 5px 12px;
+  border-radius: 16px;
+  background: var(--bg);
+  color: var(--text-sub);
+  font-size: 12px;
+  font-weight: 600;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.stats-activity-chip.active {
+  border-color: var(--mint);
+  color: var(--mint);
+  background: var(--mint-bg);
+}
 </style>
 </head>
 <body>
@@ -1183,6 +1499,7 @@ body {
     <h1>MyRoutine</h1>
     <div class="header-actions">
       <button class="icon-btn" onclick="switchTab('history')" data-i18n-title="header.history" title="히스토리">📅</button>
+      <button class="icon-btn" onclick="switchTab('stats')" data-i18n-title="header.stats" title="통계">📈</button>
       <button class="icon-btn" onclick="toggleDarkMode()" data-i18n-title="header.darkMode" title="다크 모드">🌙</button>
       <button class="icon-btn" onclick="showBackupModal()" data-i18n-title="header.backup" title="백업/복원">💾</button>
     </div>
@@ -1247,6 +1564,7 @@ body {
 
   <!-- Section: Analysis (미션3) -->
   <div id="sec-analysis" class="section">
+    <div id="past-date-banner"></div>
     <div class="card">
       <h3 style="font-size:16px;margin-bottom:16px;text-align:center" data-i18n="analysis.timeDistribution">시간 분배</h3>
       <div class="chart-container">
@@ -1280,6 +1598,8 @@ body {
 
     <div id="monthly-calendar"></div>
 
+    <div id="save-return-btn"></div>
+
     <button class="btn btn-coral btn-block" onclick="exportPDF()" style="margin-top:16px">
       📄 <span data-i18n="analysis.exportPdf">PDF로 내보내기</span>
     </button>
@@ -1289,7 +1609,7 @@ body {
   <div id="sec-history" class="section">
     <div class="card">
       <h3 style="font-size:16px;margin-bottom:16px" data-i18n="history.title">기록 히스토리</h3>
-      <ul class="history-list" id="history-list"></ul>
+      <div class="history-list" id="history-list"></div>
       <div class="empty-state" id="history-empty" style="display:none">
         <div class="emoji">📅</div>
         <p data-i18n-html="history.emptyMsg">아직 기록된 날이 없어요<br>'기록' 탭에서 하루를 시작해보세요!</p>
@@ -1298,21 +1618,7 @@ body {
 
     <div class="settings-section">
       <div class="card">
-        <h4 data-i18n="settings.title">설정</h4>
-        <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
-          <label style="font-size:13px;flex-shrink:0" data-i18n="settings.defaultSleep">기본 취침 시간</label>
-          <input type="time" id="default-sleep" value="00:00"
-                 style="padding:8px;border:2px solid var(--mint-light);border-radius:8px;font-size:14px;background:var(--card);color:var(--text);outline:none"
-                 onchange="saveSettings()">
-        </div>
-        <div style="display:flex;gap:12px;align-items:center">
-          <label style="font-size:13px;flex-shrink:0" data-i18n="settings.defaultWake">기본 기상 시간</label>
-          <input type="time" id="default-wake" value="07:00"
-                 style="padding:8px;border:2px solid var(--mint-light);border-radius:8px;font-size:14px;background:var(--card);color:var(--text);outline:none"
-                 onchange="saveSettings()">
-        </div>
-        <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(0,0,0,0.06)">
-          <h4 style="font-size:13px;color:var(--text-sub);margin-bottom:10px" data-i18n="settings.categoryColor">카테고리 색상</h4>
+        <h4 data-i18n="settings.categoryColor">카테고리 색상</h4>
           <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
             <label style="font-size:13px;flex-shrink:0" data-i18n="settings.fixedTime">고정 시간</label>
             <input type="color" id="color-fixed" value="#8E9AAF"
@@ -1325,7 +1631,64 @@ body {
                    style="width:36px;height:36px;border:none;border-radius:8px;cursor:pointer;background:none"
                    onchange="saveColorSettings()">
           </div>
-        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section: Stats Dashboard -->
+  <div id="sec-stats" class="section">
+    <div class="card">
+      <div class="stats-mode-toggle">
+        <button class="stats-mode-btn active" onclick="setStatsMode('weekly')" data-mode="weekly" data-i18n="stats.weekly">주간</button>
+        <button class="stats-mode-btn" onclick="setStatsMode('monthly')" data-mode="monthly" data-i18n="stats.monthly">월간</button>
+      </div>
+      <div class="stats-nav">
+        <button class="icon-btn" onclick="navigateStatsPeriod(-1)">◀</button>
+        <span class="stats-period-label" id="stats-period-label"></span>
+        <button class="icon-btn" onclick="navigateStatsPeriod(1)">▶</button>
+      </div>
+    </div>
+
+    <div class="stats-summary-row" id="stats-summary-row">
+      <div class="stats-summary-card">
+        <div class="stats-summary-value" id="stats-total-time">-</div>
+        <div class="stats-summary-label" data-i18n="stats.totalTime">총 시간</div>
+      </div>
+      <div class="stats-summary-card">
+        <div class="stats-summary-value" id="stats-avg-desired">-</div>
+        <div class="stats-summary-label" data-i18n="stats.avgDesired">평균 달성률</div>
+      </div>
+      <div class="stats-summary-card">
+        <div class="stats-summary-value" id="stats-avg-flex">-</div>
+        <div class="stats-summary-label" data-i18n="stats.avgFlex">평균 유동 비율</div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="stats-empty" style="display:none">
+      <div class="emoji">📈</div>
+      <p data-i18n="stats.noData">이 기간에는 기록이 없어요</p>
+    </div>
+
+    <div id="stats-charts-area">
+      <div class="card" id="stats-desired-card">
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.desiredTrend">원하는 삶 달성률 추이</h3>
+        <div class="stats-chart-container"><canvas id="stats-desired-chart"></canvas></div>
+      </div>
+
+      <div class="card" id="stats-ratio-card">
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.fixedFlexTrend">고정/유동 시간 비율</h3>
+        <div class="stats-chart-container"><canvas id="stats-ratio-chart"></canvas></div>
+      </div>
+
+      <div class="card" id="stats-ranking-card">
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.activityRanking">활동 TOP 5</h3>
+        <div id="stats-ranking-list"></div>
+      </div>
+
+      <div class="card" id="stats-activity-card">
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.activityTrend">활동별 시간 추이</h3>
+        <div class="stats-activity-chips" id="stats-activity-chips"></div>
+        <div class="stats-chart-container"><canvas id="stats-activity-chart"></canvas></div>
       </div>
     </div>
   </div>
@@ -1400,10 +1763,12 @@ const TRANSLATIONS = {
     'analysis.summaryTitle': '오늘 하루, 진짜 나를 위한 시간',
     'analysis.summaryDesc': '유동 시간 중 {pct}%가 원하는 삶을 위한 시간입니다',
     'analysis.encourageMsg': '💪 유동 시간이 고정 시간보다 적어요.<br>작은 시간이라도 나를 위해 쓸 수 있어요!',
+    'analysis.editingDate': '📅 {date} 분석 수정 중',
+    'analysis.backToToday': '오늘로 돌아가기',
+    'analysis.saveAndReturn': '저장 완료',
     'history.title': '기록 히스토리',
     'history.emptyMsg': '아직 기록된 날이 없어요<br>\'기록\' 탭에서 하루를 시작해보세요!',
-    'history.completed': '완료', 'history.recording': '기록중',
-    'settings.title': '설정', 'settings.defaultSleep': '기본 취침 시간', 'settings.defaultWake': '기본 기상 시간',
+    'history.completed': '완료', 'history.recording': '기록중', 'history.days': '{n}일', 'history.year': '{y}년',
     'settings.categoryColor': '카테고리 색상', 'settings.fixedTime': '고정 시간', 'settings.flexibleTime': '유동 시간',
     'modal.editTime': '시간 수정', 'modal.hourLabel': '{h}시',
     'modal.cancel': '취소', 'modal.confirm': '확인',
@@ -1444,7 +1809,16 @@ const TRANSLATIONS = {
     'pdf.memo': '오늘의 메모',
     'pdf.calendarTitle': '{y}년 {m}월 달성 현황',
     'pdf.calendarSummary': '{total}일 중 {stars}일 달성 ★',
+    'pdf.activityMemo': '메모',
     'calendar.achievement': '{total}일 중 {stars}일 달성',
+    'activityMemo.placeholder': '이 활동에 대한 메모...',
+    'header.stats': '통계', 'stats.weekly': '주간', 'stats.monthly': '월간',
+    'stats.period': '기간', 'stats.recordedDays': '기록일',
+    'stats.noData': '이 기간에는 기록이 없어요',
+    'stats.activityRanking': '활동 TOP 5', 'stats.desiredTrend': '원하는 삶 달성률 추이',
+    'stats.fixedFlexTrend': '고정/유동 시간 비율', 'stats.activityTrend': '활동별 시간 추이',
+    'stats.totalTime': '총 시간', 'stats.avgDesired': '평균 달성률', 'stats.avgFlex': '평균 유동 비율',
+    'stats.selectActivity': '활동을 선택하세요',
   },
   ja: {
     'app.subtitle': '一日の分析',
@@ -1470,10 +1844,12 @@ const TRANSLATIONS = {
     'analysis.summaryTitle': '今日一日、本当の自分のための時間',
     'analysis.summaryDesc': '自由時間の{pct}%が理想の人生のための時間です',
     'analysis.encourageMsg': '💪 自由時間が固定時間より少ないです。<br>少しの時間でも自分のために使えます！',
+    'analysis.editingDate': '📅 {date} 分析を編集中',
+    'analysis.backToToday': '今日に戻る',
+    'analysis.saveAndReturn': '保存完了',
     'history.title': '記録履歴',
     'history.emptyMsg': 'まだ記録された日がありません<br>「記録」タブで一日を始めましょう！',
-    'history.completed': '完了', 'history.recording': '記録中',
-    'settings.title': '設定', 'settings.defaultSleep': 'デフォルト就寝時間', 'settings.defaultWake': 'デフォルト起床時間',
+    'history.completed': '完了', 'history.recording': '記録中', 'history.days': '{n}日', 'history.year': '{y}年',
     'settings.categoryColor': 'カテゴリ色', 'settings.fixedTime': '固定時間', 'settings.flexibleTime': '自由時間',
     'modal.editTime': '時間修正', 'modal.hourLabel': '{h}時',
     'modal.cancel': 'キャンセル', 'modal.confirm': '確認',
@@ -1514,7 +1890,16 @@ const TRANSLATIONS = {
     'pdf.memo': '今日のメモ',
     'pdf.calendarTitle': '{y}年 {m}月 達成状況',
     'pdf.calendarSummary': '{total}日中 {stars}日達成 ★',
+    'pdf.activityMemo': 'メモ',
     'calendar.achievement': '{total}日中 {stars}日達成',
+    'activityMemo.placeholder': 'この活動についてメモ...',
+    'header.stats': '統計', 'stats.weekly': '週間', 'stats.monthly': '月間',
+    'stats.period': '期間', 'stats.recordedDays': '記録日',
+    'stats.noData': 'この期間には記録がありません',
+    'stats.activityRanking': '活動 TOP 5', 'stats.desiredTrend': '理想達成率の推移',
+    'stats.fixedFlexTrend': '固定/自由時間の割合', 'stats.activityTrend': '活動別時間の推移',
+    'stats.totalTime': '合計時間', 'stats.avgDesired': '平均達成率', 'stats.avgFlex': '平均自由比率',
+    'stats.selectActivity': '活動を選択してください',
   },
   en: {
     'app.subtitle': 'Daily Analysis',
@@ -1540,10 +1925,12 @@ const TRANSLATIONS = {
     'analysis.summaryTitle': 'Time truly for yourself today',
     'analysis.summaryDesc': '{pct}% of flexible time was for the life you want',
     'analysis.encourageMsg': '💪 Your flexible time is less than fixed time.<br>Even a little time for yourself matters!',
+    'analysis.editingDate': '📅 Editing {date}',
+    'analysis.backToToday': 'Back to today',
+    'analysis.saveAndReturn': 'Save & Return',
     'history.title': 'Record History',
     'history.emptyMsg': "No recorded days yet<br>Start your day in the 'Record' tab!",
-    'history.completed': 'Done', 'history.recording': 'Recording',
-    'settings.title': 'Settings', 'settings.defaultSleep': 'Default Sleep Time', 'settings.defaultWake': 'Default Wake Time',
+    'history.completed': 'Done', 'history.recording': 'Recording', 'history.days': '{n} days', 'history.year': '{y}',
     'settings.categoryColor': 'Category Colors', 'settings.fixedTime': 'Fixed Time', 'settings.flexibleTime': 'Flexible Time',
     'modal.editTime': 'Edit Time', 'modal.hourLabel': '{h}:00',
     'modal.cancel': 'Cancel', 'modal.confirm': 'OK',
@@ -1584,7 +1971,16 @@ const TRANSLATIONS = {
     'pdf.memo': "Today's Memo",
     'pdf.calendarTitle': '{month} {y} Achievement',
     'pdf.calendarSummary': '{stars} of {total} days achieved ★',
+    'pdf.activityMemo': 'Memo',
     'calendar.achievement': '{stars} of {total} days achieved',
+    'activityMemo.placeholder': 'Leave a note about this activity...',
+    'header.stats': 'Stats', 'stats.weekly': 'Weekly', 'stats.monthly': 'Monthly',
+    'stats.period': 'Period', 'stats.recordedDays': 'Recorded',
+    'stats.noData': 'No records for this period',
+    'stats.activityRanking': 'Top 5 Activities', 'stats.desiredTrend': 'Desired Life Achievement Trend',
+    'stats.fixedFlexTrend': 'Fixed/Flexible Ratio', 'stats.activityTrend': 'Activity Time Trend',
+    'stats.totalTime': 'Total Time', 'stats.avgDesired': 'Avg Achievement', 'stats.avgFlex': 'Avg Flexible',
+    'stats.selectActivity': 'Select an activity',
   }
 };
 
@@ -1682,10 +2078,17 @@ function getIcon(activity) {
   }
   return DEFAULT_ICONS[activity] || '📌';
 }
-let data = { dates: {}, activityPresets: {}, customPresets: null, settings: { defaultSleepStart: '00:00', defaultWakeUp: '07:00' } };
+let data = { dates: {}, activityPresets: {}, customPresets: null, settings: {} };
 let currentDate = getTodayStr();
 let donutChart = null;
 let calendarMonth = null;
+let viewingPastDate = false;
+let statsMode = 'weekly';
+let statsPeriod = null;
+let statsDesiredChart = null;
+let statsRatioChart = null;
+let statsActivityChart = null;
+let statsSelectedActivity = null;
 
 // ============== Init ==============
 function init() {
@@ -1694,7 +2097,6 @@ function init() {
   updateClock();
   setInterval(updateClock, 1000);
   renderAll();
-  loadSettings();
   if (document.documentElement.getAttribute('data-theme') === 'dark' ||
       localStorage.getItem('myRoutineDark') === 'true') {
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -1710,9 +2112,46 @@ function getTodayStr() {
 function updateClock() {
   const now = new Date();
   const days = getDayNames();
-  document.getElementById('current-date').textContent = formatDateDisplay(now.getFullYear(), now.getMonth()+1, now.getDate(), days[now.getDay()]);
-  document.getElementById('current-time').textContent =
-    String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+  const timeEl = document.getElementById('current-time');
+
+  // 과거 날짜 열람 중이면 해당 날짜 표시 + 시계 숨김
+  if (viewingPastDate && currentDate !== getTodayStr()) {
+    const [py, pm, pd] = currentDate.split('-').map(Number);
+    const pastDt = new Date(py, pm - 1, pd);
+    document.getElementById('current-date').textContent = formatDateDisplay(py, pm, pd, days[pastDt.getDay()]);
+    timeEl.style.display = 'none';
+  } else {
+    document.getElementById('current-date').textContent = formatDateDisplay(now.getFullYear(), now.getMonth()+1, now.getDate(), days[now.getDay()]);
+    timeEl.textContent = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+    timeEl.style.display = '';
+  }
+
+  // 자정이 지나면 이전 날짜 자동 마감 + currentDate를 오늘로 전환
+  const today = getTodayStr();
+  if (currentDate !== today) {
+    // 과거 날짜 열람/편집 중이면 자동 전환 방지 (자동 마감만 수행)
+    const prevDate = currentDate;
+    const prevDD = data.dates[prevDate];
+    if (prevDD && prevDD.status === 'recording' && prevDD.entries.length > 0) {
+      prevDD.status = 'completed';
+      prevDD.closedAt = '23:59';
+      // 미분류 활동 자동 분류
+      prevDD.entries.forEach(e => {
+        if (!e.category) {
+          if (data.customPresets) {
+            const cp = data.customPresets.find(p => p.name === e.activity);
+            if (cp) { e.category = cp.category; return; }
+          }
+          e.category = data.activityPresets[e.activity] || DEFAULT_CATEGORIES[e.activity] || null;
+        }
+      });
+      saveData();
+    }
+    if (!viewingPastDate) {
+      currentDate = today;
+      renderAll();
+    }
+  }
 }
 
 function formatDateDisplay(y, m, d, dayName) {
@@ -1740,20 +2179,9 @@ function saveData() {
 
 function getDateData(d) {
   if (!data.dates[d]) {
-    data.dates[d] = { status: 'recording', entries: [], closedAt: null, sleepStart: data.settings.defaultSleepStart, memo: '' };
+    data.dates[d] = { status: 'recording', entries: [], closedAt: null, sleepStart: null, memo: '' };
   }
   return data.dates[d];
-}
-
-function loadSettings() {
-  document.getElementById('default-sleep').value = data.settings.defaultSleepStart || '00:00';
-  document.getElementById('default-wake').value = data.settings.defaultWakeUp || '07:00';
-}
-
-function saveSettings() {
-  data.settings.defaultSleepStart = document.getElementById('default-sleep').value;
-  data.settings.defaultWakeUp = document.getElementById('default-wake').value;
-  saveData();
 }
 
 function saveColorSettings() {
@@ -1782,6 +2210,312 @@ function applyCustomColors(fixedColor, flexColor) {
   document.documentElement.style.setProperty('--mint-light', flexColor + '99');
 }
 
+// ============== Stats Dashboard ==============
+function initStatsPeriod() {
+  const today = new Date();
+  if (statsMode === 'weekly') {
+    const day = today.getDay();
+    const diff = day === 0 ? 6 : day - 1; // Monday start
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - diff);
+    statsPeriod = { year: monday.getFullYear(), month: monday.getMonth(), day: monday.getDate() };
+  } else {
+    statsPeriod = { year: today.getFullYear(), month: today.getMonth() };
+  }
+}
+
+function getStatsPeriodDates() {
+  if (!statsPeriod) initStatsPeriod();
+  const dates = [];
+  if (statsMode === 'weekly') {
+    const start = new Date(statsPeriod.year, statsPeriod.month, statsPeriod.day);
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      dates.push(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'));
+    }
+  } else {
+    const year = statsPeriod.year;
+    const month = statsPeriod.month;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    for (let i = 1; i <= daysInMonth; i++) {
+      dates.push(year + '-' + String(month+1).padStart(2,'0') + '-' + String(i).padStart(2,'0'));
+    }
+  }
+  return dates;
+}
+
+function aggregateStatsData(dates) {
+  const days = [];
+  dates.forEach(dateStr => {
+    const dd = data.dates[dateStr];
+    if (!dd || !dd.entries || dd.entries.length === 0) return;
+    const allClassified = dd.entries.every(e => e.category);
+    if (!allClassified) return;
+    const stats = calcStats(dd);
+    days.push({ date: dateStr, ...stats });
+  });
+  return days;
+}
+
+function setStatsMode(mode) {
+  statsMode = mode;
+  document.querySelectorAll('.stats-mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
+  });
+  initStatsPeriod();
+  renderStats();
+}
+
+function navigateStatsPeriod(dir) {
+  if (!statsPeriod) initStatsPeriod();
+  if (statsMode === 'weekly') {
+    const d = new Date(statsPeriod.year, statsPeriod.month, statsPeriod.day);
+    d.setDate(d.getDate() + dir * 7);
+    statsPeriod = { year: d.getFullYear(), month: d.getMonth(), day: d.getDate() };
+  } else {
+    let m = statsPeriod.month + dir;
+    let y = statsPeriod.year;
+    if (m > 11) { m = 0; y++; }
+    if (m < 0) { m = 11; y--; }
+    statsPeriod = { year: y, month: m };
+  }
+  renderStats();
+}
+
+function formatStatsPeriodLabel() {
+  if (!statsPeriod) initStatsPeriod();
+  if (statsMode === 'weekly') {
+    const start = new Date(statsPeriod.year, statsPeriod.month, statsPeriod.day);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+    return `${start.getFullYear()} ${fmt(start)} ~ ${fmt(end)}`;
+  } else {
+    const monthName = t('month.' + (statsPeriod.month + 1));
+    return `${statsPeriod.year} ${monthName}`;
+  }
+}
+
+function renderStats() {
+  if (!statsPeriod) initStatsPeriod();
+  document.getElementById('stats-period-label').textContent = formatStatsPeriodLabel();
+
+  const dates = getStatsPeriodDates();
+  const days = aggregateStatsData(dates);
+
+  const chartsArea = document.getElementById('stats-charts-area');
+  const emptyEl = document.getElementById('stats-empty');
+  const summaryRow = document.getElementById('stats-summary-row');
+
+  if (days.length === 0) {
+    chartsArea.style.display = 'none';
+    summaryRow.style.display = 'none';
+    emptyEl.style.display = '';
+    return;
+  }
+  chartsArea.style.display = '';
+  summaryRow.style.display = '';
+  emptyEl.style.display = 'none';
+
+  renderStatsSummaryCards(days);
+  renderStatsDesiredChart(days, dates);
+  renderStatsRatioChart(days, dates);
+  renderStatsRanking(days);
+  renderStatsActivityTrend(days, dates);
+}
+
+function renderStatsSummaryCards(days) {
+  const totalMin = days.reduce((s, d) => s + d.totalMin, 0);
+  const avgDesired = days.length > 0
+    ? Math.round(days.reduce((s, d) => s + (d.flexMin > 0 ? (d.desiredMin / d.flexMin * 100) : 0), 0) / days.length)
+    : 0;
+  const avgFlex = days.length > 0
+    ? Math.round(days.reduce((s, d) => s + (d.totalMin > 0 ? (d.flexMin / d.totalMin * 100) : 0), 0) / days.length)
+    : 0;
+
+  document.getElementById('stats-total-time').textContent = formatMin(totalMin);
+  document.getElementById('stats-avg-desired').textContent = avgDesired + '%';
+  document.getElementById('stats-avg-flex').textContent = avgFlex + '%';
+}
+
+function renderStatsDesiredChart(days, dates) {
+  const ctx = document.getElementById('stats-desired-chart').getContext('2d');
+  if (statsDesiredChart) statsDesiredChart.destroy();
+
+  const labels = dates.map(d => {
+    const parts = d.split('-');
+    return parseInt(parts[1]) + '/' + parseInt(parts[2]);
+  });
+  const values = dates.map(dateStr => {
+    const day = days.find(d => d.date === dateStr);
+    if (!day || day.flexMin === 0) return null;
+    return Math.round(day.desiredMin / day.flexMin * 100);
+  });
+
+  statsDesiredChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        borderColor: 'rgba(255,127,127,0.9)',
+        backgroundColor: 'rgba(255,127,127,0.15)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointBackgroundColor: 'rgba(255,127,127,1)',
+        spanGaps: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y + '%' } } },
+      scales: {
+        y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } },
+        x: { ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderStatsRatioChart(days, dates) {
+  const ctx = document.getElementById('stats-ratio-chart').getContext('2d');
+  if (statsRatioChart) statsRatioChart.destroy();
+
+  const labels = dates.map(d => {
+    const parts = d.split('-');
+    return parseInt(parts[1]) + '/' + parseInt(parts[2]);
+  });
+  const fixedData = dates.map(dateStr => {
+    const day = days.find(d => d.date === dateStr);
+    return day ? day.fixedMin : 0;
+  });
+  const flexData = dates.map(dateStr => {
+    const day = days.find(d => d.date === dateStr);
+    return day ? day.flexMin : 0;
+  });
+
+  statsRatioChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: t('analysis.fixedTime'), data: fixedData, backgroundColor: 'rgba(142,154,175,0.7)', borderRadius: 3 },
+        { label: t('analysis.flexibleTime'), data: flexData, backgroundColor: 'rgba(126,206,193,0.7)', borderRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, usePointStyle: true, pointStyleWidth: 10, padding: 12 } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + formatMin(ctx.parsed.y) } }
+      },
+      scales: {
+        x: { stacked: true, ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }, grid: { display: false } },
+        y: { stacked: true, ticks: { callback: v => Math.floor(v/60) + 'h', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } }
+      }
+    }
+  });
+}
+
+function renderStatsRanking(days) {
+  const actMap = {};
+  days.forEach(d => {
+    d.activities.forEach(a => {
+      if (!actMap[a.activity]) actMap[a.activity] = 0;
+      actMap[a.activity] += a.minutes;
+    });
+  });
+  const sorted = Object.entries(actMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const maxMin = sorted.length > 0 ? sorted[0][1] : 1;
+
+  const medals = ['gold', 'silver', 'bronze', 'default', 'default'];
+  const colors = ['#FFD700', '#C0C0C0', '#CD7F32', 'var(--mint)', 'var(--blue-gray-light)'];
+
+  const container = document.getElementById('stats-ranking-list');
+  container.innerHTML = sorted.map(([ name, mins ], i) => `
+    <div class="stats-ranking-item">
+      <div class="stats-ranking-medal ${medals[i]}">${i + 1}</div>
+      <span class="stats-ranking-name">${name}</span>
+      <div class="stats-ranking-bar-bg">
+        <div class="stats-ranking-bar" style="width:${Math.round(mins/maxMin*100)}%;background:${colors[i]}"></div>
+      </div>
+      <span class="stats-ranking-time">${formatMin(mins)}</span>
+    </div>
+  `).join('');
+}
+
+function renderStatsActivityTrend(days, dates) {
+  // Collect all activities
+  const actSet = new Set();
+  days.forEach(d => d.activities.forEach(a => actSet.add(a.activity)));
+  const allActivities = [...actSet].sort();
+
+  const chipsEl = document.getElementById('stats-activity-chips');
+  if (!statsSelectedActivity || !actSet.has(statsSelectedActivity)) {
+    statsSelectedActivity = allActivities[0] || null;
+  }
+
+  chipsEl.innerHTML = allActivities.map(a =>
+    `<button class="stats-activity-chip${a === statsSelectedActivity ? ' active' : ''}" onclick="selectStatsActivity('${a.replace(/'/g, "\\'")}')">${a}</button>`
+  ).join('');
+
+  if (!statsSelectedActivity) {
+    const ctx = document.getElementById('stats-activity-chart').getContext('2d');
+    if (statsActivityChart) { statsActivityChart.destroy(); statsActivityChart = null; }
+    return;
+  }
+
+  const ctx = document.getElementById('stats-activity-chart').getContext('2d');
+  if (statsActivityChart) statsActivityChart.destroy();
+
+  const labels = dates.map(d => {
+    const parts = d.split('-');
+    return parseInt(parts[1]) + '/' + parseInt(parts[2]);
+  });
+  const values = dates.map(dateStr => {
+    const day = days.find(d => d.date === dateStr);
+    if (!day) return 0;
+    return day.activities.filter(a => a.activity === statsSelectedActivity).reduce((s, a) => s + a.minutes, 0);
+  });
+
+  statsActivityChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: 'rgba(126,206,193,0.6)',
+        borderColor: 'rgba(126,206,193,1)',
+        borderWidth: 1,
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => formatMin(ctx.parsed.y) } } },
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: v => Math.floor(v/60) > 0 ? Math.floor(v/60) + 'h' : v + 'm', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } },
+        x: { ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function selectStatsActivity(activity) {
+  statsSelectedActivity = activity;
+  document.querySelectorAll('.stats-activity-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.textContent === activity);
+  });
+  const dates = getStatsPeriodDates();
+  const days = aggregateStatsData(dates);
+  renderStatsActivityTrend(days, dates);
+}
+
 // ============== Tab Navigation ==============
 function switchTab(tab) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -1793,6 +2527,7 @@ function switchTab(tab) {
   if (tab === 'classify') renderClassify();
   if (tab === 'analysis') renderAnalysis();
   if (tab === 'history') renderHistory();
+  if (tab === 'stats') renderStats();
 }
 
 function switchDate(d) {
@@ -1827,7 +2562,8 @@ function addEntry(activityName) {
       }
       return data.activityPresets[activity] || DEFAULT_CATEGORIES[activity] || null;
     })(),
-    isDesiredLife: false
+    isDesiredLife: false,
+    memo: ''
   });
 
   dd.entries.sort((a, b) => timeToMin(a.time) - timeToMin(b.time));
@@ -1847,6 +2583,39 @@ function deleteEntry(id) {
   dd.entries = dd.entries.filter(e => e.id !== id);
   saveData();
   renderTimeline();
+}
+
+function toggleTimelineMemo(entryId, event) {
+  if (event.target.closest('.timeline-time') || event.target.closest('.delete-btn')) return;
+  const item = document.getElementById('tl-' + entryId);
+  if (!item) return;
+  const wasExpanded = item.classList.contains('memo-expanded');
+  item.classList.toggle('memo-expanded');
+  if (!wasExpanded) {
+    const ta = item.querySelector('.timeline-memo-input');
+    if (ta) setTimeout(() => ta.focus(), 100);
+  }
+}
+
+function saveActivityMemo(entryId, value) {
+  const dd = getDateData(currentDate);
+  const entry = dd.entries.find(e => e.id === entryId);
+  if (!entry) return;
+  entry.memo = value;
+  saveData();
+  const item = document.getElementById('tl-' + entryId);
+  if (!item) return;
+  const actDiv = item.querySelector('.timeline-activity');
+  if (!actDiv) return;
+  let badge = actDiv.querySelector('.timeline-memo-badge');
+  if (value && !badge) {
+    const span = document.createElement('span');
+    span.className = 'timeline-memo-badge';
+    span.textContent = '📝';
+    actDiv.appendChild(span);
+  } else if (!value && badge) {
+    badge.remove();
+  }
 }
 
 function editEntryTime(id) {
@@ -1906,7 +2675,7 @@ function closeDay() {
   // 취침 엔트리에서 시간 가져오기
   const bedEntry = [...dd.entries].reverse().find(e => isBedActivity(e.activity));
   const defaultCloseTime = bedEntry ? bedEntry.time : getCurrentTime();
-  const defaultSleepTime = bedEntry ? bedEntry.time : data.settings.defaultSleepStart;
+  const defaultSleepTime = bedEntry ? bedEntry.time : '00:00';
 
   showModal(`
     <h3>${t('modal.closeDay')}</h3>
@@ -1964,6 +2733,8 @@ function updateRecordStatus() {
 
   if (isCompleted) {
     el.innerHTML = '<span class="pulse-dot"></span>' + t('record.statusCompleted');
+  } else if (viewingPastDate) {
+    el.innerHTML = '<span class="pulse-dot"></span>' + t('record.statusRecording');
   } else if (dd.entries.length > 0) {
     const last = dd.entries[dd.entries.length - 1];
     const [h, m] = last.time.split(':').map(Number);
@@ -2015,19 +2786,26 @@ function renderTimeline() {
   let html = '';
   dd.entries.forEach((entry, i) => {
     const duration = calcDuration(dd, i);
+    const memo = entry.memo || '';
+    const memoBadge = memo ? '<span class="timeline-memo-badge">📝</span>' : '';
     html += `
-      <div class="timeline-item">
+      <div class="timeline-item" id="tl-${entry.id}" onclick="toggleTimelineMemo('${entry.id}', event)">
         <div class="timeline-dot"></div>
         <div class="timeline-content">
           <div class="timeline-info">
             <div class="timeline-time" onclick="editEntryTime('${entry.id}')">${entry.time}</div>
-            <div class="timeline-activity">${getIcon(entry.activity)} ${escHtml(displayActivity(entry.activity))}</div>
+            <div class="timeline-activity">${getIcon(entry.activity)} ${escHtml(displayActivity(entry.activity))}${memoBadge}</div>
             ${duration ? `<div class="timeline-duration">${duration}</div>` : ''}
           </div>
           ${dd.status !== 'completed' ? `
           <div class="timeline-actions">
             <button class="delete-btn" onclick="deleteEntry('${entry.id}')">✕</button>
           </div>` : ''}
+          <div class="timeline-memo-area">
+            <textarea class="timeline-memo-input" placeholder="${t('activityMemo.placeholder')}"
+              onclick="event.stopPropagation()"
+              oninput="saveActivityMemo('${entry.id}', this.value)">${escHtml(memo)}</textarea>
+          </div>
         </div>
       </div>
     `;
@@ -2117,6 +2895,8 @@ function goAnalysis() {
 
 function renderAnalysis() {
   renderMonthlyCalendar();
+  renderPastDateBanner();
+  renderSaveReturnBtn();
   const dd = getDateData(currentDate);
   if (!dd || dd.entries.length === 0) {
     document.getElementById('stat-summary').innerHTML = `<div class="empty-state"><p>${t('analysis.noData')}</p></div>`;
@@ -2131,6 +2911,37 @@ function renderAnalysis() {
   renderFinalSummary(dd, stats);
   renderEncouragement(stats);
   renderDailyMemo();
+}
+
+function renderPastDateBanner() {
+  const banner = document.getElementById('past-date-banner');
+  if (!banner) return;
+  const today = getTodayStr();
+  if (currentDate === today) {
+    banner.innerHTML = '';
+    return;
+  }
+  banner.innerHTML = `
+    <div class="past-date-banner">
+      <span class="banner-date">${t('analysis.editingDate', {date: formatDateKr(currentDate)})}</span>
+      <button class="btn-back" onclick="returnToToday()">${t('analysis.backToToday')}</button>
+    </div>
+  `;
+}
+
+function renderSaveReturnBtn() {
+  const container = document.getElementById('save-return-btn');
+  if (!container) return;
+  const today = getTodayStr();
+  if (currentDate === today) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = `
+    <button class="btn btn-coral btn-block" onclick="returnToToday()" style="margin-top:16px">
+      ✅ ${t('analysis.saveAndReturn')} · ${t('analysis.backToToday')}
+    </button>
+  `;
 }
 
 function calcStats(dd) {
@@ -2223,6 +3034,18 @@ function renderStatSummary(stats) {
 
 function renderBarChart(dd, stats) {
   const container = document.getElementById('bar-chart-list');
+  const isPastCompleted = currentDate !== getTodayStr() && dd.status === 'completed';
+
+  // Collect memos by activity name
+  const memosByActivity = {};
+  dd.entries.forEach(e => {
+    const m = e.memo || '';
+    if (m) {
+      const name = displayActivity(e.activity);
+      if (!memosByActivity[name]) memosByActivity[name] = [];
+      memosByActivity[name].push({ time: e.time, memo: m });
+    }
+  });
 
   // Aggregate same activity names (sleep is already single)
   const merged = {};
@@ -2236,17 +3059,39 @@ function renderBarChart(dd, stats) {
   const mergedList = Object.values(merged).sort((a, b) => b.minutes - a.minutes);
   const maxMin = Math.max(...mergedList.map(a => a.minutes), 1);
 
-  container.innerHTML = mergedList.map(a => `
-    <div class="bar-chart-item">
-      <div class="bar-label">
-        <span>${getIcon(a.activity)} ${escHtml(displayActivity(a.activity))}</span>
-        <span>${formatMin(a.minutes)}</span>
+  container.innerHTML = mergedList.map(a => {
+    const isSleep = a.activity === t('sleep');
+    const showToggle = isPastCompleted && !isSleep;
+    const encodedName = encodeURIComponent(a.activity);
+    const toggleHtml = showToggle ? `
+      <div class="bar-chart-toggle">
+        <button class="toggle-btn ${a.category === 'fixed' ? 'active-fixed' : ''}"
+                onclick="setCategoryInAnalysis('${encodedName}', 'fixed')">${t('classify.fixed')}</button>
+        <button class="toggle-btn ${a.category === 'flexible' ? 'active-flexible' : ''}"
+                onclick="setCategoryInAnalysis('${encodedName}', 'flexible')">${t('classify.flexible')}</button>
       </div>
-      <div class="bar-track">
-        <div class="bar-fill ${a.category || 'fixed'}" data-width="${(a.minutes/maxMin*100)}" style="width:0%"></div>
+    ` : '';
+    const displayName = displayActivity(a.activity);
+    const memos = memosByActivity[displayName] || [];
+    const memosHtml = memos.length > 0 ? `
+      <div class="activity-memo-list">
+        ${memos.map(m => `<div class="activity-memo-item">📝 ${m.time} ${escHtml(m.memo)}</div>`).join('')}
       </div>
-    </div>
-  `).join('');
+    ` : '';
+    return `
+      <div class="bar-chart-item">
+        <div class="bar-label">
+          <span>${getIcon(a.activity)} ${escHtml(displayName)}</span>
+          <span>${formatMin(a.minutes)}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill ${a.category || 'fixed'}" data-width="${(a.minutes/maxMin*100)}" style="width:0%"></div>
+        </div>
+        ${toggleHtml}
+        ${memosHtml}
+      </div>
+    `;
+  }).join('');
 
   // Animate bars
   requestAnimationFrame(() => {
@@ -2254,6 +3099,20 @@ function renderBarChart(dd, stats) {
       el.style.width = el.dataset.width + '%';
     });
   });
+}
+
+function setCategoryInAnalysis(encodedName, cat) {
+  const activityName = decodeURIComponent(encodedName);
+  const dd = getDateData(currentDate);
+  if (!dd) return;
+  dd.entries.forEach(e => {
+    if (e.activity === activityName) {
+      e.category = cat;
+    }
+  });
+  data.activityPresets[activityName] = cat;
+  saveData();
+  renderAnalysis();
 }
 
 function renderDesiredList(dd, stats) {
@@ -2266,14 +3125,16 @@ function renderDesiredList(dd, stats) {
   }
 
   container.innerHTML = flexActivities.map(a => {
-    const entry = dd.entries.find(e => e.activity === a.activity);
+    const entry = dd.entries.find(e => e.id === a.id);
     const checked = entry ? entry.isDesiredLife : false;
+    const memo = entry ? (entry.memo || '') : '';
     return `
-      <div class="desired-item ${checked ? 'checked' : ''}" onclick="toggleDesired('${entry ? entry.id : ''}')">
+      <div class="desired-item ${checked ? 'checked' : ''}" onclick="toggleDesired('${a.id}')">
         <div class="desired-check">${checked ? '✓' : ''}</div>
         <div style="flex:1">
           <div style="font-weight:600;font-size:14px">${getIcon(a.activity)} ${escHtml(displayActivity(a.activity))}</div>
           <div style="font-size:12px;color:var(--text-sub)">${formatMin(a.minutes)}</div>
+          ${memo ? `<div style="font-size:12px;color:var(--text-sub);margin-top:2px">📝 ${escHtml(memo)}</div>` : ''}
         </div>
       </div>
     `;
@@ -2358,32 +3219,91 @@ function renderHistory() {
   }
 
   emptyState.style.display = 'none';
-  container.innerHTML = dates.map(d => {
-    const dd = data.dates[d];
-    const preview = dd.entries.slice(0, 3).map(e => displayActivity(e.activity)).join(', ');
-    const statusClass = dd.status === 'completed' ? 'completed' : 'recording';
-    const statusText = dd.status === 'completed' ? t('history.completed') : t('history.recording');
-    return `
-      <li class="history-item" onclick="loadHistoryDate('${d}')">
-        <div>
-          <div class="history-date">${formatDateKr(d)}</div>
-          <div class="history-preview">${escHtml(preview)}${dd.entries.length > 3 ? '...' : ''}</div>
-        </div>
-        <span class="history-status ${statusClass}">${statusText}</span>
-      </li>
-    `;
-  }).join('');
+
+  // Group dates by year → month
+  const groups = new Map();
+  dates.forEach(d => {
+    const [y, m] = d.split('-');
+    if (!groups.has(y)) groups.set(y, new Map());
+    const yearMap = groups.get(y);
+    if (!yearMap.has(m)) yearMap.set(m, []);
+    yearMap.get(m).push(d);
+  });
+
+  let isFirstYear = true;
+  let html = '';
+
+  groups.forEach((months, year) => {
+    const yearDayCount = Array.from(months.values()).reduce((sum, days) => sum + days.length, 0);
+    const yearCollapsed = !isFirstYear ? ' collapsed' : '';
+    html += `<div class="history-year${yearCollapsed}">`;
+    html += `<div class="history-year-header" onclick="toggleHistoryGroup(this)">`;
+    html += `<span class="history-toggle">▼</span> ${t('history.year').replace('{y}', year)}`;
+    html += `<span class="history-count">${t('history.days').replace('{n}', yearDayCount)}</span>`;
+    html += `</div>`;
+    html += `<div class="history-year-body">`;
+
+    let isFirstMonth = isFirstYear;
+    months.forEach((days, month) => {
+      const monthCollapsed = !isFirstMonth ? ' collapsed' : '';
+      const monthNum = parseInt(month);
+      html += `<div class="history-month${monthCollapsed}">`;
+      html += `<div class="history-month-header" onclick="toggleHistoryGroup(this)">`;
+      html += `<span class="history-toggle">▼</span> ${t('month.' + monthNum)}`;
+      html += `<span class="history-count">${t('history.days').replace('{n}', days.length)}</span>`;
+      html += `</div>`;
+      html += `<div class="history-month-body">`;
+
+      days.forEach(d => {
+        const dd = data.dates[d];
+        const preview = dd.entries.slice(0, 3).map(e => displayActivity(e.activity)).join(', ');
+        const statusClass = dd.status === 'completed' ? 'completed' : 'recording';
+        const statusText = dd.status === 'completed' ? t('history.completed') : t('history.recording');
+        html += `
+          <div class="history-item" onclick="loadHistoryDate('${d}')">
+            <div>
+              <div class="history-date">${formatDateKr(d)}</div>
+              <div class="history-preview">${escHtml(preview)}${dd.entries.length > 3 ? '...' : ''}</div>
+            </div>
+            <span class="history-status ${statusClass}">${statusText}</span>
+          </div>`;
+      });
+
+      html += `</div></div>`;
+      isFirstMonth = false;
+    });
+
+    html += `</div></div>`;
+    isFirstYear = false;
+  });
+
+  container.innerHTML = html;
+}
+
+function toggleHistoryGroup(headerEl) {
+  const group = headerEl.parentElement;
+  group.classList.toggle('collapsed');
 }
 
 function loadHistoryDate(d) {
   currentDate = d;
   calendarMonth = null;
   const dd = data.dates[d];
+  const today = getTodayStr();
+  viewingPastDate = (d !== today);
   if (dd && dd.status === 'completed') {
     switchTab('analysis');
   } else {
     switchTab('record');
   }
+  renderAll();
+}
+
+function returnToToday() {
+  viewingPastDate = false;
+  currentDate = getTodayStr();
+  calendarMonth = null;
+  switchTab('analysis');
   renderAll();
 }
 
@@ -2467,6 +3387,7 @@ function exportPDF() {
             <th style="padding:8px 12px;border-bottom:2px solid #ddd;text-align:left;font-size:13px;">${t('pdf.activity')}</th>
             <th style="padding:8px 12px;border-bottom:2px solid #ddd;text-align:left;font-size:13px;">${t('pdf.category')}</th>
             <th style="padding:8px 12px;border-bottom:2px solid #ddd;text-align:left;font-size:13px;">${t('pdf.duration')}</th>
+            <th style="padding:8px 12px;border-bottom:2px solid #ddd;text-align:left;font-size:13px;">${t('pdf.activityMemo')}</th>
           </tr>
         </thead>
         <tbody>
@@ -2481,6 +3402,7 @@ function exportPDF() {
                 </span>
               </td>
               <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;">${formatMin(calcDurationMin(dd, i))}</td>
+              <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;max-width:150px;word-break:break-word;">${e.memo ? escHtml(e.memo) : ''}</td>
             </tr>`;
           }).join('')}
         </tbody>
@@ -2934,11 +3856,12 @@ function renderMonthlyCalendar() {
     const desiredHrs = hasData && result.desiredMin > 0
       ? (result.desiredMin >= 60 ? Math.floor(result.desiredMin / 60) + 'h' : result.desiredMin + 'm')
       : (hasData ? '0h' : '');
+    const needsReview = hasData && result.desiredMin === 0;
 
     dayCells += `<div class="${classes.join(' ')}"${onclick}>
       <span class="day-num">${d}</span>
       ${starred ? '<span class="day-star">★</span>' : ''}
-      ${hasData ? `<span class="day-desired">${desiredHrs}</span>` : ''}
+      ${hasData ? `<span class="day-desired${needsReview ? ' needs-review' : ''}">${desiredHrs}</span>` : ''}
     </div>`;
   }
 
