@@ -12,6 +12,9 @@
 <title>MyRoutine - 나의 하루 분석</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <style>
 :root {
   --mint: #7ECEC1;
@@ -1153,6 +1156,32 @@ body {
   justify-content: center;
 }
 
+/* Auth & Sync */
+.auth-btn { background:none; border:none; cursor:pointer; padding:4px; }
+.auth-avatar { width:28px; height:28px; border-radius:50%; vertical-align:middle; }
+.auth-icon { font-size:20px; }
+
+.sync-dot {
+  display:inline-block; width:8px; height:8px; border-radius:50%;
+  margin-left:6px; vertical-align:middle;
+}
+.sync-dot.synced { background:#22C55E; }
+.sync-dot.syncing { background:#F59E0B; animation: pulse-sync 1s infinite; }
+.sync-dot.error { background:#EF4444; }
+.sync-dot.offline { background:#9CA3AF; }
+@keyframes pulse-sync { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.login-banner {
+  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+  border-radius: var(--radius); padding: 10px 14px;
+  font-size: 13px; color: #2E7D32; margin-bottom: 8px;
+  display:flex; align-items:center; justify-content:space-between;
+  cursor:pointer;
+}
+[data-theme="dark"] .login-banner {
+  background: linear-gradient(135deg, #1B5E20, #2E7D32); color: #A5D6A7;
+}
+
 /* Monthly Calendar */
 .calendar-card {
   background: var(--card);
@@ -1534,6 +1563,10 @@ body {
       <button class="icon-btn" onclick="switchTab('stats')" data-i18n-title="header.stats" title="통계">📈</button>
       <button class="icon-btn" onclick="toggleDarkMode()" data-i18n-title="header.darkMode" title="다크 모드">🌙</button>
       <button class="icon-btn" onclick="showBackupModal()" data-i18n-title="header.backup" title="백업/복원">💾</button>
+      <button class="icon-btn auth-btn" id="auth-btn" onclick="handleAuthClick()">
+        <span id="auth-icon" class="auth-icon">👤</span>
+      </button>
+      <span id="sync-dot" class="sync-dot" style="display:none;"></span>
     </div>
   </div>
 
@@ -1551,6 +1584,9 @@ body {
 
     <!-- Goals -->
     <div id="goal-section" class="goal-section"></div>
+
+    <!-- Login Banner -->
+    <div id="login-banner"></div>
 
     <!-- Quick chips -->
     <div class="chips-header">
@@ -1875,6 +1911,19 @@ const TRANSLATIONS = {
     'goals.reminder': '오늘 아직 {activity} 기록이 없어요',
     'goals.delete': '이 목표를 삭제할까요?', 'goals.saved': '목표가 저장되었습니다',
     'goals.deleted': '목표가 삭제되었습니다', 'goals.active': '활성', 'goals.inactive': '비활성',
+    'auth.login': '로그인', 'auth.logout': '로그아웃',
+    'auth.loginGoogle': 'Google로 로그인',
+    'auth.profile': '내 계정', 'auth.lastSync': '마지막 동기화',
+    'auth.syncing': '동기화 중...', 'auth.synced': '동기화 완료', 'auth.syncError': '동기화 오류',
+    'auth.loginBanner': '로그인하면 데이터가 자동 백업됩니다 ☁️',
+    'auth.confirmLogout': '로그아웃하면 동기화가 중단됩니다. 로컬 데이터는 유지됩니다.',
+    'auth.firstSyncUpload': '로컬 데이터를 클라우드에 업로드',
+    'auth.firstSyncDownload': '클라우드 데이터로 교체',
+    'auth.firstSyncTitle': '데이터 동기화',
+    'auth.firstSyncMsg': '클라우드에 기존 데이터가 있습니다. 어떻게 할까요?',
+    'auth.uploadComplete': '클라우드 업로드 완료',
+    'auth.downloadComplete': '클라우드 데이터 적용 완료',
+    'auth.syncNow': '지금 동기화', 'auth.never': '없음',
   },
   ja: {
     'app.subtitle': '一日の分析',
@@ -1967,6 +2016,19 @@ const TRANSLATIONS = {
     'goals.reminder': '今日まだ{activity}の記録がありません',
     'goals.delete': 'この目標を削除しますか？', 'goals.saved': '目標が保存されました',
     'goals.deleted': '目標が削除されました', 'goals.active': '有効', 'goals.inactive': '無効',
+    'auth.login': 'ログイン', 'auth.logout': 'ログアウト',
+    'auth.loginGoogle': 'Googleでログイン',
+    'auth.profile': 'マイアカウント', 'auth.lastSync': '最終同期',
+    'auth.syncing': '同期中...', 'auth.synced': '同期完了', 'auth.syncError': '同期エラー',
+    'auth.loginBanner': 'ログインで自動バックアップ ☁️',
+    'auth.confirmLogout': 'ログアウトすると同期が停止します。ローカルデータは保持されます。',
+    'auth.firstSyncUpload': 'ローカルデータをアップロード',
+    'auth.firstSyncDownload': 'クラウドデータに置換',
+    'auth.firstSyncTitle': 'データ同期',
+    'auth.firstSyncMsg': 'クラウドに既存データがあります。どうしますか？',
+    'auth.uploadComplete': 'アップロード完了',
+    'auth.downloadComplete': 'ダウンロード完了',
+    'auth.syncNow': '今すぐ同期', 'auth.never': 'なし',
   },
   en: {
     'app.subtitle': 'Daily Analysis',
@@ -2059,6 +2121,19 @@ const TRANSLATIONS = {
     'goals.reminder': 'No {activity} recorded today yet',
     'goals.delete': 'Delete this goal?', 'goals.saved': 'Goal saved',
     'goals.deleted': 'Goal deleted', 'goals.active': 'Active', 'goals.inactive': 'Inactive',
+    'auth.login': 'Sign in', 'auth.logout': 'Sign out',
+    'auth.loginGoogle': 'Sign in with Google',
+    'auth.profile': 'My Account', 'auth.lastSync': 'Last synced',
+    'auth.syncing': 'Syncing...', 'auth.synced': 'Synced', 'auth.syncError': 'Sync error',
+    'auth.loginBanner': 'Sign in to auto-backup ☁️',
+    'auth.confirmLogout': 'Sync will stop. Local data is kept.',
+    'auth.firstSyncUpload': 'Upload local data to cloud',
+    'auth.firstSyncDownload': 'Use cloud data',
+    'auth.firstSyncTitle': 'Data Sync',
+    'auth.firstSyncMsg': 'Cloud has existing data. What to do?',
+    'auth.uploadComplete': 'Upload complete',
+    'auth.downloadComplete': 'Download complete',
+    'auth.syncNow': 'Sync now', 'auth.never': 'Never',
   }
 };
 
@@ -2191,9 +2266,295 @@ let statsExcludeFixed = false;
 let statsCachedDays = [];
 let statsCachedDates = [];
 
+// ============== Firebase ==============
+const firebaseConfig = {
+  apiKey: "AIzaSyAt8f5u4NwEiSyp4syxY7iLf_FAO3tM8dk",
+  authDomain: "myroutine-bekking.firebaseapp.com",
+  projectId: "myroutine-bekking",
+  storageBucket: "myroutine-bekking.firebasestorage.app",
+  messagingSenderId: "75626230147",
+  appId: "1:75626230147:web:17485fe1a4be31fc3a86b6"
+};
+
+let firebaseReady = false;
+let currentUser = null;
+let syncTimer = null;
+let isSyncing = false;
+let lastSyncTime = null;
+
+try {
+  firebase.initializeApp(firebaseConfig);
+  firebaseReady = true;
+} catch(e) { console.warn('Firebase init failed:', e); }
+
+const auth = firebaseReady ? firebase.auth() : null;
+const db = firebaseReady ? firebase.firestore() : null;
+
+// --- Auth Functions ---
+function handleAuthClick() {
+  if (currentUser) {
+    showProfileModal();
+  } else {
+    signInWithGoogle();
+  }
+}
+
+function signInWithGoogle() {
+  if (!auth) return;
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(err => {
+    console.warn('Google sign-in error:', err);
+    if (err.code === 'auth/popup-blocked') {
+      auth.signInWithRedirect(provider);
+    }
+  });
+}
+
+function signOutUser() {
+  if (!auth) return;
+  showConfirm(t('auth.confirmLogout'), () => {
+    auth.signOut().then(() => {
+      currentUser = null;
+      updateAuthUI(null);
+      updateSyncStatus('hidden');
+      renderLoginBanner();
+    });
+  });
+}
+
+function onAuthChanged(user) {
+  currentUser = user;
+  updateAuthUI(user);
+  if (user) {
+    renderLoginBanner();
+    syncData();
+  } else {
+    updateSyncStatus('hidden');
+    renderLoginBanner();
+  }
+}
+
+function updateAuthUI(user) {
+  const iconEl = document.getElementById('auth-icon');
+  if (!iconEl) return;
+  if (user && user.photoURL) {
+    iconEl.innerHTML = `<img src="${user.photoURL}" class="auth-avatar" referrerpolicy="no-referrer">`;
+  } else {
+    iconEl.textContent = '👤';
+  }
+}
+
+function updateSyncStatus(status) {
+  const dot = document.getElementById('sync-dot');
+  if (!dot) return;
+  if (status === 'hidden') {
+    dot.style.display = 'none';
+    return;
+  }
+  dot.style.display = 'inline-block';
+  dot.className = 'sync-dot ' + status;
+}
+
+function showProfileModal() {
+  if (!currentUser) return;
+  const syncTimeStr = lastSyncTime
+    ? new Date(lastSyncTime).toLocaleString(currentLang === 'ko' ? 'ko-KR' : currentLang === 'ja' ? 'ja-JP' : 'en-US')
+    : t('auth.never');
+  const html = `
+    <div style="text-align:center;padding:8px 0;">
+      ${currentUser.photoURL ? `<img src="${currentUser.photoURL}" style="width:56px;height:56px;border-radius:50%;margin-bottom:8px;" referrerpolicy="no-referrer">` : '<div style="font-size:48px;margin-bottom:8px;">👤</div>'}
+      <h3 style="margin-bottom:4px;">${t('auth.profile')}</h3>
+      <p style="font-size:13px;color:var(--text-sub);margin-bottom:16px;">${currentUser.email || ''}</p>
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:16px;font-size:13px;text-align:left;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:var(--text-sub);">${t('auth.lastSync')}</span>
+          <span>${syncTimeStr}</span>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block btn-sm" onclick="manualSync()" style="margin-bottom:8px;">${t('auth.syncNow')}</button>
+      <button class="btn btn-outline btn-block btn-sm" onclick="signOutUser();closeModal();" style="color:var(--danger);border-color:var(--danger);">${t('auth.logout')}</button>
+      <button class="btn btn-block btn-sm" onclick="closeModal()" style="margin-top:4px;color:var(--text-sub);">${t('modal.close')}</button>
+    </div>
+  `;
+  showModal(html);
+}
+
+function renderLoginBanner() {
+  const banner = document.getElementById('login-banner');
+  if (!banner) return;
+  if (currentUser || !firebaseReady) {
+    banner.innerHTML = '';
+    return;
+  }
+  banner.innerHTML = `<div class="login-banner" onclick="signInWithGoogle()">
+    <span>${t('auth.loginBanner')}</span>
+    <span style="font-size:12px;font-weight:700;">→</span>
+  </div>`;
+}
+
+// --- Sync Functions ---
+function debouncedSync() {
+  if (!currentUser || !db) return;
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    syncToCloud();
+  }, 3000);
+}
+
+async function manualSync() {
+  if (!currentUser || !db) return;
+  closeModal();
+  await syncToCloud();
+  showToast(t('auth.synced'));
+}
+
+async function syncToCloud() {
+  if (!currentUser || !db || isSyncing) return;
+  isSyncing = true;
+  updateSyncStatus('syncing');
+  try {
+    const uid = currentUser.uid;
+    const userRef = db.collection('users').doc(uid);
+    const now = firebase.firestore.FieldValue.serverTimestamp();
+
+    // 1. Upload config document
+    await userRef.set({
+      activityPresets: data.activityPresets || {},
+      customPresets: data.customPresets || null,
+      settings: data.settings || {},
+      goals: data.goals || [],
+      lastSync: now
+    }, { merge: true });
+
+    // 2. Upload date documents in batches
+    const dateKeys = Object.keys(data.dates);
+    const BATCH_SIZE = 450;
+    for (let i = 0; i < dateKeys.length; i += BATCH_SIZE) {
+      const batch = db.batch();
+      const chunk = dateKeys.slice(i, i + BATCH_SIZE);
+      for (const dateStr of chunk) {
+        const dateRef = userRef.collection('dates').doc(dateStr);
+        batch.set(dateRef, {
+          ...data.dates[dateStr],
+          updatedAt: now
+        });
+      }
+      await batch.commit();
+    }
+
+    lastSyncTime = Date.now();
+    localStorage.setItem('myRoutineLastSync', String(lastSyncTime));
+    updateSyncStatus('synced');
+  } catch (err) {
+    console.warn('syncToCloud error:', err);
+    updateSyncStatus('error');
+  } finally {
+    isSyncing = false;
+  }
+}
+
+async function syncFromCloud() {
+  if (!currentUser || !db) return;
+  updateSyncStatus('syncing');
+  try {
+    const uid = currentUser.uid;
+    const userRef = db.collection('users').doc(uid);
+
+    // 1. Read config
+    const configDoc = await userRef.get();
+    if (configDoc.exists) {
+      const cfg = configDoc.data();
+      if (cfg.activityPresets) data.activityPresets = cfg.activityPresets;
+      if (cfg.customPresets !== undefined) data.customPresets = cfg.customPresets;
+      if (cfg.settings) data.settings = cfg.settings;
+      if (cfg.goals) data.goals = cfg.goals;
+    }
+
+    // 2. Read all dates
+    const datesSnap = await userRef.collection('dates').get();
+    datesSnap.forEach(doc => {
+      const d = doc.data();
+      delete d.updatedAt;
+      data.dates[doc.id] = d;
+    });
+
+    // Save to localStorage
+    localStorage.setItem('myRoutine', JSON.stringify(data));
+    lastSyncTime = Date.now();
+    localStorage.setItem('myRoutineLastSync', String(lastSyncTime));
+    updateSyncStatus('synced');
+  } catch (err) {
+    console.warn('syncFromCloud error:', err);
+    updateSyncStatus('error');
+  }
+}
+
+async function syncData() {
+  if (!currentUser || !db) return;
+  updateSyncStatus('syncing');
+  try {
+    const uid = currentUser.uid;
+    const userRef = db.collection('users').doc(uid);
+    const configDoc = await userRef.get();
+
+    const cloudExists = configDoc.exists && configDoc.data().lastSync;
+    const localHasData = Object.keys(data.dates).length > 0;
+
+    if (!cloudExists && localHasData) {
+      // Cloud empty, local has data → upload
+      await syncToCloud();
+    } else if (cloudExists && !localHasData) {
+      // Cloud has data, local empty → download
+      await syncFromCloud();
+      renderAll();
+    } else if (cloudExists && localHasData) {
+      // Both have data → show choice modal
+      handleFirstSync();
+    } else {
+      // Both empty → nothing to do
+      updateSyncStatus('synced');
+    }
+  } catch (err) {
+    console.warn('syncData error:', err);
+    updateSyncStatus('error');
+  }
+}
+
+function handleFirstSync() {
+  const html = `
+    <div style="text-align:center;padding:8px 0;">
+      <div style="font-size:32px;margin-bottom:8px;">☁️</div>
+      <h3 style="margin-bottom:4px;">${t('auth.firstSyncTitle')}</h3>
+      <p style="font-size:14px;color:var(--text-sub);margin:12px 0;">${t('auth.firstSyncMsg')}</p>
+      <button class="btn btn-primary btn-block btn-sm" style="margin-bottom:8px;" onclick="doFirstSyncUpload()">
+        ${t('auth.firstSyncUpload')}
+      </button>
+      <button class="btn btn-outline btn-block btn-sm" onclick="doFirstSyncDownload()">
+        ${t('auth.firstSyncDownload')}
+      </button>
+      <button class="btn btn-block btn-sm" onclick="closeModal()" style="margin-top:8px;color:var(--text-sub);">${t('modal.cancel')}</button>
+    </div>
+  `;
+  showModal(html);
+}
+
+async function doFirstSyncUpload() {
+  closeModal();
+  await syncToCloud();
+  showToast(t('auth.uploadComplete'));
+}
+
+async function doFirstSyncDownload() {
+  closeModal();
+  await syncFromCloud();
+  renderAll();
+  showToast(t('auth.downloadComplete'));
+}
+
 // ============== Init ==============
 function init() {
   loadData();
+  lastSyncTime = parseInt(localStorage.getItem('myRoutineLastSync')) || null;
   applyStaticTranslations();
   updateClock();
   setInterval(updateClock, 1000);
@@ -2203,6 +2564,8 @@ function init() {
     document.documentElement.setAttribute('data-theme', 'dark');
   }
   loadColorSettings();
+  if (auth) auth.onAuthStateChanged(onAuthChanged);
+  else renderLoginBanner();
 }
 
 function getTodayStr() {
@@ -2276,6 +2639,7 @@ function loadData() {
 function saveData() {
   try {
     localStorage.setItem('myRoutine', JSON.stringify(data));
+    if (currentUser) debouncedSync();
   } catch(e) { console.warn('localStorage save error', e); }
 }
 
@@ -4466,6 +4830,7 @@ function renderAll() {
   renderTimeline();
   renderChips();
   renderGoalCards();
+  renderLoginBanner();
 }
 
 // ============== PWA Service Worker & Install ==============
