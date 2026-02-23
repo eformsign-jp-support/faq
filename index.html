@@ -450,6 +450,55 @@ body {
   color: var(--text);
 }
 
+/* Past date editing banner */
+.past-date-banner {
+  background: linear-gradient(135deg, var(--coral-bg), #FFF5EE);
+  border: 1px solid var(--coral-light);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+[data-theme="dark"] .past-date-banner {
+  background: linear-gradient(135deg, var(--coral-bg), #2A1515);
+}
+
+.past-date-banner .banner-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--coral);
+}
+
+.past-date-banner .btn-back {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--coral);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Bar chart category toggle (analysis editing) */
+.bar-chart-toggle {
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1.5px solid var(--blue-gray-light);
+  margin-top: 6px;
+}
+
+.bar-chart-toggle .toggle-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
 /* Analysis */
 .chart-container {
   position: relative;
@@ -1089,6 +1138,10 @@ body {
   font-weight: 600;
 }
 
+.day-desired.needs-review {
+  color: var(--coral);
+}
+
 .calendar-summary {
   text-align: center;
   margin-top: 12px;
@@ -1247,6 +1300,7 @@ body {
 
   <!-- Section: Analysis (미션3) -->
   <div id="sec-analysis" class="section">
+    <div id="past-date-banner"></div>
     <div class="card">
       <h3 style="font-size:16px;margin-bottom:16px;text-align:center" data-i18n="analysis.timeDistribution">시간 분배</h3>
       <div class="chart-container">
@@ -1279,6 +1333,8 @@ body {
     <div id="daily-memo"></div>
 
     <div id="monthly-calendar"></div>
+
+    <div id="save-return-btn"></div>
 
     <button class="btn btn-coral btn-block" onclick="exportPDF()" style="margin-top:16px">
       📄 <span data-i18n="analysis.exportPdf">PDF로 내보내기</span>
@@ -1385,6 +1441,9 @@ const TRANSLATIONS = {
     'analysis.summaryTitle': '오늘 하루, 진짜 나를 위한 시간',
     'analysis.summaryDesc': '유동 시간 중 {pct}%가 원하는 삶을 위한 시간입니다',
     'analysis.encourageMsg': '💪 유동 시간이 고정 시간보다 적어요.<br>작은 시간이라도 나를 위해 쓸 수 있어요!',
+    'analysis.editingDate': '📅 {date} 분석 수정 중',
+    'analysis.backToToday': '오늘로 돌아가기',
+    'analysis.saveAndReturn': '저장 완료',
     'history.title': '기록 히스토리',
     'history.emptyMsg': '아직 기록된 날이 없어요<br>\'기록\' 탭에서 하루를 시작해보세요!',
     'history.completed': '완료', 'history.recording': '기록중',
@@ -1454,6 +1513,9 @@ const TRANSLATIONS = {
     'analysis.summaryTitle': '今日一日、本当の自分のための時間',
     'analysis.summaryDesc': '自由時間の{pct}%が理想の人生のための時間です',
     'analysis.encourageMsg': '💪 自由時間が固定時間より少ないです。<br>少しの時間でも自分のために使えます！',
+    'analysis.editingDate': '📅 {date} 分析を編集中',
+    'analysis.backToToday': '今日に戻る',
+    'analysis.saveAndReturn': '保存完了',
     'history.title': '記録履歴',
     'history.emptyMsg': 'まだ記録された日がありません<br>「記録」タブで一日を始めましょう！',
     'history.completed': '完了', 'history.recording': '記録中',
@@ -1523,6 +1585,9 @@ const TRANSLATIONS = {
     'analysis.summaryTitle': 'Time truly for yourself today',
     'analysis.summaryDesc': '{pct}% of flexible time was for the life you want',
     'analysis.encourageMsg': '💪 Your flexible time is less than fixed time.<br>Even a little time for yourself matters!',
+    'analysis.editingDate': '📅 Editing {date}',
+    'analysis.backToToday': 'Back to today',
+    'analysis.saveAndReturn': 'Save & Return',
     'history.title': 'Record History',
     'history.emptyMsg': "No recorded days yet<br>Start your day in the 'Record' tab!",
     'history.completed': 'Done', 'history.recording': 'Recording',
@@ -1668,6 +1733,7 @@ let data = { dates: {}, activityPresets: {}, customPresets: null, settings: {} }
 let currentDate = getTodayStr();
 let donutChart = null;
 let calendarMonth = null;
+let viewingPastDate = false;
 
 // ============== Init ==============
 function init() {
@@ -1698,6 +1764,7 @@ function updateClock() {
   // 자정이 지나면 이전 날짜 자동 마감 + currentDate를 오늘로 전환
   const today = getTodayStr();
   if (currentDate !== today) {
+    // 과거 날짜 열람/편집 중이면 자동 전환 방지 (자동 마감만 수행)
     const prevDate = currentDate;
     const prevDD = data.dates[prevDate];
     if (prevDD && prevDD.status === 'recording' && prevDD.entries.length > 0) {
@@ -1715,8 +1782,10 @@ function updateClock() {
       });
       saveData();
     }
-    currentDate = today;
-    renderAll();
+    if (!viewingPastDate) {
+      currentDate = today;
+      renderAll();
+    }
   }
 }
 
@@ -2111,6 +2180,8 @@ function goAnalysis() {
 
 function renderAnalysis() {
   renderMonthlyCalendar();
+  renderPastDateBanner();
+  renderSaveReturnBtn();
   const dd = getDateData(currentDate);
   if (!dd || dd.entries.length === 0) {
     document.getElementById('stat-summary').innerHTML = `<div class="empty-state"><p>${t('analysis.noData')}</p></div>`;
@@ -2125,6 +2196,37 @@ function renderAnalysis() {
   renderFinalSummary(dd, stats);
   renderEncouragement(stats);
   renderDailyMemo();
+}
+
+function renderPastDateBanner() {
+  const banner = document.getElementById('past-date-banner');
+  if (!banner) return;
+  const today = getTodayStr();
+  if (currentDate === today) {
+    banner.innerHTML = '';
+    return;
+  }
+  banner.innerHTML = `
+    <div class="past-date-banner">
+      <span class="banner-date">${t('analysis.editingDate', {date: formatDateKr(currentDate)})}</span>
+      <button class="btn-back" onclick="returnToToday()">${t('analysis.backToToday')}</button>
+    </div>
+  `;
+}
+
+function renderSaveReturnBtn() {
+  const container = document.getElementById('save-return-btn');
+  if (!container) return;
+  const today = getTodayStr();
+  if (currentDate === today) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = `
+    <button class="btn btn-coral btn-block" onclick="returnToToday()" style="margin-top:16px">
+      ✅ ${t('analysis.saveAndReturn')} · ${t('analysis.backToToday')}
+    </button>
+  `;
 }
 
 function calcStats(dd) {
@@ -2217,6 +2319,7 @@ function renderStatSummary(stats) {
 
 function renderBarChart(dd, stats) {
   const container = document.getElementById('bar-chart-list');
+  const isPastCompleted = currentDate !== getTodayStr() && dd.status === 'completed';
 
   // Aggregate same activity names (sleep is already single)
   const merged = {};
@@ -2230,17 +2333,31 @@ function renderBarChart(dd, stats) {
   const mergedList = Object.values(merged).sort((a, b) => b.minutes - a.minutes);
   const maxMin = Math.max(...mergedList.map(a => a.minutes), 1);
 
-  container.innerHTML = mergedList.map(a => `
-    <div class="bar-chart-item">
-      <div class="bar-label">
-        <span>${getIcon(a.activity)} ${escHtml(displayActivity(a.activity))}</span>
-        <span>${formatMin(a.minutes)}</span>
+  container.innerHTML = mergedList.map(a => {
+    const isSleep = a.activity === t('sleep');
+    const showToggle = isPastCompleted && !isSleep;
+    const encodedName = encodeURIComponent(a.activity);
+    const toggleHtml = showToggle ? `
+      <div class="bar-chart-toggle">
+        <button class="toggle-btn ${a.category === 'fixed' ? 'active-fixed' : ''}"
+                onclick="setCategoryInAnalysis('${encodedName}', 'fixed')">${t('classify.fixed')}</button>
+        <button class="toggle-btn ${a.category === 'flexible' ? 'active-flexible' : ''}"
+                onclick="setCategoryInAnalysis('${encodedName}', 'flexible')">${t('classify.flexible')}</button>
       </div>
-      <div class="bar-track">
-        <div class="bar-fill ${a.category || 'fixed'}" data-width="${(a.minutes/maxMin*100)}" style="width:0%"></div>
+    ` : '';
+    return `
+      <div class="bar-chart-item">
+        <div class="bar-label">
+          <span>${getIcon(a.activity)} ${escHtml(displayActivity(a.activity))}</span>
+          <span>${formatMin(a.minutes)}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill ${a.category || 'fixed'}" data-width="${(a.minutes/maxMin*100)}" style="width:0%"></div>
+        </div>
+        ${toggleHtml}
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   // Animate bars
   requestAnimationFrame(() => {
@@ -2248,6 +2365,20 @@ function renderBarChart(dd, stats) {
       el.style.width = el.dataset.width + '%';
     });
   });
+}
+
+function setCategoryInAnalysis(encodedName, cat) {
+  const activityName = decodeURIComponent(encodedName);
+  const dd = getDateData(currentDate);
+  if (!dd) return;
+  dd.entries.forEach(e => {
+    if (e.activity === activityName) {
+      e.category = cat;
+    }
+  });
+  data.activityPresets[activityName] = cat;
+  saveData();
+  renderAnalysis();
 }
 
 function renderDesiredList(dd, stats) {
@@ -2373,11 +2504,21 @@ function loadHistoryDate(d) {
   currentDate = d;
   calendarMonth = null;
   const dd = data.dates[d];
+  const today = getTodayStr();
+  viewingPastDate = (d !== today);
   if (dd && dd.status === 'completed') {
-    switchTab('classify');
+    switchTab('analysis');
   } else {
     switchTab('record');
   }
+  renderAll();
+}
+
+function returnToToday() {
+  viewingPastDate = false;
+  currentDate = getTodayStr();
+  calendarMonth = null;
+  switchTab('analysis');
   renderAll();
 }
 
@@ -2928,11 +3069,12 @@ function renderMonthlyCalendar() {
     const desiredHrs = hasData && result.desiredMin > 0
       ? (result.desiredMin >= 60 ? Math.floor(result.desiredMin / 60) + 'h' : result.desiredMin + 'm')
       : (hasData ? '0h' : '');
+    const needsReview = hasData && result.desiredMin === 0;
 
     dayCells += `<div class="${classes.join(' ')}"${onclick}>
       <span class="day-num">${d}</span>
       ${starred ? '<span class="day-star">★</span>' : ''}
-      ${hasData ? `<span class="day-desired">${desiredHrs}</span>` : ''}
+      ${hasData ? `<span class="day-desired${needsReview ? ' needs-review' : ''}">${desiredHrs}</span>` : ''}
     </div>`;
   }
 
