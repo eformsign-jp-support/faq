@@ -283,6 +283,25 @@ body {
   color: white;
 }
 
+.chip.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+.chip.drag-over {
+  box-shadow: 0 0 0 2px var(--mint);
+  transform: scale(1.05);
+}
+
+.chips.reorder-mode .chip {
+  animation: chipShake 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes chipShake {
+  0% { transform: rotate(-1deg); }
+  100% { transform: rotate(1deg); }
+}
+
 /* Preset Manager */
 .preset-list { max-height: 50vh; overflow-y: auto; margin-bottom: 12px; }
 .preset-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid rgba(128,128,128,0.12); }
@@ -1324,6 +1343,15 @@ body {
   right: 4px;
 }
 
+.day-diamond {
+  color: #00BCD4;
+  font-size: 9px;
+  line-height: 1;
+  position: absolute;
+  top: 2px;
+  left: 4px;
+}
+
 .day-desired {
   font-size: 9px;
   line-height: 1;
@@ -1965,6 +1993,7 @@ const TRANSLATIONS = {
     'about.privacyNoPermission': '카메라, 위치 등 어떤 권한도 요청하지 않습니다',
     'about.privacyOpenSource': '소스 코드가 100% 공개되어 있습니다',
     'about.developer': '만든 사람: 민짱 (Bekking Studio)',
+    'about.feedback': '앱 개선에 대한 의견을 보내주세요',
     'preset.manage': '프리셋 관리', 'preset.addNew': '+ 새 프리셋 추가', 'preset.done': '완료',
     'preset.edit': '프리셋 편집', 'preset.name': '프리셋 이름',
     'preset.selectIcon': '아이콘 선택', 'preset.selectColor': '버튼 색상', 'preset.save': '저장',
@@ -1980,6 +2009,7 @@ const TRANSLATIONS = {
     'toast.confirmDelete': '이 기록을 삭제할까요?',
     'toast.enterName': '이름을 입력하세요', 'toast.duplicateName': '이미 같은 이름이 있습니다', 'toast.cannotDelete': '기상/취침은 삭제할 수 없습니다',
     'toast.recorded': '✓ {0} 기록했습니다',
+    'preset.reordered': '✓ 버튼 순서가 변경되었습니다',
     'day.sun': '일', 'day.mon': '월', 'day.tue': '화', 'day.wed': '수',
     'day.thu': '목', 'day.fri': '금', 'day.sat': '토',
     'month.1': '1월', 'month.2': '2월', 'month.3': '3월', 'month.4': '4월',
@@ -2093,6 +2123,7 @@ const TRANSLATIONS = {
     'about.privacyNoPermission': 'カメラ・位置情報などの権限を一切要求しません',
     'about.privacyOpenSource': 'ソースコードは100%公開されています',
     'about.developer': '開発者: ミンちゃん (Bekking Studio)',
+    'about.feedback': 'アプリ改善のご意見をお聞かせください',
     'preset.manage': 'プリセット管理', 'preset.addNew': '+ 新しいプリセット追加', 'preset.done': '完了',
     'preset.edit': 'プリセット編集', 'preset.name': 'プリセット名',
     'preset.selectIcon': 'アイコン選択', 'preset.selectColor': 'ボタン色', 'preset.save': '保存',
@@ -2108,6 +2139,7 @@ const TRANSLATIONS = {
     'toast.confirmDelete': 'この記録を削除しますか？',
     'toast.enterName': '名前を入力してください', 'toast.duplicateName': '同じ名前がすでにあります', 'toast.cannotDelete': '起床/就寝は削除できません',
     'toast.recorded': '✓ {0} 記録しました',
+    'preset.reordered': '✓ ボタンの順序を変更しました',
     'day.sun': '日', 'day.mon': '月', 'day.tue': '火', 'day.wed': '水',
     'day.thu': '木', 'day.fri': '金', 'day.sat': '土',
     'month.1': '1月', 'month.2': '2月', 'month.3': '3月', 'month.4': '4月',
@@ -2221,6 +2253,7 @@ const TRANSLATIONS = {
     'about.privacyNoPermission': 'No permissions requested (camera, location, etc.)',
     'about.privacyOpenSource': 'Source code is 100% open source',
     'about.developer': 'Made by Min-chan (Bekking Studio)',
+    'about.feedback': 'Send us your feedback to improve the app',
     'preset.manage': 'Preset Manager', 'preset.addNew': '+ Add New Preset', 'preset.done': 'Done',
     'preset.edit': 'Edit Preset', 'preset.name': 'Preset Name',
     'preset.selectIcon': 'Select Icon', 'preset.selectColor': 'Button color', 'preset.save': 'Save',
@@ -2236,6 +2269,7 @@ const TRANSLATIONS = {
     'toast.confirmDelete': 'Delete this record?',
     'toast.enterName': 'Please enter a name', 'toast.duplicateName': 'This name already exists', 'toast.cannotDelete': 'Wake Up/Bedtime cannot be deleted',
     'toast.recorded': '✓ Recorded {0}',
+    'preset.reordered': '✓ Button order changed',
     'day.sun': 'Sun', 'day.mon': 'Mon', 'day.tue': 'Tue', 'day.wed': 'Wed',
     'day.thu': 'Thu', 'day.fri': 'Fri', 'day.sat': 'Sat',
     'month.1': 'Jan', 'month.2': 'Feb', 'month.3': 'Mar', 'month.4': 'Apr',
@@ -3612,11 +3646,117 @@ function renderChips() {
     return;
   }
 
-  container.innerHTML = chips.map(c => {
+  container.innerHTML = chips.map((c, i) => {
     const color = getPresetColor(c);
     const style = color ? `background:${color}20;color:${color};--chip-active:${color};` : '';
-    return `<button class="chip" style="${style}" onmousedown="event.preventDefault()" onclick="addEntry('${escAttr(c)}')">${getIcon(c)} ${escHtml(displayActivity(c))}</button>`;
+    return `<button class="chip" data-chip-index="${i}" data-chip-name="${escAttr(c)}" style="${style}" onmousedown="event.preventDefault()" onclick="addEntry('${escAttr(c)}')">${getIcon(c)} ${escHtml(displayActivity(c))}</button>`;
   }).join('');
+
+  initChipDragReorder(container);
+}
+
+// ============== Chip Long-Press Drag Reorder ==============
+let chipDragState = null;
+
+function initChipDragReorder(container) {
+  const chips = container.querySelectorAll('.chip');
+  chips.forEach(chip => {
+    chip.addEventListener('touchstart', onChipTouchStart, { passive: false });
+    chip.addEventListener('touchmove', onChipTouchMove, { passive: false });
+    chip.addEventListener('touchend', onChipTouchEnd);
+    chip.addEventListener('touchcancel', onChipTouchEnd);
+  });
+}
+
+function onChipTouchStart(e) {
+  const chip = e.currentTarget;
+  chipDragState = {
+    chip,
+    startX: e.touches[0].clientX,
+    startY: e.touches[0].clientY,
+    longPressTimer: setTimeout(() => enterChipReorderMode(chip), 500),
+    reordering: false,
+    moved: false
+  };
+}
+
+function enterChipReorderMode(chip) {
+  if (!chipDragState) return;
+  chipDragState.reordering = true;
+  const container = document.getElementById('quick-chips');
+  container.classList.add('reorder-mode');
+  chip.classList.add('dragging');
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
+function onChipTouchMove(e) {
+  if (!chipDragState) return;
+
+  const dx = e.touches[0].clientX - chipDragState.startX;
+  const dy = e.touches[0].clientY - chipDragState.startY;
+
+  // Cancel long-press if finger moves too much before reorder activates
+  if (!chipDragState.reordering && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+    clearTimeout(chipDragState.longPressTimer);
+    chipDragState = null;
+    return;
+  }
+
+  if (!chipDragState.reordering) return;
+  e.preventDefault();
+  chipDragState.moved = true;
+
+  // Find which chip is under finger
+  const touch = e.touches[0];
+  const container = document.getElementById('quick-chips');
+  const allChips = container.querySelectorAll('.chip');
+
+  allChips.forEach(c => c.classList.remove('drag-over'));
+
+  const target = document.elementFromPoint(touch.clientX, touch.clientY);
+  const targetChip = target?.closest?.('.chip');
+  if (targetChip && targetChip !== chipDragState.chip) {
+    targetChip.classList.add('drag-over');
+    chipDragState.targetChip = targetChip;
+  } else {
+    chipDragState.targetChip = null;
+  }
+}
+
+function onChipTouchEnd(e) {
+  if (!chipDragState) return;
+  clearTimeout(chipDragState.longPressTimer);
+
+  const container = document.getElementById('quick-chips');
+  container.classList.remove('reorder-mode');
+  container.querySelectorAll('.chip').forEach(c => {
+    c.classList.remove('dragging', 'drag-over');
+  });
+
+  if (chipDragState.reordering && chipDragState.targetChip) {
+    const fromIdx = parseInt(chipDragState.chip.dataset.chipIndex);
+    const toIdx = parseInt(chipDragState.targetChip.dataset.chipIndex);
+    if (!isNaN(fromIdx) && !isNaN(toIdx) && fromIdx !== toIdx) {
+      reorderChipPreset(fromIdx, toIdx);
+    }
+  }
+
+  // Block the click event if we were reordering
+  if (chipDragState.reordering) {
+    e.preventDefault();
+  }
+
+  chipDragState = null;
+}
+
+function reorderChipPreset(fromIdx, toIdx) {
+  initCustomPresets();
+  if (!data.customPresets || fromIdx >= data.customPresets.length || toIdx >= data.customPresets.length) return;
+  const item = data.customPresets.splice(fromIdx, 1)[0];
+  data.customPresets.splice(toIdx, 0, item);
+  saveData();
+  renderChips();
+  showToast(t('preset.reordered'));
 }
 
 // ============== Mission 2: Classify ==============
@@ -4102,10 +4242,11 @@ function buildPdfCalendar() {
     const result = calcDesiredPctForDate(ds);
     const hasData = result !== null;
     const starred = hasData && result.flexMin > 0 && result.desiredPct >= 80;
+    const diamond = hasData && allGoalsAchievedForDate(ds);
     if (hasData) totalWithData++;
     if (starred) starCount++;
     const desiredMin = hasData ? (result.desiredMin || 0) : 0;
-    dayData.push({ day: d, hasData, starred, dateStr: ds, desiredMin });
+    dayData.push({ day: d, hasData, starred, diamond, dateStr: ds, desiredMin });
   }
 
   let cells = '';
@@ -4119,11 +4260,12 @@ function buildPdfCalendar() {
   dayData.forEach(dd => {
     const bg = dd.dateStr === currentDate ? '#E8F6F3' : (dd.hasData ? '#fafafa' : '#fff');
     const star = dd.starred ? '<span style="color:#FFD700;font-size:9px;"> ★</span>' : '';
+    const diamondIcon = dd.diamond ? '<span style="font-size:8px;"> 💎</span>' : '';
     const color = dd.hasData ? '#333' : '#ccc';
     const desiredLabel = dd.hasData
       ? `<br><span style="font-size:9px;color:#7ECEC1;font-weight:600;">${dd.desiredMin >= 60 ? Math.floor(dd.desiredMin / 60) + 'h' : (dd.desiredMin > 0 ? dd.desiredMin + 'm' : '0h')}</span>`
       : '';
-    row += `<td style="${cellStyle}background:${bg};color:${color};border-radius:6px;">${dd.day}${star}${desiredLabel}</td>`;
+    row += `<td style="${cellStyle}background:${bg};color:${color};border-radius:6px;">${dd.day}${star}${diamondIcon}${desiredLabel}</td>`;
     col++;
     if (col % 7 === 0) { row += '</tr><tr>'; }
   });
@@ -4480,7 +4622,11 @@ function showAboutModal() {
         <li>${t('about.privacyOpenSource')}</li>
       </ul>
     </div>
-    <p style="text-align:center;font-size:0.88em;color:var(--text-secondary);margin-bottom:14px">${t('about.developer')}</p>
+    <p style="text-align:center;font-size:0.88em;color:var(--text-secondary);margin-bottom:4px">${t('about.developer')}</p>
+    <p style="text-align:center;font-size:0.82em;color:var(--text-secondary);margin-bottom:14px">
+      📧 ${t('about.feedback')}<br>
+      <a href="mailto:info.bekking@gmail.com" style="color:var(--mint);text-decoration:none;font-weight:600;">info.bekking@gmail.com</a>
+    </p>
     <a href="https://buymeacoffee.com/bekkingstudio" target="_blank" rel="noopener" class="btn btn-block" style="background:#FFDD00;color:#000;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">☕ ${t('support.coffee')}</a>
     <button class="btn btn-outline btn-block" onclick="closeModal();localStorage.removeItem('tourCompleted');startTour();" style="margin-top:8px">📖 ${t('tour.replay')}</button>
     <div class="modal-actions" style="margin-top:8px">
@@ -4800,6 +4946,12 @@ function calcGoalProgress(goal, dateStr) {
   }
   const pct = goal.targetMin > 0 ? Math.min(Math.round(totalMin / goal.targetMin * 100), 999) : 0;
   return { currentMin: totalMin, targetMin: goal.targetMin, percent: pct };
+}
+
+function allGoalsAchievedForDate(dateStr) {
+  const activeGoals = (data.goals || []).filter(g => g.active);
+  if (activeGoals.length === 0) return false;
+  return activeGoals.every(g => calcGoalProgress(g, dateStr).percent >= 100);
 }
 
 function calcGoalStreak(goal) {
@@ -5154,6 +5306,7 @@ function renderMonthlyCalendar() {
     const result = calcDesiredPctForDate(dateStr);
     const hasData = result !== null;
     const starred = hasData && result.flexMin > 0 && result.desiredPct >= 80;
+    const diamond = hasData && allGoalsAchievedForDate(dateStr);
 
     if (hasData) totalWithData++;
     if (starred) starCount++;
@@ -5173,6 +5326,7 @@ function renderMonthlyCalendar() {
     dayCells += `<div class="${classes.join(' ')}"${onclick}>
       <span class="day-num">${d}</span>
       ${starred ? '<span class="day-star">★</span>' : ''}
+      ${diamond ? '<span class="day-diamond">💎</span>' : ''}
       ${hasData ? `<span class="day-desired${needsReview ? ' needs-review' : ''}">${desiredHrs}</span>` : ''}
     </div>`;
   }
