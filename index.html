@@ -1566,6 +1566,38 @@ body {
 }
 .goal-empty { text-align:center; padding:12px; color:var(--text-sub); font-size:13px; }
 .goal-achieved-badge { color:var(--success); font-weight:700; font-size:12px; }
+
+/* Onboarding Tour */
+.tour-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.6);
+  z-index:300; transition:opacity 0.3s;
+}
+.tour-highlight {
+  position:relative; z-index:301;
+  box-shadow:0 0 0 4px #4ecdc4, 0 0 20px rgba(78,205,196,0.4);
+  border-radius:12px;
+}
+.tour-tooltip {
+  position:fixed; z-index:302;
+  background:#fff; border-radius:16px; padding:20px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.2); max-width:320px;
+  font-size:15px; color:#333; line-height:1.5;
+  animation: tourFadeIn 0.3s ease;
+}
+@keyframes tourFadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.tour-tooltip h3 { margin:0 0 8px; font-size:17px; color:#2d3436; }
+.tour-tooltip .tour-actions { display:flex; gap:8px; margin-top:16px; }
+.tour-tooltip .btn-tour-next {
+  flex:1; padding:10px 16px; border:none; border-radius:10px;
+  background:var(--mint); color:#fff; font-size:14px; font-weight:700; cursor:pointer;
+}
+.tour-tooltip .btn-tour-skip {
+  padding:10px 16px; border:none; border-radius:10px;
+  background:transparent; color:#999; font-size:14px; cursor:pointer;
+}
+.tour-step-dots { display:flex; gap:6px; justify-content:center; margin-top:12px; }
+.tour-step-dots span { width:8px; height:8px; border-radius:50%; background:#ddd; }
+.tour-step-dots span.active { background:var(--mint); }
 </style>
 </head>
 <body>
@@ -1954,6 +1986,13 @@ const TRANSLATIONS = {
     'share.shareText': 'MyRoutine으로 분석한 나의 하루',
     'share.generating': '이미지 생성 중...', 'share.shared': '공유 완료!',
     'share.downloaded': '이미지가 저장되었습니다', 'share.failed': '공유에 실패했습니다',
+    'tour.welcome.title': '환영합니다!', 'tour.welcome.desc': 'MyRoutine에 오신 것을 환영합니다! 하루를 기록하고 분석해 보세요.',
+    'tour.record.title': '빠른 기록', 'tour.record.desc': '프리셋 버튼을 눌러 활동을 빠르게 기록하세요.',
+    'tour.classify.title': '분류', 'tour.classify.desc': '기록한 활동을 고정/유동으로 분류할 수 있어요.',
+    'tour.analyze.title': '분석', 'tour.analyze.desc': '하루 분석 결과를 확인하고 PDF로 내보낼 수 있어요.',
+    'tour.closeday.title': '하루 마감', 'tour.closeday.desc': '하루가 끝나면 마감 버튼을 눌러 하루를 정리하세요.',
+    'tour.done.title': '준비 완료!', 'tour.done.desc': '지금 바로 시작해 보세요!',
+    'tour.next': '다음', 'tour.skip': '건너뛰기', 'tour.start': '시작하기', 'tour.replay': '사용법 다시 보기',
   },
   ja: {
     'app.subtitle': '一日の分析',
@@ -2064,6 +2103,13 @@ const TRANSLATIONS = {
     'share.shareText': 'MyRoutineで分析した一日',
     'share.generating': '画像を生成中...', 'share.shared': 'シェア完了！',
     'share.downloaded': '画像を保存しました', 'share.failed': 'シェアに失敗しました',
+    'tour.welcome.title': 'ようこそ！', 'tour.welcome.desc': 'MyRoutineへようこそ！一日を記録して分析しましょう。',
+    'tour.record.title': 'クイック記録', 'tour.record.desc': 'プリセットボタンで活動をすばやく記録します。',
+    'tour.classify.title': '分類', 'tour.classify.desc': '記録した活動を固定/柔軟に分類できます。',
+    'tour.analyze.title': '分析', 'tour.analyze.desc': '一日の分析結果を確認してPDFで出力できます。',
+    'tour.closeday.title': '一日の締め', 'tour.closeday.desc': '一日の終わりに締めボタンで整理しましょう。',
+    'tour.done.title': '準備完了！', 'tour.done.desc': 'さあ始めましょう！',
+    'tour.next': '次へ', 'tour.skip': 'スキップ', 'tour.start': '始める', 'tour.replay': '使い方を見る',
   },
   en: {
     'app.subtitle': 'Daily Analysis',
@@ -2174,6 +2220,13 @@ const TRANSLATIONS = {
     'share.shareText': 'My day analyzed with MyRoutine',
     'share.generating': 'Generating image...', 'share.shared': 'Shared!',
     'share.downloaded': 'Image saved', 'share.failed': 'Failed to share',
+    'tour.welcome.title': 'Welcome!', 'tour.welcome.desc': 'Welcome to MyRoutine! Record and analyze your day.',
+    'tour.record.title': 'Quick Record', 'tour.record.desc': 'Tap preset buttons to quickly record activities.',
+    'tour.classify.title': 'Classify', 'tour.classify.desc': 'Classify activities as fixed or flexible.',
+    'tour.analyze.title': 'Analysis', 'tour.analyze.desc': 'View daily analysis and export as PDF.',
+    'tour.closeday.title': 'Close Day', 'tour.closeday.desc': 'Tap the close button to wrap up your day.',
+    'tour.done.title': 'All Set!', 'tour.done.desc': 'Start recording now!',
+    'tour.next': 'Next', 'tour.skip': 'Skip', 'tour.start': 'Get Started', 'tour.replay': 'Replay Tour',
   }
 };
 
@@ -2611,6 +2664,12 @@ function init() {
   loadColorSettings();
   if (auth) auth.onAuthStateChanged(onAuthChanged);
   else renderLoginBanner();
+  // Auto-start onboarding tour for first-time users
+  const dd = data.dates[currentDate];
+  const entries = dd ? dd.entries : [];
+  if (!localStorage.getItem('tourCompleted') && entries.length === 0) {
+    setTimeout(() => startTour(), 500);
+  }
 }
 
 function getTodayStr() {
@@ -4330,6 +4389,7 @@ function showBackupModal() {
     <button class="btn btn-outline btn-block" onclick="document.getElementById('import-file').click()">📥 ${t('modal.importJson')}</button>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
     <a href="https://buymeacoffee.com/bekkingstudio" target="_blank" rel="noopener" class="btn btn-block" style="margin-top:16px;background:#FFDD00;color:#000;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">☕ ${t('support.coffee')}</a>
+    <button class="btn btn-outline btn-block" onclick="closeModal();localStorage.removeItem('tourCompleted');startTour();" style="margin-top:8px">📖 ${t('tour.replay')}</button>
     <div class="modal-actions" style="margin-top:8px">
       <button class="btn btn-outline btn-block" onclick="closeModal()">${t('modal.close')}</button>
     </div>
@@ -5135,6 +5195,120 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
+// ============== Onboarding Tour ==============
+let tourActive = false;
+const TOUR_STEPS = [
+  { id:'welcome', target:null, position:'center' },
+  { id:'record', target:'#quick-chips', position:'below' },
+  { id:'classify', target:'.tab[data-tab="classify"]', position:'above' },
+  { id:'analyze', target:'.tab[data-tab="analysis"]', position:'above' },
+  { id:'closeday', target:'#close-day-btn', position:'above' },
+  { id:'done', target:null, position:'center' }
+];
+let tourStepIndex = 0;
+let tourOverlay = null;
+let tourCloseDayWasHidden = false;
+
+function startTour() {
+  tourActive = true;
+  tourStepIndex = 0;
+  tourOverlay = document.createElement('div');
+  tourOverlay.className = 'tour-overlay';
+  document.body.appendChild(tourOverlay);
+  // Force close-day-btn visible during tour
+  const cdb = document.getElementById('close-day-btn');
+  if (cdb && cdb.style.display === 'none') {
+    tourCloseDayWasHidden = true;
+    cdb.style.display = '';
+  }
+  showTourStep(0);
+}
+
+function showTourStep(index) {
+  tourStepIndex = index;
+  // Remove previous highlight & tooltip
+  document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+  const oldTip = document.querySelector('.tour-tooltip');
+  if (oldTip) oldTip.remove();
+
+  if (index >= TOUR_STEPS.length) { endTour(); return; }
+  const step = TOUR_STEPS[index];
+  const isFirst = index === 0;
+  const isLast = index === TOUR_STEPS.length - 1;
+
+  // Highlight target
+  let targetEl = null;
+  if (step.target) {
+    targetEl = document.querySelector(step.target);
+    if (targetEl) targetEl.classList.add('tour-highlight');
+  }
+
+  // Build tooltip
+  const tooltip = document.createElement('div');
+  tooltip.className = 'tour-tooltip';
+  const dots = TOUR_STEPS.map((_, i) => `<span class="${i === index ? 'active' : ''}"></span>`).join('');
+  tooltip.innerHTML = `
+    <h3>${t('tour.' + step.id + '.title')}</h3>
+    <p>${t('tour.' + step.id + '.desc')}</p>
+    <div class="tour-step-dots">${dots}</div>
+    <div class="tour-actions">
+      ${isLast
+        ? `<button class="btn-tour-next" onclick="endTour()">${t('tour.start')}!</button>`
+        : `<button class="btn-tour-next" onclick="showTourStep(${index + 1})">${isFirst ? t('tour.start') : t('tour.next')}</button>
+           <button class="btn-tour-skip" onclick="endTour()">${t('tour.skip')}</button>`
+      }
+    </div>
+  `;
+  document.body.appendChild(tooltip);
+  positionTooltip(targetEl, tooltip, step.position);
+}
+
+function positionTooltip(targetEl, tooltip, position) {
+  if (!targetEl || position === 'center') {
+    tooltip.style.top = '50%';
+    tooltip.style.left = '50%';
+    tooltip.style.transform = 'translate(-50%, -50%)';
+    return;
+  }
+  const rect = targetEl.getBoundingClientRect();
+  const tipW = tooltip.offsetWidth;
+  const tipH = tooltip.offsetHeight;
+  let left = rect.left + rect.width / 2 - tipW / 2;
+  let top;
+
+  if (position === 'below') {
+    top = rect.bottom + 12;
+  } else {
+    top = rect.top - tipH - 12;
+  }
+
+  // Clamp within viewport
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  if (left < 8) left = 8;
+  if (left + tipW > vw - 8) left = vw - tipW - 8;
+  if (top < 8) top = 8;
+  if (top + tipH > vh - 8) top = vh - tipH - 8;
+
+  tooltip.style.left = left + 'px';
+  tooltip.style.top = top + 'px';
+}
+
+function endTour() {
+  tourActive = false;
+  if (tourOverlay) { tourOverlay.remove(); tourOverlay = null; }
+  document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+  const oldTip = document.querySelector('.tour-tooltip');
+  if (oldTip) oldTip.remove();
+  // Restore close-day-btn visibility
+  if (tourCloseDayWasHidden) {
+    const cdb = document.getElementById('close-day-btn');
+    if (cdb) cdb.style.display = 'none';
+    tourCloseDayWasHidden = false;
+  }
+  localStorage.setItem('tourCompleted', '1');
+}
+
 // ============== Touch Swipe ==============
 (function() {
   const TAB_ORDER = ['record', 'classify', 'analysis'];
@@ -5144,6 +5318,7 @@ if ('serviceWorker' in navigator) {
     touchStartY = e.changedTouches[0].screenY;
   }, { passive: true });
   document.addEventListener('touchend', e => {
+    if (tourActive) return;
     const dx = e.changedTouches[0].screenX - touchStartX;
     const dy = e.changedTouches[0].screenY - touchStartY;
     if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return;
