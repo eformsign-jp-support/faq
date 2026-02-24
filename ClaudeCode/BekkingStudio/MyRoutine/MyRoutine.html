@@ -300,16 +300,6 @@ body {
   position: relative;
 }
 
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 24px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--mint-light);
-}
-
 .timeline-item {
   display: flex;
   align-items: flex-start;
@@ -318,6 +308,18 @@ body {
   position: relative;
   animation: slideIn 0.3s ease;
 }
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+}
+.timeline-item:last-child::before { bottom: 50%; }
+.timeline-item[data-period="am"]::before { background: #FFB74D; }
+.timeline-item[data-period="pm"]::before { background: #7986CB; }
 
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(-10px); }
@@ -328,14 +330,14 @@ body {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--mint);
-  border: 3px solid var(--mint-light);
   position: relative;
   z-index: 1;
   margin-top: 6px;
   flex-shrink: 0;
   margin-left: 19px;
 }
+.timeline-item[data-period="am"] .timeline-dot { background: #FF9800; border: 3px solid #FFB74D; }
+.timeline-item[data-period="pm"] .timeline-dot { background: #5C6BC0; border: 3px solid #7986CB; }
 
 .timeline-content {
   flex: 1;
@@ -3505,8 +3507,10 @@ function renderTimeline() {
     const duration = calcDuration(dd, i);
     const memo = entry.memo || '';
     const memoBadge = memo ? '<span class="timeline-memo-badge">📝</span>' : '';
+    const hour = parseInt(entry.time.split(':')[0], 10);
+    const period = hour < 12 ? 'am' : 'pm';
     html += `
-      <div class="timeline-item" id="tl-${entry.id}" onclick="toggleTimelineMemo('${entry.id}', event)">
+      <div class="timeline-item" id="tl-${entry.id}" data-period="${period}" onclick="toggleTimelineMemo('${entry.id}', event)">
         <div class="timeline-dot"></div>
         <div class="timeline-content">
           <div class="timeline-info">
