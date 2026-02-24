@@ -1635,7 +1635,7 @@ body {
     <div class="header-actions">
       <button class="icon-btn" onclick="switchTab('history')" data-i18n-title="header.history" title="히스토리">📅</button>
       <button class="icon-btn" onclick="toggleDarkMode()" data-i18n-title="header.darkMode" title="다크 모드">🌙</button>
-      <button class="icon-btn" onclick="showBackupModal()" data-i18n-title="header.backup" title="백업/복원">💾</button>
+      <button class="icon-btn" onclick="showAboutModal()" data-i18n-title="header.about" title="앱 정보">ℹ️</button>
       <button class="icon-btn auth-btn" id="auth-btn" onclick="handleAuthClick()">
         <span id="auth-icon" class="auth-icon">👤</span>
       </button>
@@ -1919,7 +1919,7 @@ let currentLang = detectLang();
 const TRANSLATIONS = {
   ko: {
     'app.subtitle': '나의 하루 분석',
-    'header.history': '히스토리', 'header.darkMode': '다크 모드', 'header.backup': '백업/복원',
+    'header.history': '히스토리', 'header.darkMode': '다크 모드', 'header.about': '앱 정보',
     'record.quickRecord': '빠른 기록', 'record.presetEdit': '프리셋 편집',
     'record.placeholder': '글쓰기, 명상, 산책...', 'record.record': '기록',
     'record.todayTimeline': '오늘의 타임라인',
@@ -1956,6 +1956,15 @@ const TRANSLATIONS = {
     'modal.sleepTime': '취침 시간 (잠든 시간)', 'modal.closeDayBtn': '마감하기',
     'modal.dataManagement': '데이터 관리',
     'modal.exportJson': 'JSON 내보내기', 'modal.importJson': 'JSON 가져오기', 'modal.close': '닫기',
+    'about.title': 'MyRoutine 정보',
+    'about.version': 'v1.0 · Bekking Studio',
+    'about.privacy': '개인정보 안내',
+    'about.privacyLocal': '모든 기록은 사용자 기기에만 저장됩니다',
+    'about.privacyNoCollect': '개인정보를 수집하지 않습니다',
+    'about.privacyCloud': 'Google 로그인 시에만 본인 클라우드에 백업됩니다',
+    'about.privacyNoPermission': '카메라, 위치 등 어떤 권한도 요청하지 않습니다',
+    'about.privacyOpenSource': '소스 코드가 100% 공개되어 있습니다',
+    'about.developer': '만든 사람: 민짱 (Bekking Studio)',
     'preset.manage': '프리셋 관리', 'preset.addNew': '+ 새 프리셋 추가', 'preset.done': '완료',
     'preset.edit': '프리셋 편집', 'preset.name': '프리셋 이름',
     'preset.selectIcon': '아이콘 선택', 'preset.selectColor': '버튼 색상', 'preset.save': '저장',
@@ -2038,7 +2047,7 @@ const TRANSLATIONS = {
   },
   ja: {
     'app.subtitle': '一日の分析',
-    'header.history': '履歴', 'header.darkMode': 'ダークモード', 'header.backup': 'バックアップ/復元',
+    'header.history': '履歴', 'header.darkMode': 'ダークモード', 'header.about': 'アプリ情報',
     'record.quickRecord': 'クイック記録', 'record.presetEdit': 'プリセット編集',
     'record.placeholder': '執筆、瞑想、散歩...', 'record.record': '記録',
     'record.todayTimeline': '今日のタイムライン',
@@ -2075,6 +2084,15 @@ const TRANSLATIONS = {
     'modal.sleepTime': '就寝時間（寝た時間）', 'modal.closeDayBtn': '締める',
     'modal.dataManagement': 'データ管理',
     'modal.exportJson': 'JSONエクスポート', 'modal.importJson': 'JSONインポート', 'modal.close': '閉じる',
+    'about.title': 'MyRoutine について',
+    'about.version': 'v1.0 · Bekking Studio',
+    'about.privacy': 'プライバシー',
+    'about.privacyLocal': 'すべての記録はお使いの端末にのみ保存されます',
+    'about.privacyNoCollect': '個人情報を収集しません',
+    'about.privacyCloud': 'Googleログイン時のみご本人のクラウドにバックアップされます',
+    'about.privacyNoPermission': 'カメラ・位置情報などの権限を一切要求しません',
+    'about.privacyOpenSource': 'ソースコードは100%公開されています',
+    'about.developer': '開発者: ミンちゃん (Bekking Studio)',
     'preset.manage': 'プリセット管理', 'preset.addNew': '+ 新しいプリセット追加', 'preset.done': '完了',
     'preset.edit': 'プリセット編集', 'preset.name': 'プリセット名',
     'preset.selectIcon': 'アイコン選択', 'preset.selectColor': 'ボタン色', 'preset.save': '保存',
@@ -2157,7 +2175,7 @@ const TRANSLATIONS = {
   },
   en: {
     'app.subtitle': 'Daily Analysis',
-    'header.history': 'History', 'header.darkMode': 'Dark Mode', 'header.backup': 'Backup/Restore',
+    'header.history': 'History', 'header.darkMode': 'Dark Mode', 'header.about': 'About',
     'record.quickRecord': 'Quick Record', 'record.presetEdit': 'Edit Presets',
     'record.placeholder': 'Writing, meditation, walking...', 'record.record': 'Record',
     'record.todayTimeline': "Today's Timeline",
@@ -2194,6 +2212,15 @@ const TRANSLATIONS = {
     'modal.sleepTime': 'Sleep time (when you fell asleep)', 'modal.closeDayBtn': 'Close',
     'modal.dataManagement': 'Data Management',
     'modal.exportJson': 'Export JSON', 'modal.importJson': 'Import JSON', 'modal.close': 'Close',
+    'about.title': 'About MyRoutine',
+    'about.version': 'v1.0 · Bekking Studio',
+    'about.privacy': 'Privacy',
+    'about.privacyLocal': 'All records are stored only on your device',
+    'about.privacyNoCollect': 'We do not collect personal information',
+    'about.privacyCloud': 'Data is backed up to your cloud only when signed in with Google',
+    'about.privacyNoPermission': 'No permissions requested (camera, location, etc.)',
+    'about.privacyOpenSource': 'Source code is 100% open source',
+    'about.developer': 'Made by Min-chan (Bekking Studio)',
     'preset.manage': 'Preset Manager', 'preset.addNew': '+ Add New Preset', 'preset.done': 'Done',
     'preset.edit': 'Edit Preset', 'preset.name': 'Preset Name',
     'preset.selectIcon': 'Select Icon', 'preset.selectColor': 'Button color', 'preset.save': 'Save',
@@ -4438,58 +4465,28 @@ function toggleDarkMode() {
   localStorage.setItem('myRoutineDark', !isDark);
 }
 
-// ============== Backup/Restore ==============
-function showBackupModal() {
+// ============== About / App Info ==============
+function showAboutModal() {
   showModal(`
-    <h3>${t('modal.dataManagement')}</h3>
-    <button class="btn btn-primary btn-block" onclick="exportJSON()" style="margin-bottom:10px">📤 ${t('modal.exportJson')}</button>
-    <button class="btn btn-outline btn-block" onclick="document.getElementById('import-file').click()">📥 ${t('modal.importJson')}</button>
-    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
-    <a href="https://buymeacoffee.com/bekkingstudio" target="_blank" rel="noopener" class="btn btn-block" style="margin-top:16px;background:#FFDD00;color:#000;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">☕ ${t('support.coffee')}</a>
+    <h3>ℹ️ ${t('about.title')}</h3>
+    <p style="text-align:center;color:var(--text-secondary);margin-bottom:12px">${t('about.version')}</p>
+    <div style="background:var(--bg-secondary);border-radius:12px;padding:14px 16px;margin-bottom:14px;font-size:0.92em;line-height:1.7">
+      <strong>🔒 ${t('about.privacy')}</strong>
+      <ul style="margin:8px 0 0;padding-left:20px;list-style:disc">
+        <li>${t('about.privacyLocal')}</li>
+        <li>${t('about.privacyNoCollect')}</li>
+        <li>${t('about.privacyCloud')}</li>
+        <li>${t('about.privacyNoPermission')}</li>
+        <li>${t('about.privacyOpenSource')}</li>
+      </ul>
+    </div>
+    <p style="text-align:center;font-size:0.88em;color:var(--text-secondary);margin-bottom:14px">${t('about.developer')}</p>
+    <a href="https://buymeacoffee.com/bekkingstudio" target="_blank" rel="noopener" class="btn btn-block" style="background:#FFDD00;color:#000;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">☕ ${t('support.coffee')}</a>
     <button class="btn btn-outline btn-block" onclick="closeModal();localStorage.removeItem('tourCompleted');startTour();" style="margin-top:8px">📖 ${t('tour.replay')}</button>
     <div class="modal-actions" style="margin-top:8px">
       <button class="btn btn-outline btn-block" onclick="closeModal()">${t('modal.close')}</button>
     </div>
   `);
-}
-
-function exportJSON() {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `MyRoutine_backup_${getTodayStr()}.json`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  showToast(t('toast.backupSaved'));
-}
-
-function importJSON(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    try {
-      const imported = JSON.parse(ev.target.result);
-      if (imported.dates && typeof imported.dates === 'object' && !Array.isArray(imported.dates)) {
-        const safe = {};
-        if (imported.dates) safe.dates = imported.dates;
-        if (imported.activityPresets && typeof imported.activityPresets === 'object') safe.activityPresets = imported.activityPresets;
-        if (Array.isArray(imported.customPresets)) safe.customPresets = imported.customPresets;
-        if (imported.settings && typeof imported.settings === 'object') safe.settings = imported.settings;
-        if (Array.isArray(imported.goals)) safe.goals = imported.goals;
-        data = { ...data, ...safe };
-        saveData();
-        renderAll();
-        closeModal();
-        showToast(t('toast.dataLoaded'));
-      } else {
-        showToast(t('toast.invalidFile'));
-      }
-    } catch(err) {
-      showToast(t('toast.readError'));
-    }
-  };
-  reader.readAsText(file);
 }
 
 // ============== Helpers ==============
