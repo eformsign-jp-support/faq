@@ -827,11 +827,26 @@ body {
   color: var(--text-light);
   font-size: 11px;
   font-weight: 600;
-  transition: color var(--transition);
+  border-radius: 12px;
+  margin: 4px 3px;
+  transition: color var(--transition), background var(--transition);
 }
 
-.tab.active {
-  color: var(--mint);
+.tab.active[data-tab="record"] {
+  color: #7ECEC1;
+  background: rgba(126, 206, 193, 0.15);
+}
+.tab.active[data-tab="classify"] {
+  color: #8E9AAF;
+  background: rgba(142, 154, 175, 0.18);
+}
+.tab.active[data-tab="analysis"] {
+  color: #FF7F7F;
+  background: rgba(255, 127, 127, 0.15);
+}
+.tab.active[data-tab="stats"] {
+  color: #A78BFA;
+  background: rgba(167, 139, 250, 0.15);
 }
 
 .tab-icon {
