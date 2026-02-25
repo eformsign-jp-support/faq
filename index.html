@@ -4688,6 +4688,10 @@ function calcSleepMin(dd) {
         totalSleep += wakeTime;
       }
       hadFirstWake = true;
+    } else if (lastBedTime !== null) {
+      // 취침 후 기상 없이 다른 활동 → 암묵적 기상 (낮잠 종료)
+      totalSleep += Math.max(0, timeToMin(entry.time) - lastBedTime);
+      lastBedTime = null;
     }
   }
 
