@@ -4691,8 +4691,9 @@ function calcSleepMin(dd) {
     }
   }
 
-  // Last 취침 without following 기상: 취침→24:00
-  if (lastBedTime !== null) {
+  // Last 취침 without following 기상: 하루 마감된 경우에만 취침→24:00 계산
+  // (기록 중이면 낮잠 진행 중일 수 있으므로 미완료 취침은 세지 않음)
+  if (lastBedTime !== null && dd.status === 'completed') {
     totalSleep += 24 * 60 - lastBedTime;
   }
 
