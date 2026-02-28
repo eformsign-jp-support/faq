@@ -2779,9 +2779,35 @@ async function doFirstSyncDownload() {
   showToast(t('auth.downloadComplete'));
 }
 
+// ============== Auto-close past days ==============
+function autoClosePastDays() {
+  const today = getTodayStr();
+  let changed = false;
+  for (const dateStr of Object.keys(data.dates)) {
+    if (dateStr >= today) continue;
+    const dd = data.dates[dateStr];
+    if (dd.status === 'recording' && dd.entries.length > 0) {
+      dd.status = 'completed';
+      dd.closedAt = '23:59';
+      dd.entries.forEach(e => {
+        if (!e.category) {
+          if (data.customPresets) {
+            const cp = data.customPresets.find(p => p.name === e.activity);
+            if (cp) { e.category = cp.category; return; }
+          }
+          e.category = data.activityPresets[e.activity] || DEFAULT_CATEGORIES[e.activity] || null;
+        }
+      });
+      changed = true;
+    }
+  }
+  if (changed) saveData();
+}
+
 // ============== Init ==============
 function init() {
   loadData();
+  autoClosePastDays();
   lastSyncTime = parseInt(localStorage.getItem('myRoutineLastSync')) || null;
   applyStaticTranslations();
   updateClock();
