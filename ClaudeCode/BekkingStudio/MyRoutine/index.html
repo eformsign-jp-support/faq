@@ -3805,7 +3805,7 @@ function showChipContextMenu(chip, touchX, touchY) {
   // Move button
   const moveBtn = document.createElement('button');
   moveBtn.innerHTML = `↕️ ${t('chip.move')}`;
-  moveBtn.onclick = () => { closeChipContextMenu(); enterChipReorderMode(); };
+  moveBtn.onclick = () => { closeChipContextMenu(); enterChipReorderMode(parseInt(chip.dataset.chipIndex)); };
   menu.appendChild(moveBtn);
 
   // Edit button
@@ -3850,7 +3850,7 @@ function closeChipContextMenu() {
   document.getElementById('chip-context-menu')?.remove();
 }
 
-function enterChipReorderMode() {
+function enterChipReorderMode(fromIdx) {
   closeModal();
   initCustomPresets();
   const container = document.getElementById('quick-chips');
@@ -3858,8 +3858,13 @@ function enterChipReorderMode() {
   container.querySelectorAll('.chip').forEach(c => c.classList.add('dragging'));
   if (navigator.vibrate) navigator.vibrate(30);
 
-  // Enable drag reorder
-  let dragFrom = null;
+  // Pre-select the long-pressed chip
+  let dragFrom = fromIdx != null ? fromIdx : null;
+  if (dragFrom != null) {
+    const srcChip = container.querySelector(`.chip[data-chip-index="${dragFrom}"]`);
+    if (srcChip) srcChip.style.outline = '2px solid var(--mint)';
+  }
+
   container.querySelectorAll('.chip').forEach(chip => {
     chip.onclick = function(e) {
       e.preventDefault(); e.stopPropagation();
