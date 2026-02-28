@@ -2060,6 +2060,7 @@ const TRANSLATIONS = {
     'toast.invalidFile': '올바른 MyRoutine 백업 파일이 아닙니다',
     'toast.readError': '파일을 읽을 수 없습니다',
     'toast.confirmDelete': '이 기록을 삭제할까요?',
+    'chip.deleteConfirm': '"{0}" 버튼을 삭제할까요?',
     'toast.enterName': '이름을 입력하세요', 'toast.duplicateName': '이미 같은 이름이 있습니다', 'toast.cannotDelete': '기상/취침은 삭제할 수 없습니다',
     'toast.recorded': '✓ {0} 기록했습니다',
     'preset.reordered': '✓ 버튼 순서가 변경되었습니다',
@@ -2192,6 +2193,7 @@ const TRANSLATIONS = {
     'toast.invalidFile': '正しいMyRoutineバックアップファイルではありません',
     'toast.readError': 'ファイルを読み取れません',
     'toast.confirmDelete': 'この記録を削除しますか？',
+    'chip.deleteConfirm': '「{0}」ボタンを削除しますか？',
     'toast.enterName': '名前を入力してください', 'toast.duplicateName': '同じ名前がすでにあります', 'toast.cannotDelete': '起床/就寝は削除できません',
     'toast.recorded': '✓ {0} 記録しました',
     'preset.reordered': '✓ ボタンの順序を変更しました',
@@ -2324,6 +2326,7 @@ const TRANSLATIONS = {
     'toast.invalidFile': 'Not a valid MyRoutine backup file',
     'toast.readError': 'Cannot read the file',
     'toast.confirmDelete': 'Delete this record?',
+    'chip.deleteConfirm': 'Delete "{0}" button?',
     'toast.enterName': 'Please enter a name', 'toast.duplicateName': 'This name already exists', 'toast.cannotDelete': 'Wake Up/Bedtime cannot be deleted',
     'toast.recorded': '✓ Recorded {0}',
     'preset.reordered': '✓ Button order changed',
@@ -2466,7 +2469,9 @@ const ICON_CANDIDATES = [
   '💰','📝','🎁','🔧','🚿','👔','🤝','🧑‍💻','🎹','🏋️',
   '🧑‍🍳','🎧','📚','🖥️','🚴','🏕️','🎭','🍳','🧪','🗣️',
   '🎶','🌍','🧑‍🎨','💡','🛠️','📦','🧑‍🏫','🏖️','🌙','⏰',
-  '🧩','🎪','🍵','📮','🪴','🛍️','🧑‍💼','📐','🧑‍⚕️','💤'
+  '🧩','🎪','🍵','📮','🪴','🛍️','🧑‍💼','📐','🧑‍⚕️','💤',
+  '🏢','🏫','🏪','🏬','🏭','🏗️','🏛️','⛪','🏰','🕌',
+  '🚌','🚇','🧑‍🔬','🎲','🍕','🍜','🥗','🧁','🍷','🫖'
 ];
 const COLOR_PALETTE = [
   { id: 'default', value: null,      label: '기본' },
@@ -2477,6 +2482,12 @@ const COLOR_PALETTE = [
   { id: 'orange',  value: '#F59E0B', label: '주황' },
   { id: 'pink',    value: '#EC4899', label: '분홍' },
   { id: 'gray',    value: '#9CA3AF', label: '회색' },
+  { id: 'teal',    value: '#14B8A6', label: '청록' },
+  { id: 'indigo',  value: '#6366F1', label: '남색' },
+  { id: 'rose',    value: '#F43F5E', label: '로즈' },
+  { id: 'lime',    value: '#84CC16', label: '라임' },
+  { id: 'amber',   value: '#D97706', label: '앰버' },
+  { id: 'sky',     value: '#0EA5E9', label: '하늘' },
 ];
 function isWakeActivity(name) {
   if (name === '기상') return true;
@@ -3832,7 +3843,7 @@ function showChipContextMenu(chip, touchX, touchY) {
     delBtn.innerHTML = `🗑️ ${t('chip.delete')}`;
     delBtn.onclick = () => {
       closeChipContextMenu();
-      showConfirm(chipName, () => {
+      showConfirm(t('chip.deleteConfirm').replace('{0}', displayActivity(chipName)), () => {
         const idx = data.customPresets.findIndex(p => p.name === chipName);
         if (idx >= 0) data.customPresets.splice(idx, 1);
         delete data.activityPresets[chipName];
