@@ -3725,16 +3725,10 @@ function renderTimeline() {
 function renderChips() {
   const dd = getDateData(currentDate);
 
-  // Use customPresets if available, otherwise DEFAULT_PRESETS
-  const presetList = data.customPresets
+  // Use customPresets only — preset manager is the single source of truth
+  const chips = data.customPresets
     ? data.customPresets.map(p => p.name)
     : DEFAULT_PRESETS;
-  const allActivities = new Set([...presetList, ...Object.keys(data.activityPresets)]);
-  Object.values(data.dates).forEach(d => {
-    d.entries.forEach(e => allActivities.add(e.activity));
-  });
-  const hidden = data.hiddenActivities || [];
-  const chips = [...allActivities].filter(c => !hidden.includes(c));
   const container = document.getElementById('quick-chips');
 
   if (chips.length === 0) {
@@ -3847,8 +3841,6 @@ function showChipContextMenu(chip, touchX, touchY) {
         const idx = data.customPresets.findIndex(p => p.name === chipName);
         if (idx >= 0) data.customPresets.splice(idx, 1);
         delete data.activityPresets[chipName];
-        if (!data.hiddenActivities) data.hiddenActivities = [];
-        if (!data.hiddenActivities.includes(chipName)) data.hiddenActivities.push(chipName);
         saveData();
         renderChips();
       });
