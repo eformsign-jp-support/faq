@@ -2029,7 +2029,7 @@ const TRANSLATIONS = {
     'history.emptyMsg': '아직 기록된 날이 없어요<br>\'기록\' 탭에서 하루를 시작해보세요!',
     'history.completed': '완료', 'history.recording': '기록중', 'history.days': '{n}일', 'history.year': '{y}년',
     'settings.categoryColor': '카테고리 색상', 'settings.fixedTime': '고정 시간', 'settings.flexibleTime': '유동 시간',
-    'modal.editTime': '시간 수정', 'modal.hourLabel': '{h}시',
+    'modal.editTime': '시간 수정', 'modal.changeActivity': '활동 변경', 'modal.hourLabel': '{h}시',
     'modal.cancel': '취소', 'modal.confirm': '확인', 'modal.confirmTitle': '확인',
     'modal.closeDay': '하루 마감',
     'modal.closeDayDesc': '마감 시간과 취침 시간을 입력해주세요',
@@ -2162,7 +2162,7 @@ const TRANSLATIONS = {
     'history.emptyMsg': 'まだ記録された日がありません<br>「記録」タブで一日を始めましょう！',
     'history.completed': '完了', 'history.recording': '記録中', 'history.days': '{n}日', 'history.year': '{y}年',
     'settings.categoryColor': 'カテゴリ色', 'settings.fixedTime': '固定時間', 'settings.flexibleTime': '自由時間',
-    'modal.editTime': '時間修正', 'modal.hourLabel': '{h}時',
+    'modal.editTime': '時間修正', 'modal.changeActivity': '活動変更', 'modal.hourLabel': '{h}時',
     'modal.cancel': 'キャンセル', 'modal.confirm': '確認', 'modal.confirmTitle': '確認',
     'modal.closeDay': '一日の締め',
     'modal.closeDayDesc': '締め時間と就寝時間を入力してください',
@@ -2295,7 +2295,7 @@ const TRANSLATIONS = {
     'history.emptyMsg': "No recorded days yet<br>Start your day in the 'Record' tab!",
     'history.completed': 'Done', 'history.recording': 'Recording', 'history.days': '{n} days', 'history.year': '{y}',
     'settings.categoryColor': 'Category Colors', 'settings.fixedTime': 'Fixed Time', 'settings.flexibleTime': 'Flexible Time',
-    'modal.editTime': 'Edit Time', 'modal.hourLabel': '{h}:00',
+    'modal.editTime': 'Edit Time', 'modal.changeActivity': 'Change Activity', 'modal.hourLabel': '{h}:00',
     'modal.cancel': 'Cancel', 'modal.confirm': 'OK', 'modal.confirmTitle': 'Confirm',
     'modal.closeDay': 'Close Day',
     'modal.closeDayDesc': 'Enter closing time and sleep time',
@@ -3571,6 +3571,44 @@ function confirmEditTime(id) {
   closeModal();
 }
 
+function editEntryActivity(id) {
+  const dd = getDateData(currentDate);
+  const entry = dd.entries.find(e => e.id === id);
+  if (!entry) return;
+
+  const presets = data.customPresets ? data.customPresets : [];
+  const chipListHtml = presets.map(p => {
+    const color = p.color || null;
+    const style = color ? `background:${color}20;color:${color};` : '';
+    const selected = p.name === entry.activity ? 'outline:2px solid var(--mint);' : '';
+    return `<button class="chip" style="${style}${selected}" onclick="confirmEditActivity('${escAttr(id)}','${escAttr(p.name)}')">${p.icon} ${escHtml(displayActivity(p.name))}</button>`;
+  }).join('');
+
+  showModal(`
+    <h3>${t('modal.changeActivity')}</h3>
+    <p style="font-size:14px;color:var(--text-sub);margin-bottom:10px">${entry.time} · ${getIcon(entry.activity)} ${escHtml(displayActivity(entry.activity))}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;max-height:280px;overflow-y:auto;margin-bottom:12px;">${chipListHtml}</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">${t('modal.cancel')}</button>
+    </div>
+  `);
+}
+
+function confirmEditActivity(id, newActivity) {
+  const dd = getDateData(currentDate);
+  const entry = dd.entries.find(e => e.id === id);
+  if (entry && entry.activity !== newActivity) {
+    entry.activity = newActivity;
+    if (data.customPresets) {
+      const preset = data.customPresets.find(p => p.name === newActivity);
+      if (preset) entry.category = preset.category;
+    }
+    saveData();
+    renderTimeline();
+  }
+  closeModal();
+}
+
 function closeDay() {
   const dd = getDateData(currentDate);
   if (dd.entries.length === 0) {
@@ -3703,7 +3741,7 @@ function renderTimeline() {
         <div class="timeline-content">
           <div class="timeline-info">
             <div class="timeline-time" onclick="editEntryTime('${entry.id}')">${entry.time}</div>
-            <div class="timeline-activity">${getIcon(entry.activity)} ${escHtml(displayActivity(entry.activity))}${memoBadge}</div>
+            <div class="timeline-activity" onclick="editEntryActivity('${entry.id}');event.stopPropagation();" style="cursor:pointer">${getIcon(entry.activity)} ${escHtml(displayActivity(entry.activity))}${memoBadge}</div>
             ${duration ? `<div class="timeline-duration">${duration}</div>` : ''}
           </div>
           ${dd.status !== 'completed' ? `
