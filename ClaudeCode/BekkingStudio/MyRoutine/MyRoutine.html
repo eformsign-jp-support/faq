@@ -440,6 +440,9 @@ body {
   font-weight: 600;
   margin-top: 2px;
 }
+.timeline-edit-activity-btn {
+  background: none; border: none; padding: 0 2px; font-size: 12px; cursor: pointer; opacity: 0.5; vertical-align: middle;
+}
 
 .timeline-duration {
   font-size: 11px;
@@ -3741,7 +3744,7 @@ function renderTimeline() {
         <div class="timeline-content">
           <div class="timeline-info">
             <div class="timeline-time" onclick="editEntryTime('${entry.id}')">${entry.time}</div>
-            <div class="timeline-activity" onclick="editEntryActivity('${entry.id}');event.stopPropagation();" style="cursor:pointer">${getIcon(entry.activity)} ${escHtml(displayActivity(entry.activity))}${memoBadge}</div>
+            <div class="timeline-activity">${getIcon(entry.activity)} ${escHtml(displayActivity(entry.activity))}${memoBadge}${dd.status !== 'completed' ? ` <button class="timeline-edit-activity-btn" onclick="editEntryActivity('${entry.id}');event.stopPropagation();">✏️</button>` : ''}</div>
             ${duration ? `<div class="timeline-duration">${duration}</div>` : ''}
           </div>
           ${dd.status !== 'completed' ? `
