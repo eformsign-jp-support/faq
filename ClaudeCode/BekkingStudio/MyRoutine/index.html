@@ -630,6 +630,32 @@ body {
 .plan-note-card textarea {
   min-height: 100px;
 }
+.plan-timeline-blocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.plan-timeline-block {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--text-sub);
+}
+.plan-timeline-block.big3 {
+  background: rgba(245, 158, 11, 0.12);
+  color: #B45309;
+  font-weight: 600;
+}
+.plan-timeline-block .ptb-time {
+  font-weight: 600;
+}
 .plan-credit {
   padding: 12px 16px;
   font-size: 12px;
@@ -638,45 +664,7 @@ body {
   text-align: center;
   opacity: 0.8;
 }
-.plan-schedule-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-}
-.plan-schedule-item:last-child { border-bottom: none; }
-.plan-schedule-item .schedule-time {
-  font-size: 13px;
-  color: var(--text-sub);
-  white-space: nowrap;
-  min-width: 90px;
-}
-.plan-schedule-item .schedule-bar {
-  flex: 1;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(59, 130, 246, 0.2);
-  position: relative;
-  overflow: hidden;
-}
-.plan-schedule-item .schedule-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: #3B82F6;
-}
-.plan-schedule-item.big3 .schedule-bar-fill {
-  background: #F59E0B;
-}
-.plan-schedule-item .schedule-label {
-  font-size: 13px;
-  font-weight: 500;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 120px;
-}
+
 
 /* Plan vs Actual */
 .pva-big3-item {
@@ -2054,6 +2042,7 @@ body {
 
     <!-- Timeline -->
     <div class="card">
+      <div id="plan-timeline-bar"></div>
       <h3 style="font-size:15px;margin-bottom:12px;color:var(--text-sub)" data-i18n="record.todayTimeline">오늘의 타임라인</h3>
       <div class="timeline" id="timeline"></div>
       <div class="empty-state" id="timeline-empty">
@@ -2089,11 +2078,6 @@ body {
       <h3 style="font-size:16px;margin-bottom:4px">🎯 <span data-i18n="plan.big3Title">Big 3 + 타임 박싱</span></h3>
       <p style="font-size:12px;color:var(--text-sub);margin-bottom:12px" data-i18n="plan.big3Desc">⭐ 중요한 3개를 선택하고, 시간을 배정하세요</p>
       <div id="plan-big3-list"></div>
-    </div>
-
-    <div class="card" id="plan-schedule-card" style="display:none">
-      <h3 style="font-size:16px;margin-bottom:12px">📅 <span data-i18n="plan.scheduleTitle">오늘의 타임테이블</span></h3>
-      <div id="plan-schedule-list"></div>
     </div>
 
     <div class="plan-note-card">
@@ -2389,8 +2373,9 @@ const TRANSLATIONS = {
     'modal.dataManagement': '데이터 관리',
     'modal.exportJson': 'JSON 내보내기', 'modal.importJson': 'JSON 가져오기', 'modal.close': '닫기',
     'about.title': 'MyRoutine 정보',
-    'about.version': 'v2.0 · Bekking Studio',
-    'about.updateNote': '🆕 v2.0 업데이트: 브라이언 트레이시의 목표 설정 7단계를 앱에 담았습니다. 목표를 등록하고 기한을 설정하세요. 할 일 체크리스트로 진행 상황을 관리하고, 매일 한 가지 행동을 기록하세요. 장애물을 파악하고 진행률을 추적하면 목표가 다가옵니다. 달성 시 메달(🥇🥈🥉)을 획득하세요!',
+    'about.version': 'v2.1 · Bekking Studio',
+    'about.updateToggle': '업데이트 내용 확인하기',
+    'about.updateNote': '<strong>v2.1</strong> — 일론 머스크의 시간 관리법 도입! 📋 계획 탭에서 브레인 덤프로 할 일을 꺼내고, Big 3로 우선순위를 정하고, 타임 박싱으로 시간을 배정하세요. 분석 탭에서 계획 vs 실제를 비교할 수 있습니다.<br><br><strong>v2.0</strong> — 브라이언 트레이시의 목표 설정 7단계를 앱에 담았습니다. 목표를 등록하고 기한을 설정하세요. 할 일 체크리스트로 진행 상황을 관리하고, 매일 한 가지 행동을 기록하세요. 달성 시 메달(🥇🥈🥉)을 획득하세요!',
     'about.privacy': '개인정보 안내',
     'about.privacyLocal': '모든 기록은 사용자 기기에만 저장됩니다',
     'about.privacyNoCollect': '개인정보를 수집하지 않습니다',
@@ -2431,7 +2416,7 @@ const TRANSLATIONS = {
     'plan.allDone': '모든 할 일을 완료했어요! 🎉',
     'plan.timeboxTitle': '타임 박싱', 'plan.timeboxDesc': '각 할 일에 시간 블록을 배정하세요',
     'plan.scheduleTitle': '오늘의 타임테이블', 'plan.noteTitle': '오늘의 다짐', 'plan.notePlaceholder': '오늘의 다짐을 적어보세요...',
-    'plan.reset': '초기화', 'plan.resetConfirm': '계획을 초기화할까요? 모든 할 일이 삭제됩니다.', 'plan.resetDone': '계획이 초기화되었습니다',
+    'plan.reset': '초기화', 'plan.resetTitle': '계획 초기화', 'plan.resetMsg': '오늘의 할 일 목록이 모두 지워집니다.<br>이전 날짜의 계획은 유지됩니다.', 'plan.resetCancel': '취소', 'plan.resetConfirmBtn': '초기화', 'plan.resetDone': '계획이 초기화되었습니다',
     'plan.tapToSet': '탭하여 시간 설정',
     'plan.credit': '💡 일론 머스크의 시간 관리법 — <strong>브레인 덤프</strong>로 할 일을 꺼내고, <strong>Big 3</strong>로 우선순위를 정하고, <strong>타임 박싱</strong>으로 시간을 배정하세요.',
     'plan.vsActualTitle': '계획 vs 실제', 'plan.big3Result': 'Big 3 달성: {done}/{total}',
@@ -2548,8 +2533,9 @@ const TRANSLATIONS = {
     'modal.dataManagement': 'データ管理',
     'modal.exportJson': 'JSONエクスポート', 'modal.importJson': 'JSONインポート', 'modal.close': '閉じる',
     'about.title': 'MyRoutine について',
-    'about.version': 'v2.0 · Bekking Studio',
-    'about.updateNote': '🆕 v2.0: ブライアン・トレーシーの目標設定7ステップを搭載。目標を登録し期限を設定、やることリストで進捗管理、毎日の行動を記録しましょう。障害物を把握し進捗率を追跡すれば目標に近づきます。達成時にメダル(🥇🥈🥉)を獲得！',
+    'about.version': 'v2.1 · Bekking Studio',
+    'about.updateToggle': 'アップデート内容を確認',
+    'about.updateNote': '<strong>v2.1</strong> — イーロン・マスクの時間管理法を導入！📋 計画タブでブレインダンプ、Big 3で優先順位を決め、タイムボクシングで時間を割り当て。分析タブで計画vs実際を比較できます。<br><br><strong>v2.0</strong> — ブライアン・トレーシーの目標設定7ステップを搭載。目標を登録し期限を設定、やることリストで進捗管理、毎日の行動を記録。達成時にメダル(🥇🥈🥉)を獲得！',
     'about.privacy': 'プライバシー',
     'about.privacyLocal': 'すべての記録はお使いの端末にのみ保存されます',
     'about.privacyNoCollect': '個人情報を収集しません',
@@ -2590,7 +2576,7 @@ const TRANSLATIONS = {
     'plan.allDone': 'すべて完了しました！ 🎉',
     'plan.timeboxTitle': 'タイムボクシング', 'plan.timeboxDesc': '各タスクに時間ブロックを割り当てましょう',
     'plan.scheduleTitle': '今日のタイムテーブル', 'plan.noteTitle': '今日の意気込み', 'plan.notePlaceholder': '今日の意気込みを書いてみましょう...',
-    'plan.reset': 'リセット', 'plan.resetConfirm': '計画をリセットしますか？すべてのタスクが削除されます。', 'plan.resetDone': '計画がリセットされました',
+    'plan.reset': 'リセット', 'plan.resetTitle': '計画リセット', 'plan.resetMsg': '今日のタスクがすべて削除されます。<br>過去の計画は保持されます。', 'plan.resetCancel': 'キャンセル', 'plan.resetConfirmBtn': 'リセット', 'plan.resetDone': '計画がリセットされました',
     'plan.tapToSet': 'タップして時間設定',
     'plan.credit': '💡 イーロン・マスクの時間管理法 — <strong>ブレインダンプ</strong>でタスクを出し、<strong>Big 3</strong>で優先順位を決め、<strong>タイムボクシング</strong>で時間を割り当てましょう。',
     'plan.vsActualTitle': '計画 vs 実際', 'plan.big3Result': 'Big 3 達成: {done}/{total}',
@@ -2707,8 +2693,9 @@ const TRANSLATIONS = {
     'modal.dataManagement': 'Data Management',
     'modal.exportJson': 'Export JSON', 'modal.importJson': 'Import JSON', 'modal.close': 'Close',
     'about.title': 'About MyRoutine',
-    'about.version': 'v2.0 · Bekking Studio',
-    'about.updateNote': "🆕 v2.0: Brian Tracy's 7-step goal setting formula, built into the app. Register goals with deadlines, manage tasks with checklists, and log one daily action. Identify obstacles, track progress, and watch your goals get closer. Earn medals (🥇🥈🥉) when you achieve them!",
+    'about.version': 'v2.1 · Bekking Studio',
+    'about.updateToggle': 'View update details',
+    'about.updateNote': "<strong>v2.1</strong> — Elon Musk's time management method! 📋 Brain Dump tasks in the Plan tab, pick Big 3 priorities, Time Box them. Compare Plan vs Actual in Analysis.<br><br><strong>v2.0</strong> — Brian Tracy's 7-step goal setting formula. Register goals with deadlines, manage tasks with checklists, log daily actions. Earn medals (🥇🥈🥉) when you achieve them!",
     'about.privacy': 'Privacy',
     'about.privacyLocal': 'All records are stored only on your device',
     'about.privacyNoCollect': 'We do not collect personal information',
@@ -2749,7 +2736,7 @@ const TRANSLATIONS = {
     'plan.allDone': 'All tasks done! 🎉',
     'plan.timeboxTitle': 'Time Boxing', 'plan.timeboxDesc': 'Assign time blocks to each task',
     'plan.scheduleTitle': "Today's Timetable", 'plan.noteTitle': "Today's Resolution", 'plan.notePlaceholder': 'Write your resolution for today...',
-    'plan.reset': 'Reset', 'plan.resetConfirm': 'Reset your plan? All tasks will be deleted.', 'plan.resetDone': 'Plan has been reset',
+    'plan.reset': 'Reset', 'plan.resetTitle': 'Reset Plan', 'plan.resetMsg': "Today's task list will be cleared.<br>Previous days' plans are preserved.", 'plan.resetCancel': 'Cancel', 'plan.resetConfirmBtn': 'Reset', 'plan.resetDone': 'Plan has been reset',
     'plan.tapToSet': 'Tap to set time',
     'plan.credit': "💡 Elon Musk's time management — <strong>Brain Dump</strong> all tasks, pick your <strong>Big 3</strong> priorities, then <strong>Time Box</strong> them into your schedule.",
     'plan.vsActualTitle': 'Plan vs Actual', 'plan.big3Result': 'Big 3 achieved: {done}/{total}',
@@ -4292,15 +4279,30 @@ function renderPlan() {
   const plan = getPlan();
   renderDumpList(plan);
   renderBig3Unified(plan);
-  renderSchedule(plan);
   renderPlanNote(plan);
 }
 
 function resetPlan() {
-  if (!confirm(t('plan.resetConfirm'))) return;
+  const modal = document.getElementById('modal-container');
+  modal.innerHTML = `
+    <div class="modal-overlay" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()" style="max-width:320px">
+        <h3 style="margin:0 0 12px;font-size:17px">🗑️ ${t('plan.resetTitle')}</h3>
+        <p style="font-size:14px;color:var(--text-sub);line-height:1.6;margin-bottom:16px">${t('plan.resetMsg')}</p>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="closeModal()" style="flex:1;background:var(--bg);color:var(--text)">${t('plan.resetCancel')}</button>
+          <button class="btn" onclick="confirmResetPlan()" style="flex:1;background:var(--coral);color:white">${t('plan.resetConfirmBtn')}</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function confirmResetPlan() {
   const dd = getDateData(currentDate);
   dd.plan = { dump: [], big3: [], blocks: {}, note: '' };
   saveData();
+  closeModal();
   renderPlan();
   showToast(t('plan.resetDone'));
 }
@@ -4430,13 +4432,12 @@ function setTimeBlock(idx, field, value) {
   }
   saveData();
   renderBig3Unified(plan);
-  renderSchedule(plan);
 }
 
 function initTimeBlock(idx) {
   const plan = getPlan();
   if (!plan.blocks) plan.blocks = {};
-  if (plan.blocks[idx] && plan.blocks[idx].start) return; // already set
+  if (plan.blocks[idx] && plan.blocks[idx].start) return;
   const now = new Date();
   const h = now.getHours();
   const m = now.getMinutes();
@@ -4448,49 +4449,6 @@ function initTimeBlock(idx) {
   plan.blocks[idx].end = endStr;
   saveData();
   renderBig3Unified(plan);
-  renderSchedule(plan);
-}
-
-function renderSchedule(plan) {
-  const card = document.getElementById('plan-schedule-card');
-  const container = document.getElementById('plan-schedule-list');
-  if (!plan.blocks) { card.style.display = 'none'; return; }
-
-  const scheduled = [];
-  plan.dump.forEach((item, i) => {
-    const block = plan.blocks[i];
-    if (block && block.start && block.end) {
-      const [sh, sm] = block.start.split(':').map(Number);
-      const [eh, em] = block.end.split(':').map(Number);
-      let dur = (eh * 60 + em) - (sh * 60 + sm);
-      if (dur < 0) dur += 24 * 60;
-      scheduled.push({
-        text: item.text,
-        start: block.start,
-        end: block.end,
-        startMin: sh * 60 + sm,
-        duration: dur,
-        isBig3: plan.big3.includes(i),
-        done: item.done
-      });
-    }
-  });
-
-  if (scheduled.length === 0) { card.style.display = 'none'; return; }
-  card.style.display = '';
-
-  scheduled.sort((a, b) => a.startMin - b.startMin);
-  const maxDur = Math.max(...scheduled.map(s => s.duration), 1);
-
-  container.innerHTML = scheduled.map(s => `
-    <div class="plan-schedule-item ${s.isBig3 ? 'big3' : ''}">
-      <div class="schedule-time">${s.start} ~ ${s.end}</div>
-      <div class="schedule-bar">
-        <div class="schedule-bar-fill" style="width:${Math.round(s.duration / maxDur * 100)}%"></div>
-      </div>
-      <div class="schedule-label" ${s.done ? 'style="text-decoration:line-through;color:var(--text-sub)"' : ''}>${s.isBig3 ? '★ ' : ''}${escHtml(s.text)}</div>
-    </div>
-  `).join('');
 }
 
 function savePlanNote() {
@@ -4522,13 +4480,17 @@ function renderBig3Mini() {
     <button class="icon-btn" onclick="switchTab('plan')" style="width:24px;height:24px;font-size:12px;color:var(--text-sub)">📋</button>
   </div>`;
 
+  if (!plan.blocks) plan.blocks = {};
   html += plan.big3.map((idx, rank) => {
     const item = plan.dump[idx];
     if (!item) return '';
+    const block = plan.blocks[idx] || {};
+    const timeStr = block.start && block.end ? `${block.start}~${block.end}` : '';
     return `
       <div class="big3-mini-item ${item.done ? 'done' : ''}" onclick="toggleDumpDone(${idx});renderBig3Mini()">
         <div class="mini-check">${item.done ? '✓' : rank + 1}</div>
         <span style="flex:1;font-size:13px;${item.done ? 'text-decoration:line-through' : ''}">${escHtml(item.text)}</span>
+        ${timeStr ? `<span style="font-size:11px;color:var(--text-sub);flex-shrink:0">${timeStr}</span>` : ''}
       </div>
     `;
   }).join('');
@@ -4928,7 +4890,40 @@ function startRecordStatusTimer() {
   _recordStatusTimer = setInterval(updateRecordStatus, 60000);
 }
 
+function renderPlanTimelineBar() {
+  const bar = document.getElementById('plan-timeline-bar');
+  if (!bar) return;
+  const dd = getDateData(currentDate);
+  const plan = dd.plan;
+  if (!plan || !plan.blocks || Object.keys(plan.blocks).length === 0) {
+    bar.innerHTML = '';
+    return;
+  }
+  const items = [];
+  plan.dump.forEach((item, i) => {
+    const block = plan.blocks[i];
+    if (block && block.start && block.end) {
+      items.push({
+        text: item.text,
+        start: block.start,
+        end: block.end,
+        isBig3: plan.big3.includes(i),
+        startMin: block.start.split(':').map(Number).reduce((h, m) => h * 60 + m)
+      });
+    }
+  });
+  if (items.length === 0) { bar.innerHTML = ''; return; }
+  items.sort((a, b) => a.startMin - b.startMin);
+  bar.innerHTML = `<div class="plan-timeline-blocks">${items.map(s =>
+    `<div class="plan-timeline-block ${s.isBig3 ? 'big3' : ''}">
+      <span class="ptb-time">${s.start}</span>
+      <span>${s.isBig3 ? '★ ' : ''}${escHtml(s.text.length > 8 ? s.text.slice(0, 8) + '…' : s.text)}</span>
+    </div>`
+  ).join('')}</div>`;
+}
+
 function renderTimeline() {
+  renderPlanTimelineBar();
   updateRecordStatus();
   startRecordStatusTimer();
   const dd = getDateData(currentDate);
@@ -6058,8 +6053,13 @@ function showAboutModal() {
   showModal(`
     <h3>ℹ️ ${t('about.title')}</h3>
     <p style="text-align:center;color:var(--text-secondary);margin-bottom:12px">${t('about.version')}</p>
-    <div style="background:linear-gradient(135deg,#f59e0b10,#7ECEC110);border:1px solid #f59e0b30;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:0.85em;line-height:1.7;color:var(--text)">
-      ${t('about.updateNote')}
+    <div style="margin-bottom:14px">
+      <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.toggle-arrow').textContent=this.nextElementSibling.style.display==='none'?'▶':'▼'" style="width:100%;padding:10px 14px;border:1px solid #f59e0b30;border-radius:12px;background:linear-gradient(135deg,#f59e0b10,#7ECEC110);cursor:pointer;font-size:0.9em;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;text-align:left">
+        <span class="toggle-arrow">▶</span> 🆕 ${t('about.updateToggle')}
+      </button>
+      <div style="display:none;background:var(--bg);border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;padding:12px 14px;font-size:0.85em;line-height:1.7;color:var(--text)">
+        ${t('about.updateNote')}
+      </div>
     </div>
     <div style="background:var(--bg-secondary);border-radius:12px;padding:14px 16px;margin-bottom:14px;font-size:0.92em;line-height:1.7">
       <strong>🔒 ${t('about.privacy')}</strong>
