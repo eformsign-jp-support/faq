@@ -510,6 +510,91 @@ body {
   justify-content: center;
 }
 
+/* Plan */
+.plan-dump-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  background: var(--bg);
+  transition: background var(--transition);
+}
+.plan-dump-item.selected {
+  background: rgba(59, 130, 246, 0.1);
+  border-left: 3px solid #3B82F6;
+}
+.plan-dump-item .dump-text {
+  flex: 1;
+  font-size: 14px;
+  word-break: break-word;
+}
+.plan-dump-item .dump-text.done {
+  text-decoration: line-through;
+  color: var(--text-sub);
+}
+.plan-dump-item .dump-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.plan-dump-item .dump-check.checked {
+  background: #3B82F6;
+  border-color: #3B82F6;
+  color: white;
+}
+.plan-dump-item .dump-delete {
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--text-sub);
+  padding: 2px 4px;
+}
+.plan-big3-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  background: var(--bg);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.plan-big3-item.chosen {
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(245,158,11,0.08));
+  border-left: 3px solid #F59E0B;
+}
+.plan-big3-item .big3-rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #F59E0B;
+  color: white;
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.plan-big3-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.plan-big3-summary-item:last-child { border-bottom: none; }
+
 /* Classification */
 .classify-item {
   display: flex;
@@ -1823,9 +1908,25 @@ body {
 
   <!-- Section: Plan -->
   <div id="sec-plan" class="section">
-    <div class="empty-state">
-      <div class="emoji">📋</div>
-      <p data-i18n="plan.comingSoon">계획 기능이 곧 추가됩니다</p>
+    <div class="card">
+      <h3 style="font-size:16px;margin-bottom:4px">🧠 <span data-i18n="plan.dumpTitle">브레인 덤프</span></h3>
+      <p style="font-size:12px;color:var(--text-sub);margin-bottom:12px" data-i18n="plan.dumpDesc">오늘 해야 할 일을 모두 적어보세요</p>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="text" id="plan-dump-input" class="input" data-i18n-placeholder="plan.dumpPlaceholder" placeholder="할 일 입력" style="flex:1" onkeydown="if(event.key==='Enter')addDumpItem()">
+        <button class="btn btn-primary" onclick="addDumpItem()" style="padding:8px 16px;white-space:nowrap">+</button>
+      </div>
+      <div id="plan-dump-list"></div>
+    </div>
+
+    <div class="card" id="plan-big3-card" style="display:none">
+      <h3 style="font-size:16px;margin-bottom:4px">🎯 <span data-i18n="plan.big3Title">Big 3</span></h3>
+      <p style="font-size:12px;color:var(--text-sub);margin-bottom:12px" data-i18n="plan.big3Desc">가장 중요한 3가지를 선택하세요</p>
+      <div id="plan-big3-list"></div>
+    </div>
+
+    <div class="card" id="plan-big3-summary" style="display:none">
+      <h3 style="font-size:16px;margin-bottom:12px">⭐ <span data-i18n="plan.big3Today">오늘의 Big 3</span></h3>
+      <div id="plan-big3-summary-list"></div>
     </div>
   </div>
 
@@ -2145,7 +2246,11 @@ const TRANSLATIONS = {
     'month.9': '9월', 'month.10': '10월', 'month.11': '11월', 'month.12': '12월',
     'app.name': '갓생살기',
     'tab.plan': '계획', 'tab.record': '기록', 'tab.analysis': '분석', 'tab.goals': '목표', 'tab.stats': '통계',
-    'plan.comingSoon': '계획 기능이 곧 추가됩니다',
+    'plan.dumpTitle': '브레인 덤프', 'plan.dumpDesc': '오늘 해야 할 일을 모두 적어보세요',
+    'plan.dumpPlaceholder': '할 일 입력', 'plan.dumpEmpty': '아직 할 일이 없어요. 위에 입력해 보세요!',
+    'plan.big3Title': 'Big 3', 'plan.big3Desc': '가장 중요한 3가지를 선택하세요',
+    'plan.big3Max': '최대 3개까지 선택할 수 있어요', 'plan.big3Today': '오늘의 Big 3',
+    'plan.allDone': '모든 할 일을 완료했어요! 🎉',
     'pwa.install': 'MyRoutine 설치', 'pwa.installDesc': '홈 화면에 추가하여 앱처럼 사용하세요', 'pwa.installBtn': '설치',
     'pwa.iosDesc': 'Safari 하단의 공유 버튼(□↑)을 누른 후 "홈 화면에 추가"를 선택하세요',
     'memo.title': '오늘의 메모', 'memo.placeholder': '오늘 하루를 돌아보며 간단한 메모를 남겨보세요...',
@@ -2292,7 +2397,11 @@ const TRANSLATIONS = {
     'month.9': '9月', 'month.10': '10月', 'month.11': '11月', 'month.12': '12月',
     'app.name': '神生活',
     'tab.plan': '計画', 'tab.record': '記録', 'tab.analysis': '分析', 'tab.goals': '目標', 'tab.stats': '統計',
-    'plan.comingSoon': '計画機能がまもなく追加されます',
+    'plan.dumpTitle': 'ブレインダンプ', 'plan.dumpDesc': '今日やるべきことをすべて書き出しましょう',
+    'plan.dumpPlaceholder': 'やること入力', 'plan.dumpEmpty': 'まだやることがありません。上に入力してみましょう！',
+    'plan.big3Title': 'Big 3', 'plan.big3Desc': '最も重要な3つを選んでください',
+    'plan.big3Max': '最大3つまで選べます', 'plan.big3Today': '今日のBig 3',
+    'plan.allDone': 'すべて完了しました！ 🎉',
     'pwa.install': 'MyRoutine インストール', 'pwa.installDesc': 'ホーム画面に追加してアプリのように使いましょう', 'pwa.installBtn': 'インストール',
     'pwa.iosDesc': 'Safari下部の共有ボタン(□↑)をタップし「ホーム画面に追加」を選択してください',
     'memo.title': '今日のメモ', 'memo.placeholder': '今日一日を振り返りながら簡単なメモを残してみましょう...',
@@ -2439,7 +2548,11 @@ const TRANSLATIONS = {
     'month.9': 'Sep', 'month.10': 'Oct', 'month.11': 'Nov', 'month.12': 'Dec',
     'app.name': 'Live Your Best',
     'tab.plan': 'Plan', 'tab.record': 'Record', 'tab.analysis': 'Analysis', 'tab.goals': 'Goals', 'tab.stats': 'Stats',
-    'plan.comingSoon': 'Planning feature coming soon',
+    'plan.dumpTitle': 'Brain Dump', 'plan.dumpDesc': 'Write down everything you need to do today',
+    'plan.dumpPlaceholder': 'Enter a task', 'plan.dumpEmpty': 'No tasks yet. Add one above!',
+    'plan.big3Title': 'Big 3', 'plan.big3Desc': 'Select the 3 most important tasks',
+    'plan.big3Max': 'You can select up to 3', 'plan.big3Today': "Today's Big 3",
+    'plan.allDone': 'All tasks done! 🎉',
     'pwa.install': 'Install MyRoutine', 'pwa.installDesc': 'Add to home screen and use like an app', 'pwa.installBtn': 'Install',
     'pwa.iosDesc': 'Tap the share button (□↑) at the bottom of Safari, then select "Add to Home Screen"',
     'memo.title': "Today's Memo", 'memo.placeholder': 'Reflect on your day and leave a quick note...',
@@ -3929,6 +4042,7 @@ function switchTab(tab) {
   const bottomTab = document.querySelector(`.tab[data-tab="${tab}"]`);
   if (bottomTab) bottomTab.classList.add('active');
 
+  if (tab === 'plan') renderPlan();
   if (tab === 'record') { renderGoalCards(); renderRecordPastBanner(); }
   if (tab === 'analysis') renderAnalysis();
   if (tab === 'history') renderHistory();
@@ -3941,6 +4055,127 @@ function switchDate(d) {
   currentDate = d;
   calendarMonth = null;
   renderAll();
+}
+
+// ============== Plan ==============
+function getPlan() {
+  const dd = getDateData(currentDate);
+  if (!dd.plan) dd.plan = { dump: [], big3: [] };
+  return dd.plan;
+}
+
+function renderPlan() {
+  const plan = getPlan();
+  renderDumpList(plan);
+  renderBig3Selection(plan);
+  renderBig3Summary(plan);
+}
+
+function addDumpItem() {
+  const input = document.getElementById('plan-dump-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const plan = getPlan();
+  plan.dump.push({ text, done: false });
+  input.value = '';
+  saveData();
+  renderPlan();
+}
+
+function removeDumpItem(idx) {
+  const plan = getPlan();
+  // Remove from big3 if present
+  plan.big3 = plan.big3.filter(i => i !== idx).map(i => i > idx ? i - 1 : i);
+  plan.dump.splice(idx, 1);
+  saveData();
+  renderPlan();
+}
+
+function toggleDumpDone(idx) {
+  const plan = getPlan();
+  plan.dump[idx].done = !plan.dump[idx].done;
+  saveData();
+  renderPlan();
+}
+
+function toggleBig3(idx) {
+  const plan = getPlan();
+  const pos = plan.big3.indexOf(idx);
+  if (pos >= 0) {
+    plan.big3.splice(pos, 1);
+  } else if (plan.big3.length < 3) {
+    plan.big3.push(idx);
+  } else {
+    showToast(t('plan.big3Max'));
+    return;
+  }
+  saveData();
+  renderPlan();
+}
+
+function renderDumpList(plan) {
+  const container = document.getElementById('plan-dump-list');
+  if (plan.dump.length === 0) {
+    container.innerHTML = `<p style="text-align:center;color:var(--text-sub);padding:16px;font-size:13px">${t('plan.dumpEmpty')}</p>`;
+    document.getElementById('plan-big3-card').style.display = 'none';
+    return;
+  }
+  container.innerHTML = plan.dump.map((item, i) => {
+    const isBig3 = plan.big3.includes(i);
+    return `
+      <div class="plan-dump-item ${isBig3 ? 'selected' : ''}">
+        <div class="dump-check ${item.done ? 'checked' : ''}" onclick="toggleDumpDone(${i})">${item.done ? '✓' : ''}</div>
+        <div class="dump-text ${item.done ? 'done' : ''}">${escHtml(item.text)}</div>
+        <span class="dump-delete" onclick="removeDumpItem(${i})">✕</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderBig3Selection(plan) {
+  const card = document.getElementById('plan-big3-card');
+  const container = document.getElementById('plan-big3-list');
+  if (plan.dump.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  const undone = plan.dump.map((item, i) => ({ item, i })).filter(x => !x.item.done);
+  if (undone.length === 0) {
+    container.innerHTML = `<p style="text-align:center;color:var(--text-sub);padding:8px;font-size:13px">${t('plan.allDone')}</p>`;
+    return;
+  }
+  container.innerHTML = undone.map(({ item, i }) => {
+    const rank = plan.big3.indexOf(i);
+    const isChosen = rank >= 0;
+    return `
+      <div class="plan-big3-item ${isChosen ? 'chosen' : ''}" onclick="toggleBig3(${i})">
+        ${isChosen ? `<div class="big3-rank">${rank + 1}</div>` : `<div style="width:24px;height:24px;border-radius:50%;border:2px dashed var(--border);flex-shrink:0"></div>`}
+        <span style="flex:1;font-size:14px">${escHtml(item.text)}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderBig3Summary(plan) {
+  const card = document.getElementById('plan-big3-summary');
+  const container = document.getElementById('plan-big3-summary-list');
+  if (plan.big3.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  container.innerHTML = plan.big3.map((idx, rank) => {
+    const item = plan.dump[idx];
+    if (!item) return '';
+    return `
+      <div class="plan-big3-summary-item">
+        <div class="big3-rank" style="background:${item.done ? 'var(--mint)' : '#F59E0B'}">${rank + 1}</div>
+        <span style="flex:1;font-size:14px;${item.done ? 'text-decoration:line-through;color:var(--text-sub)' : ''}">${escHtml(item.text)}</span>
+        ${item.done ? '<span style="color:var(--mint)">✓</span>' : ''}
+      </div>
+    `;
+  }).join('');
 }
 
 // ============== Mission 1: Record ==============
