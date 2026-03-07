@@ -2107,7 +2107,8 @@ const TRANSLATIONS = {
     'modal.dataManagement': '데이터 관리',
     'modal.exportJson': 'JSON 내보내기', 'modal.importJson': 'JSON 가져오기', 'modal.close': '닫기',
     'about.title': 'MyRoutine 정보',
-    'about.version': 'v1.1 · Bekking Studio',
+    'about.version': 'v2.0 · Bekking Studio',
+    'about.updateNote': '🆕 v2.0 업데이트: 브라이언 트레이시의 목표 설정 7단계를 앱에 담았습니다. 목표를 등록하고 기한을 설정하세요. 할 일 체크리스트로 진행 상황을 관리하고, 매일 한 가지 행동을 기록하세요. 장애물을 파악하고 진행률을 추적하면 목표가 다가옵니다. 달성 시 메달(🥇🥈🥉)을 획득하세요!',
     'about.privacy': '개인정보 안내',
     'about.privacyLocal': '모든 기록은 사용자 기기에만 저장됩니다',
     'about.privacyNoCollect': '개인정보를 수집하지 않습니다',
@@ -2252,7 +2253,8 @@ const TRANSLATIONS = {
     'modal.dataManagement': 'データ管理',
     'modal.exportJson': 'JSONエクスポート', 'modal.importJson': 'JSONインポート', 'modal.close': '閉じる',
     'about.title': 'MyRoutine について',
-    'about.version': 'v1.1 · Bekking Studio',
+    'about.version': 'v2.0 · Bekking Studio',
+    'about.updateNote': '🆕 v2.0: ブライアン・トレーシーの目標設定7ステップを搭載。目標を登録し期限を設定、やることリストで進捗管理、毎日の行動を記録しましょう。障害物を把握し進捗率を追跡すれば目標に近づきます。達成時にメダル(🥇🥈🥉)を獲得！',
     'about.privacy': 'プライバシー',
     'about.privacyLocal': 'すべての記録はお使いの端末にのみ保存されます',
     'about.privacyNoCollect': '個人情報を収集しません',
@@ -2397,7 +2399,8 @@ const TRANSLATIONS = {
     'modal.dataManagement': 'Data Management',
     'modal.exportJson': 'Export JSON', 'modal.importJson': 'Import JSON', 'modal.close': 'Close',
     'about.title': 'About MyRoutine',
-    'about.version': 'v1.1 · Bekking Studio',
+    'about.version': 'v2.0 · Bekking Studio',
+    'about.updateNote': "🆕 v2.0: Brian Tracy's 7-step goal setting formula, built into the app. Register goals with deadlines, manage tasks with checklists, and log one daily action. Identify obstacles, track progress, and watch your goals get closer. Earn medals (🥇🥈🥉) when you achieve them!",
     'about.privacy': 'Privacy',
     'about.privacyLocal': 'All records are stored only on your device',
     'about.privacyNoCollect': 'We do not collect personal information',
@@ -5336,6 +5339,9 @@ function showAboutModal() {
   showModal(`
     <h3>ℹ️ ${t('about.title')}</h3>
     <p style="text-align:center;color:var(--text-secondary);margin-bottom:12px">${t('about.version')}</p>
+    <div style="background:linear-gradient(135deg,#f59e0b10,#7ECEC110);border:1px solid #f59e0b30;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:0.85em;line-height:1.7;color:var(--text)">
+      ${t('about.updateNote')}
+    </div>
     <div style="background:var(--bg-secondary);border-radius:12px;padding:14px 16px;margin-bottom:14px;font-size:0.92em;line-height:1.7">
       <strong>🔒 ${t('about.privacy')}</strong>
       <ul style="margin:8px 0 0;padding-left:20px;list-style:disc">
