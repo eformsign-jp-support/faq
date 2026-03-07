@@ -478,6 +478,12 @@ body {
 .lg-action-history { font-size: 12px; color: var(--text-sub); }
 .lg-action-history div { padding: 4px 0; border-bottom: 1px solid var(--bg); }
 .lg-action-date { color: var(--mint); font-weight: 600; margin-right: 6px; }
+.lg-stats-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.lg-stats-box { flex: 1; text-align: center; padding: 10px 4px; border-radius: var(--radius); background: var(--bg); }
+.lg-stats-num { font-size: 22px; font-weight: 800; }
+.lg-stats-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+.lg-stats-medal-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.lg-stats-medal-item { display: flex; align-items: center; gap: 4px; font-size: 13px; background: var(--bg); padding: 4px 10px; border-radius: 20px; }
 
 .timeline-duration {
   font-size: 11px;
@@ -1979,6 +1985,11 @@ body {
         <div class="stats-activity-chips" id="stats-activity-chips"></div>
         <div class="stats-chart-container"><canvas id="stats-activity-chart"></canvas></div>
       </div>
+    </div>
+
+    <div class="card" id="stats-life-goals-card" style="margin-top:16px;display:none;">
+      <h3 style="font-size:15px;margin-bottom:12px">🎯 <span data-i18n="lg.title">나의 목표</span></h3>
+      <div id="stats-life-goals-content"></div>
     </div>
 
     <button class="btn btn-coral btn-block" onclick="exportStatsPDF()" style="margin-top:16px" id="stats-export-pdf-btn">
@@ -3528,6 +3539,7 @@ function renderStats() {
     emptyEl.style.display = '';
     if (pdfBtn) pdfBtn.style.display = 'none';
     if (shareBtn) shareBtn.style.display = 'none';
+    renderStatsLifeGoals();
     return;
   }
   chartsArea.style.display = '';
@@ -3541,6 +3553,7 @@ function renderStats() {
   renderStatsRatioChart(days, dates);
   renderStatsRanking(days);
   renderStatsActivityTrend(days, dates);
+  renderStatsLifeGoals();
 }
 
 function renderStatsSummaryCards(days) {
@@ -3738,6 +3751,54 @@ function selectStatsActivity(activity) {
 function toggleStatsExcludeFixed() {
   statsExcludeFixed = document.getElementById('stats-exclude-fixed').checked;
   renderStatsRanking(statsCachedDays);
+}
+
+function renderStatsLifeGoals() {
+  initLifeGoals();
+  const card = document.getElementById('stats-life-goals-card');
+  const content = document.getElementById('stats-life-goals-content');
+  if (!data.lifeGoals || data.lifeGoals.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+
+  const completed = data.lifeGoals.filter(g => g.status === 'completed');
+  const active = data.lifeGoals.filter(g => g.status === 'active');
+  const inProgress = active.filter(g => (g.progress || 0) > 0 || (g.tasks && g.tasks.some(t => t.done)));
+  const notStarted = active.filter(g => (g.progress || 0) === 0 && (!g.tasks || !g.tasks.some(t => t.done)));
+
+  const medals = completed.map(g => getGoalMedal(g));
+  const goldCount = medals.filter(m => m === '🥇').length;
+  const silverCount = medals.filter(m => m === '🥈').length;
+  const bronzeCount = medals.filter(m => m === '🥉').length;
+  const normalCount = medals.filter(m => m === '🏅').length;
+
+  let html = `<div class="lg-stats-row">
+    <div class="lg-stats-box">
+      <div class="lg-stats-num" style="color:#10b981">${completed.length}</div>
+      <div class="lg-stats-label">완료</div>
+    </div>
+    <div class="lg-stats-box">
+      <div class="lg-stats-num" style="color:#f59e0b">${inProgress.length}</div>
+      <div class="lg-stats-label">진행중</div>
+    </div>
+    <div class="lg-stats-box">
+      <div class="lg-stats-num" style="color:#94a3b8">${notStarted.length}</div>
+      <div class="lg-stats-label">진행 전</div>
+    </div>
+  </div>`;
+
+  if (completed.length > 0) {
+    html += `<div class="lg-stats-medal-row">`;
+    if (goldCount > 0) html += `<span class="lg-stats-medal-item">🥇 ×${goldCount}</span>`;
+    if (silverCount > 0) html += `<span class="lg-stats-medal-item">🥈 ×${silverCount}</span>`;
+    if (bronzeCount > 0) html += `<span class="lg-stats-medal-item">🥉 ×${bronzeCount}</span>`;
+    if (normalCount > 0) html += `<span class="lg-stats-medal-item">🏅 ×${normalCount}</span>`;
+    html += `</div>`;
+  }
+
+  content.innerHTML = html;
 }
 
 function exportStatsPDF() {
