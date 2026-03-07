@@ -7582,12 +7582,12 @@ if ('serviceWorker' in navigator) {
 let tourActive = false;
 const TOUR_STEPS = [
   { id:'welcome', target:null, position:'center' },
-  { id:'plan', target:'.tab[data-tab="plan"]', position:'above' },
-  { id:'record', target:'#quick-chips', position:'below' },
-  { id:'analyze', target:'.tab[data-tab="analysis"]', position:'above' },
-  { id:'goals', target:'.tab[data-tab="goals"]', position:'above' },
-  { id:'stats', target:'.tab[data-tab="stats"]', position:'above' },
-  { id:'closeday', target:'#close-day-btn', position:'above' },
+  { id:'plan', target:'.tab[data-tab="plan"]', position:'above', tab:'plan' },
+  { id:'record', target:'#quick-chips', position:'below', tab:'record' },
+  { id:'analyze', target:'.tab[data-tab="analysis"]', position:'above', tab:'analysis' },
+  { id:'goals', target:'.tab[data-tab="goals"]', position:'above', tab:'goals' },
+  { id:'stats', target:'.tab[data-tab="stats"]', position:'above', tab:'stats' },
+  { id:'closeday', target:'#close-day-btn', position:'above', tab:'record' },
   { id:'done', target:null, position:'center' }
 ];
 let tourStepIndex = 0;
@@ -7620,6 +7620,11 @@ function showTourStep(index) {
   const step = TOUR_STEPS[index];
   const isFirst = index === 0;
   const isLast = index === TOUR_STEPS.length - 1;
+
+  // Switch to the relevant tab if specified
+  if (step.tab) {
+    switchTab(step.tab);
+  }
 
   // Highlight target
   let targetEl = null;
@@ -7692,6 +7697,7 @@ function endTour() {
     tourCloseDayWasHidden = false;
   }
   localStorage.setItem('tourCompleted', '1');
+  switchTab('record');
 }
 
 // ============== Touch Swipe ==============
