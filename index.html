@@ -1828,21 +1828,26 @@ body {
 }
 .book-item {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 12px; border-radius: var(--radius-sm);
-  background: var(--bg); margin-bottom: 6px; cursor: pointer;
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  background: var(--bg); margin-bottom: 4px; cursor: pointer;
   transition: background var(--transition);
 }
 .book-item:active { opacity: 0.7; }
-.book-title { font-size: 14px; font-weight: 600; }
-.book-author { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
-.book-meta { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+.book-list-scroll { max-height: 360px; overflow-y: auto; }
+.book-title { font-size: 15px; font-weight: 600; }
+.book-author { font-size: 13px; color: var(--text-sub); margin-top: 2px; }
+.book-meta { font-size: 12px; color: var(--text-light); margin-top: 2px; }
 .book-done-btn {
-  background: var(--success); color: white; border: none; border-radius: 8px;
+  background: none; color: var(--text-sub); border: 1.5px dashed var(--text-light); border-radius: 8px;
   padding: 4px 10px; font-size: 12px; cursor: pointer; white-space: nowrap;
+  transition: all var(--transition);
+}
+.book-done-btn:hover, .book-done-btn:active {
+  background: var(--success); color: white; border-color: var(--success);
 }
 .book-stars { color: #F59E0B; font-size: 13px; letter-spacing: 1px; }
 .book-section-title {
-  font-size: 13px; font-weight: 600; color: var(--text-sub);
+  font-size: 14px; font-weight: 600; color: var(--text-sub);
   margin: 14px 0 8px; padding-bottom: 4px;
   border-bottom: 1px solid var(--text-light);
 }
@@ -2087,6 +2092,21 @@ body {
 
   <!-- Section: Plan -->
   <div id="sec-plan" class="section">
+    <div class="card" id="motto-card">
+      <h3 style="font-size:16px;margin-bottom:8px">💬 <span data-i18n="plan.mottoTitle">나의 모토</span></h3>
+      <textarea id="motto-text" class="input" rows="2" data-i18n-placeholder="plan.mottoPlaceholder" placeholder="인생 모토나 좋은 글귀를 적어보세요..." style="resize:vertical;font-size:15px;line-height:1.6;width:100%;box-sizing:border-box;padding:10px 14px" oninput="saveMotto()"></textarea>
+      <div id="motto-image-area" style="margin-top:8px">
+        <div id="motto-image-preview" style="display:none;position:relative;margin-bottom:8px">
+          <img id="motto-img" style="width:100%;border-radius:var(--radius-sm);cursor:pointer" onclick="document.getElementById('motto-image-input').click()">
+          <button onclick="removeMottoImage()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">✕</button>
+        </div>
+        <label id="motto-image-btn" style="display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text-sub);cursor:pointer;padding:6px 10px;border:1px dashed var(--text-light);border-radius:var(--radius-sm)">
+          📷 <span data-i18n="plan.mottoPhoto">사진 추가</span>
+          <input type="file" id="motto-image-input" accept="image/*" style="display:none" onchange="handleMottoImage(event)">
+        </label>
+      </div>
+    </div>
+
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <h3 style="font-size:16px;margin:0">🧠 <span data-i18n="plan.dumpTitle">브레인 덤프</span></h3>
@@ -2217,7 +2237,7 @@ body {
 
     <div class="card" id="books-card" style="margin-top:16px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h3 style="font-size:15px;margin:0">📚 <span data-i18n="books.title">독서 기록</span></h3>
+        <h3 style="margin:0">📚 <span data-i18n="books.title">독서 기록</span></h3>
         <button class="icon-btn" onclick="showAddBookModal()" style="font-size:18px">+</button>
       </div>
       <div id="books-mode-toggle" style="display:flex;gap:4px;margin-bottom:12px">
@@ -2328,7 +2348,7 @@ body {
       <span class="tab-icon">📊</span><span data-i18n="tab.analysis">분석</span>
     </button>
     <button class="tab" data-tab="goals" onclick="switchTab('goals')">
-      <span class="tab-icon">🎯</span><span data-i18n="tab.goals">목표</span>
+      <span class="tab-icon">🎯</span><span data-i18n="tab.goals">목표/독서</span>
     </button>
     <button class="tab" data-tab="stats" onclick="switchTab('stats')">
       <span class="tab-icon">📈</span><span data-i18n="tab.stats">통계</span>
@@ -2449,6 +2469,7 @@ const TRANSLATIONS = {
     'toast.enterName': '이름을 입력하세요', 'toast.duplicateName': '이미 같은 이름이 있습니다', 'toast.cannotDelete': '기상/취침은 삭제할 수 없습니다',
     'toast.recorded': '✓ {0} 기록했습니다',
     'preset.reordered': '✓ 버튼 순서가 변경되었습니다',
+    'notify.title': '갓생살기 알림', 'notify.body': '오늘 하루를 아직 마감하지 않았어요! 기록을 완성해보세요.',
     'chip.move': '이동', 'chip.edit': '수정', 'chip.delete': '삭제',
     'day.sun': '일', 'day.mon': '월', 'day.tue': '화', 'day.wed': '수',
     'day.thu': '목', 'day.fri': '금', 'day.sat': '토',
@@ -2456,7 +2477,8 @@ const TRANSLATIONS = {
     'month.5': '5월', 'month.6': '6월', 'month.7': '7월', 'month.8': '8월',
     'month.9': '9월', 'month.10': '10월', 'month.11': '11월', 'month.12': '12월',
     'app.name': '갓생살기',
-    'tab.plan': '계획', 'tab.record': '기록', 'tab.analysis': '분석', 'tab.goals': '목표', 'tab.stats': '통계',
+    'tab.plan': '계획', 'tab.record': '기록', 'tab.analysis': '분석', 'tab.goals': '목표/독서', 'tab.stats': '통계',
+    'plan.mottoTitle': '나의 모토', 'plan.mottoPlaceholder': '인생 모토나 좋은 글귀를 적어보세요...', 'plan.mottoPhoto': '사진 추가',
     'plan.dumpTitle': '브레인 덤프', 'plan.dumpDesc': '오늘 해야 할 일을 모두 적어보세요',
     'plan.dumpPlaceholder': '할 일 입력', 'plan.dumpEmpty': '아직 할 일이 없어요. 위에 입력해 보세요!',
     'plan.big3Title': 'Big 3 + 타임 박싱', 'plan.big3Desc': '⭐ 중요한 3개를 선택하고, 시간을 배정하세요',
@@ -2628,6 +2650,7 @@ const TRANSLATIONS = {
     'toast.enterName': '名前を入力してください', 'toast.duplicateName': '同じ名前がすでにあります', 'toast.cannotDelete': '起床/就寝は削除できません',
     'toast.recorded': '✓ {0} 記録しました',
     'preset.reordered': '✓ ボタンの順序を変更しました',
+    'notify.title': 'MyRoutine リマインダー', 'notify.body': '今日のまとめがまだです！記録を完成させましょう。',
     'chip.move': '移動', 'chip.edit': '編集', 'chip.delete': '削除',
     'day.sun': '日', 'day.mon': '月', 'day.tue': '火', 'day.wed': '水',
     'day.thu': '木', 'day.fri': '金', 'day.sat': '土',
@@ -2635,7 +2658,8 @@ const TRANSLATIONS = {
     'month.5': '5月', 'month.6': '6月', 'month.7': '7月', 'month.8': '8月',
     'month.9': '9月', 'month.10': '10月', 'month.11': '11月', 'month.12': '12月',
     'app.name': '神生活',
-    'tab.plan': '計画', 'tab.record': '記録', 'tab.analysis': '分析', 'tab.goals': '目標', 'tab.stats': '統計',
+    'tab.plan': '計画', 'tab.record': '記録', 'tab.analysis': '分析', 'tab.goals': '目標/読書', 'tab.stats': '統計',
+    'plan.mottoTitle': '私のモットー', 'plan.mottoPlaceholder': '人生のモットーや良い言葉を書いてみましょう...', 'plan.mottoPhoto': '写真を追加',
     'plan.dumpTitle': 'ブレインダンプ', 'plan.dumpDesc': '今日やるべきことをすべて書き出しましょう',
     'plan.dumpPlaceholder': 'やること入力', 'plan.dumpEmpty': 'まだやることがありません。上に入力してみましょう！',
     'plan.big3Title': 'Big 3 + タイムボクシング', 'plan.big3Desc': '⭐ 重要な3つを選び、時間を割り当てましょう',
@@ -2807,6 +2831,7 @@ const TRANSLATIONS = {
     'toast.enterName': 'Please enter a name', 'toast.duplicateName': 'This name already exists', 'toast.cannotDelete': 'Wake Up/Bedtime cannot be deleted',
     'toast.recorded': '✓ Recorded {0}',
     'preset.reordered': '✓ Button order changed',
+    'notify.title': 'MyRoutine Reminder', 'notify.body': "You haven't closed today yet! Complete your daily record.",
     'chip.move': 'Move', 'chip.edit': 'Edit', 'chip.delete': 'Delete',
     'day.sun': 'Sun', 'day.mon': 'Mon', 'day.tue': 'Tue', 'day.wed': 'Wed',
     'day.thu': 'Thu', 'day.fri': 'Fri', 'day.sat': 'Sat',
@@ -2814,7 +2839,8 @@ const TRANSLATIONS = {
     'month.5': 'May', 'month.6': 'Jun', 'month.7': 'Jul', 'month.8': 'Aug',
     'month.9': 'Sep', 'month.10': 'Oct', 'month.11': 'Nov', 'month.12': 'Dec',
     'app.name': 'Live Your Best',
-    'tab.plan': 'Plan', 'tab.record': 'Record', 'tab.analysis': 'Analysis', 'tab.goals': 'Goals', 'tab.stats': 'Stats',
+    'tab.plan': 'Plan', 'tab.record': 'Record', 'tab.analysis': 'Analysis', 'tab.goals': 'Goals/Books', 'tab.stats': 'Stats',
+    'plan.mottoTitle': 'My Motto', 'plan.mottoPlaceholder': 'Write your life motto or favorite quotes...', 'plan.mottoPhoto': 'Add photo',
     'plan.dumpTitle': 'Brain Dump', 'plan.dumpDesc': 'Write down everything you need to do today',
     'plan.dumpPlaceholder': 'Enter a task', 'plan.dumpEmpty': 'No tasks yet. Add one above!',
     'plan.big3Title': 'Big 3 + Time Boxing', 'plan.big3Desc': '⭐ Select top 3 and assign time blocks',
@@ -3403,6 +3429,47 @@ function init() {
   const entries = dd ? dd.entries : [];
   if (!localStorage.getItem('tourCompleted') && entries.length === 0) {
     setTimeout(() => startTour(), 500);
+  }
+  scheduleReminders();
+}
+
+// --- Daily close reminder notifications ---
+let reminderTimers = [];
+function scheduleReminders() {
+  // Clear any existing timers
+  reminderTimers.forEach(id => clearTimeout(id));
+  reminderTimers = [];
+  // Request notification permission on first load
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+  const REMINDER_HOURS = [19, 21, 22]; // 7PM, 9PM, 10PM
+  const now = new Date();
+  REMINDER_HOURS.forEach(hour => {
+    const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, 0, 0);
+    const ms = target.getTime() - now.getTime();
+    if (ms > 0) {
+      const id = setTimeout(() => showReminderNotification(), ms);
+      reminderTimers.push(id);
+    }
+  });
+}
+
+function showReminderNotification() {
+  const today = getTodayStr();
+  const dd = data.dates[today];
+  // Only notify if today has entries but is not yet closed
+  if (!dd || dd.entries.length === 0 || dd.status === 'completed') return;
+  if ('Notification' in window && Notification.permission === 'granted') {
+    const title = t('notify.title');
+    const body = t('notify.body');
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.showNotification(title, { body, icon: 'https://daniel-sung.github.io/MyRoutine/icon-192.png', tag: 'daily-reminder' });
+      });
+    } else {
+      new Notification(title, { body });
+    }
   }
 }
 
@@ -4406,7 +4473,7 @@ function renderBooks() {
     readingList.innerHTML = '';
   } else {
     const today = new Date();
-    readingList.innerHTML = `<div class="book-section-title">📖 ${t('books.reading')} (${reading.length})</div>` +
+    readingList.innerHTML = `<div class="book-section-title">📖 ${t('books.reading')} (${reading.length})</div><div class="book-list-scroll">` +
       reading.map(b => {
         const start = new Date(b.startDate);
         const dayCount = Math.max(1, Math.ceil((today - start) / 86400000) + 1);
@@ -4417,14 +4484,14 @@ function renderBooks() {
             ${b.author ? `<div class="book-author">${escHtml(b.author)}</div>` : ''}
             <div class="book-meta">${b.startDate.slice(5).replace('-','/')}~ · ${dayStr} 📖</div>
           </div>
-          <button class="book-done-btn" onclick="event.stopPropagation();showFinishBookModal('${escAttr(b.id)}')">✅ ${t('books.markDone')}</button>
+          <button class="book-done-btn" onclick="event.stopPropagation();showFinishBookModal('${escAttr(b.id)}')">☐ ${t('books.markDone')}</button>
         </div>`;
-      }).join('');
+      }).join('') + '</div>';
   }
 
   // Completed list
   if (completed.length > 0) {
-    completedSection.innerHTML = `<div class="book-section-title">📗 ${t('books.completed')} (${completed.length})</div>` +
+    completedSection.innerHTML = `<div class="book-section-title">📗 ${t('books.completed')} (${completed.length})</div><div class="book-list-scroll">` +
       completed.map(b => {
         const start = new Date(b.startDate);
         const end = new Date(b.endDate);
@@ -4441,7 +4508,7 @@ function renderBooks() {
             ${b.memo ? `<div style="font-size:12px;color:var(--text-sub);margin-top:3px;font-style:italic">"${escHtml(b.memo)}"</div>` : ''}
           </div>
         </div>`;
-      }).join('');
+      }).join('') + '</div>';
   } else {
     completedSection.innerHTML = '';
   }
@@ -4940,6 +5007,7 @@ function getPlan() {
 
 function renderPlan() {
   const plan = getPlan();
+  renderMotto();
   renderDumpList(plan);
   renderBig3Unified(plan);
   renderPlanNote(plan);
@@ -5123,6 +5191,58 @@ function savePlanNote() {
 function renderPlanNote(plan) {
   const el = document.getElementById('plan-note');
   if (el) el.value = plan.note || '';
+}
+
+// ============== Motto (persistent, not reset daily) ==============
+function saveMotto() {
+  data.motto = document.getElementById('motto-text').value;
+  saveData();
+}
+
+function renderMotto() {
+  const el = document.getElementById('motto-text');
+  if (el) el.value = data.motto || '';
+  const img = document.getElementById('motto-img');
+  const preview = document.getElementById('motto-image-preview');
+  const btn = document.getElementById('motto-image-btn');
+  if (data.mottoImage) {
+    img.src = data.mottoImage;
+    preview.style.display = 'block';
+    btn.style.display = 'none';
+  } else {
+    preview.style.display = 'none';
+    btn.style.display = 'inline-flex';
+  }
+}
+
+function handleMottoImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    // Resize to max 800px to save storage
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const maxW = 800;
+      let w = img.width, h = img.height;
+      if (w > maxW) { h = h * maxW / w; w = maxW; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      data.mottoImage = canvas.toDataURL('image/jpeg', 0.8);
+      saveData();
+      renderMotto();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeMottoImage() {
+  data.mottoImage = null;
+  saveData();
+  renderMotto();
+  document.getElementById('motto-image-input').value = '';
 }
 
 // ============== Big 3 Mini (Record Tab) ==============
@@ -6213,7 +6333,13 @@ function renderDailyMemo() {
   const container = document.getElementById('daily-memo');
   const dd = getDateData(currentDate);
   const memo = dd.memo || '';
-  container.innerHTML = `
+  const planNote = dd.plan && dd.plan.note ? dd.plan.note : '';
+  const affirmationHtml = planNote ? `
+    <div class="card" style="margin-bottom:12px">
+      <h3 style="font-size:16px;margin-bottom:8px">📝 ${t('plan.noteTitle')}</h3>
+      <div style="font-size:15px;line-height:1.7;color:var(--text-sub);padding:10px 14px;background:var(--bg);border-radius:var(--radius-sm);white-space:pre-wrap">${escHtml(planNote)}</div>
+    </div>` : '';
+  container.innerHTML = affirmationHtml + `
     <div class="card">
       <h3 style="font-size:16px;margin-bottom:12px">${t('memo.title')}</h3>
       <textarea class="daily-memo-textarea" placeholder="${t('memo.placeholder')}" oninput="saveDailyMemo(this.value)">${escHtml(memo)}</textarea>
@@ -7582,12 +7708,12 @@ if ('serviceWorker' in navigator) {
 let tourActive = false;
 const TOUR_STEPS = [
   { id:'welcome', target:null, position:'center' },
-  { id:'plan', target:'.tab[data-tab="plan"]', position:'above' },
-  { id:'record', target:'#quick-chips', position:'below' },
-  { id:'analyze', target:'.tab[data-tab="analysis"]', position:'above' },
-  { id:'goals', target:'.tab[data-tab="goals"]', position:'above' },
-  { id:'stats', target:'.tab[data-tab="stats"]', position:'above' },
-  { id:'closeday', target:'#close-day-btn', position:'above' },
+  { id:'plan', target:'.tab[data-tab="plan"]', position:'center', tab:'plan' },
+  { id:'record', target:'#quick-chips', position:'center', tab:'record' },
+  { id:'analyze', target:'.tab[data-tab="analysis"]', position:'center', tab:'analysis' },
+  { id:'goals', target:'.tab[data-tab="goals"]', position:'center', tab:'goals' },
+  { id:'stats', target:'.tab[data-tab="stats"]', position:'center', tab:'stats' },
+  { id:'closeday', target:'#close-day-btn', position:'center', tab:'record' },
   { id:'done', target:null, position:'center' }
 ];
 let tourStepIndex = 0;
@@ -7621,6 +7747,11 @@ function showTourStep(index) {
   const isFirst = index === 0;
   const isLast = index === TOUR_STEPS.length - 1;
 
+  // Switch to the relevant tab if specified
+  if (step.tab) {
+    switchTab(step.tab);
+  }
+
   // Highlight target
   let targetEl = null;
   if (step.target) {
@@ -7650,9 +7781,12 @@ function showTourStep(index) {
 
 function positionTooltip(targetEl, tooltip, position) {
   if (!targetEl || position === 'center') {
-    tooltip.style.top = '50%';
     tooltip.style.left = '50%';
-    tooltip.style.transform = 'translate(-50%, -50%)';
+    tooltip.style.transform = 'translateX(-50%)';
+    // Place in upper-center area to avoid covering bottom tab bar
+    const tipH = tooltip.offsetHeight || 200;
+    const availH = window.innerHeight - 72; // 64px tab bar + 8px margin
+    tooltip.style.top = Math.max(8, (availH - tipH) / 2) + 'px';
     return;
   }
   const rect = targetEl.getBoundingClientRect();
@@ -7692,6 +7826,7 @@ function endTour() {
     tourCloseDayWasHidden = false;
   }
   localStorage.setItem('tourCompleted', '1');
+  switchTab('record');
 }
 
 // ============== Touch Swipe ==============
