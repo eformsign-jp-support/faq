@@ -3234,10 +3234,10 @@ function renderLifeGoals() {
           <span class="lg-card-title">${escHtml(g.title)}</span>
           ${ddayText ? `<span class="lg-card-dday ${ddayClass}">${ddayText}</span>` : ''}
         </div>
-        <div class="lg-card-progress">
+        ${total > 0 ? `<div class="lg-card-progress">
           <div class="lg-card-progress-bar"><div class="lg-card-progress-fill" style="width:${pct}%;background:${color}"></div></div>
           <span>${t('lg.progress', { done, total })}</span>
-        </div>
+        </div>` : ''}
       </div>`;
     }).join('');
   }
