@@ -7582,12 +7582,12 @@ if ('serviceWorker' in navigator) {
 let tourActive = false;
 const TOUR_STEPS = [
   { id:'welcome', target:null, position:'center' },
-  { id:'plan', target:'.tab[data-tab="plan"]', position:'above', tab:'plan' },
-  { id:'record', target:'#quick-chips', position:'below', tab:'record' },
-  { id:'analyze', target:'.tab[data-tab="analysis"]', position:'above', tab:'analysis' },
-  { id:'goals', target:'.tab[data-tab="goals"]', position:'above', tab:'goals' },
-  { id:'stats', target:'.tab[data-tab="stats"]', position:'above', tab:'stats' },
-  { id:'closeday', target:'#close-day-btn', position:'above', tab:'record' },
+  { id:'plan', target:'.tab[data-tab="plan"]', position:'center', tab:'plan' },
+  { id:'record', target:'#quick-chips', position:'center', tab:'record' },
+  { id:'analyze', target:'.tab[data-tab="analysis"]', position:'center', tab:'analysis' },
+  { id:'goals', target:'.tab[data-tab="goals"]', position:'center', tab:'goals' },
+  { id:'stats', target:'.tab[data-tab="stats"]', position:'center', tab:'stats' },
+  { id:'closeday', target:'#close-day-btn', position:'center', tab:'record' },
   { id:'done', target:null, position:'center' }
 ];
 let tourStepIndex = 0;
