@@ -2214,6 +2214,22 @@ body {
       <button class="btn btn-primary btn-block" onclick="showAddLifeGoalModal()" style="margin-top:12px;">+ <span data-i18n="lg.add">새 목표 추가</span></button>
     </div>
     <div id="lg-detail-view" style="display:none;"></div>
+
+    <div class="card" id="books-card" style="margin-top:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="font-size:15px;margin:0">📚 <span data-i18n="books.title">독서 기록</span></h3>
+        <button class="icon-btn" onclick="showAddBookModal()" style="font-size:18px">+</button>
+      </div>
+      <div id="books-mode-toggle" style="display:flex;gap:4px;margin-bottom:12px">
+        <button class="stats-mode-btn active" onclick="setBookMode('year')" data-bmode="year" data-i18n="books.yearly">연간</button>
+        <button class="stats-mode-btn" onclick="setBookMode('month')" data-bmode="month" data-i18n="books.monthly">월간</button>
+      </div>
+      <div id="books-reading-list"></div>
+      <div id="books-completed-section"></div>
+      <div id="books-nav" style="text-align:center;margin-top:12px"></div>
+      <div id="books-summary" style="text-align:center;margin-top:8px;font-size:13px;color:var(--text-sub)"></div>
+      <div class="stats-chart-container" style="margin-top:12px"><canvas id="books-chart"></canvas></div>
+    </div>
   </div>
 
   <!-- Section: Stats Dashboard -->
@@ -2288,17 +2304,6 @@ body {
       <h3 style="font-size:15px;margin-bottom:12px">📋 <span data-i18n="stats.planTitle">계획 실행 통계</span></h3>
       <div id="stats-plan-content"></div>
       <div class="stats-chart-container" style="margin-top:12px"><canvas id="stats-plan-chart"></canvas></div>
-    </div>
-
-    <div class="card" id="stats-books-card" style="margin-top:16px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h3 style="font-size:15px;margin:0">📚 <span data-i18n="books.title">독서 기록</span></h3>
-        <button class="icon-btn" onclick="showAddBookModal()" style="font-size:18px">+</button>
-      </div>
-      <div id="books-reading-list"></div>
-      <div id="books-completed-section"></div>
-      <div id="books-year-nav" style="text-align:center;margin-top:12px"></div>
-      <div id="books-year-summary" style="text-align:center;margin-top:8px;font-size:13px;color:var(--text-sub)"></div>
     </div>
 
     <button class="btn btn-coral btn-block" onclick="exportStatsPDF()" style="margin-top:16px" id="stats-export-pdf-btn">
@@ -2549,7 +2554,10 @@ const TRANSLATIONS = {
     'books.yearSummary': '올해 총 {n}권 완독 · 평균 {avg}일/권',
     'books.yearSummaryReading': '{r}권 읽는 중',
     'books.noBooks': '읽고 있는 책을 추가해보세요',
-    'books.readingTime': '총 독서 시간', 'books.notReading': '미완독',
+    'books.notReading': '미완독',
+    'books.yearly': '연간', 'books.monthly': '월간',
+    'books.monthUnit': '월', 'books.booksUnit': '권',
+    'books.avgDays': '평균 {avg}일/권',
   },
   ja: {
     'app.subtitle': '一日の分析',
@@ -2724,7 +2732,10 @@ const TRANSLATIONS = {
     'books.yearSummary': '今年の読了 {n}冊 · 平均 {avg}日/冊',
     'books.yearSummaryReading': '{r}冊 読書中',
     'books.noBooks': '読んでいる本を追加しましょう',
-    'books.readingTime': '読書時間合計', 'books.notReading': '未読了',
+    'books.notReading': '未読了',
+    'books.yearly': '年間', 'books.monthly': '月間',
+    'books.monthUnit': '月', 'books.booksUnit': '冊',
+    'books.avgDays': '平均 {avg}日/冊',
   },
   en: {
     'app.subtitle': 'Daily Analysis',
@@ -2899,7 +2910,10 @@ const TRANSLATIONS = {
     'books.yearSummary': '{n} books completed · avg {avg} days/book',
     'books.yearSummaryReading': '{r} reading',
     'books.noBooks': 'Add a book you\'re reading',
-    'books.readingTime': 'Total reading time', 'books.notReading': 'Not finished',
+    'books.notReading': 'Not finished',
+    'books.yearly': 'Yearly', 'books.monthly': 'Monthly',
+    'books.monthUnit': '', 'books.booksUnit': ' books',
+    'books.avgDays': 'avg {avg} days/book',
   }
 };
 
@@ -3947,7 +3961,6 @@ function renderStats() {
     if (pdfBtn) pdfBtn.style.display = 'none';
     if (shareBtn) shareBtn.style.display = 'none';
     renderStatsLifeGoals();
-    renderBooks();
     return;
   }
   chartsArea.style.display = '';
@@ -3963,7 +3976,6 @@ function renderStats() {
   renderStatsActivityTrend(days, dates);
   renderStatsLifeGoals();
   renderStatsPlan(dates);
-  renderBooks();
 }
 
 function renderStatsSummaryCards(days) {
@@ -4347,23 +4359,45 @@ function renderStatsPlan(dates) {
 
 // ============== Books (Reading Log) ==============
 let booksYear = new Date().getFullYear();
+let booksMonth = new Date().getMonth() + 1; // 1-12
+let booksMode = 'year'; // 'year' or 'month'
+let booksChart = null;
+
+function setBookMode(mode) {
+  booksMode = mode;
+  document.querySelectorAll('#books-mode-toggle .stats-mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.bmode === mode);
+  });
+  renderBooks();
+}
 
 function renderBooks() {
   if (!data.books) data.books = [];
   const readingList = document.getElementById('books-reading-list');
   const completedSection = document.getElementById('books-completed-section');
-  const yearNav = document.getElementById('books-year-nav');
-  const yearSummary = document.getElementById('books-year-summary');
+  const nav = document.getElementById('books-nav');
+  const summary = document.getElementById('books-summary');
   if (!readingList) return;
 
   // Currently reading (no endDate)
   const reading = data.books.filter(b => !b.endDate).sort((a, b) => b.startDate.localeCompare(a.startDate));
-  // Completed this year
-  const completed = data.books.filter(b => b.endDate && b.endDate.startsWith(String(booksYear)))
-    .sort((a, b) => b.endDate.localeCompare(a.endDate));
+
+  // Filter completed based on mode
+  let completed;
+  let periodLabel;
+  if (booksMode === 'month') {
+    const prefix = `${booksYear}-${String(booksMonth).padStart(2,'0')}`;
+    completed = data.books.filter(b => b.endDate && b.endDate.startsWith(prefix))
+      .sort((a, b) => b.endDate.localeCompare(a.endDate));
+    periodLabel = `${booksYear}.${String(booksMonth).padStart(2,'0')}`;
+  } else {
+    completed = data.books.filter(b => b.endDate && b.endDate.startsWith(String(booksYear)))
+      .sort((a, b) => b.endDate.localeCompare(a.endDate));
+    periodLabel = String(booksYear);
+  }
 
   // Reading list
-  if (reading.length === 0 && completed.length === 0) {
+  if (reading.length === 0 && completed.length === 0 && data.books.length === 0) {
     readingList.innerHTML = `<div style="text-align:center;color:var(--text-light);padding:16px;font-size:13px">${t('books.noBooks')}</div>`;
   } else if (reading.length === 0) {
     readingList.innerHTML = '';
@@ -4387,7 +4421,7 @@ function renderBooks() {
 
   // Completed list
   if (completed.length > 0) {
-    completedSection.innerHTML = `<div class="book-section-title">📗 ${t('books.completed')} ${booksYear} (${completed.length})</div>` +
+    completedSection.innerHTML = `<div class="book-section-title">📗 ${t('books.completed')} (${completed.length})</div>` +
       completed.map(b => {
         const start = new Date(b.startDate);
         const end = new Date(b.endDate);
@@ -4409,84 +4443,146 @@ function renderBooks() {
     completedSection.innerHTML = '';
   }
 
-  // Year nav
-  const allYears = [...new Set(data.books.map(b => {
-    const y = b.endDate ? parseInt(b.endDate.slice(0,4)) : new Date().getFullYear();
-    return y;
-  }).concat([new Date().getFullYear()]))].sort();
-  const minYear = Math.min(...allYears);
-  const maxYear = Math.max(...allYears);
-
-  yearNav.innerHTML = `
-    <button class="book-year-btn" onclick="changeBookYear(-1)" ${booksYear <= minYear ? 'disabled style="opacity:0.3"' : ''}>◀</button>
-    <span class="book-year-label">${booksYear}</span>
-    <button class="book-year-btn" onclick="changeBookYear(1)" ${booksYear >= maxYear ? 'disabled style="opacity:0.3"' : ''}>▶</button>
+  // Navigation
+  nav.innerHTML = `
+    <button class="book-year-btn" onclick="navigateBooks(-1)">◀</button>
+    <span class="book-year-label">${periodLabel}</span>
+    <button class="book-year-btn" onclick="navigateBooks(1)">▶</button>
   `;
 
-  // Year summary
-  const yearCompleted = data.books.filter(b => b.endDate && b.endDate.startsWith(String(booksYear)));
-  const yearReading = data.books.filter(b => !b.endDate);
-  if (yearCompleted.length > 0) {
-    const totalDays = yearCompleted.reduce((s, b) => {
-      const d = Math.max(1, Math.ceil((new Date(b.endDate) - new Date(b.startDate)) / 86400000) + 1);
-      return s + d;
-    }, 0);
-    const avgDays = Math.round(totalDays / yearCompleted.length);
-    let summary = t('books.yearSummary').replace('{n}', yearCompleted.length).replace('{avg}', avgDays);
-    if (booksYear === new Date().getFullYear() && yearReading.length > 0) {
-      summary += ' · ' + t('books.yearSummaryReading').replace('{r}', yearReading.length);
-    }
-    // Reading time from activity tracking
-    const readingTime = calcBookReadingTime(booksYear);
-    if (readingTime > 0) {
-      summary += `<br>${t('books.readingTime')}: ${formatMin(readingTime)}`;
-    }
-    yearSummary.innerHTML = summary;
-  } else {
-    const readingTime = calcBookReadingTime(booksYear);
-    let summary = '';
-    if (booksYear === new Date().getFullYear() && yearReading.length > 0) {
-      summary = t('books.yearSummaryReading').replace('{r}', yearReading.length);
-    }
-    if (readingTime > 0) {
-      summary += (summary ? '<br>' : '') + `${t('books.readingTime')}: ${formatMin(readingTime)}`;
-    }
-    yearSummary.innerHTML = summary;
-  }
-}
-
-function calcBookReadingTime(year) {
-  // Sum up time spent on 독서/読書/Reading activities for given year
-  let totalMin = 0;
-  const yearStr = String(year);
-  for (const [dateStr, dd] of Object.entries(data.dates)) {
-    if (!dateStr.startsWith(yearStr) || !dd.entries || dd.entries.length === 0) continue;
-    for (let i = 0; i < dd.entries.length; i++) {
-      const entry = dd.entries[i];
-      const name = entry.activity || '';
-      const isReading = name === '독서' || name === '読書' || name.toLowerCase() === 'reading' ||
-        name.includes('독서') || name.includes('読書');
-      if (!isReading) continue;
-      const [h, m] = entry.time.split(':').map(Number);
-      const start = h * 60 + m;
-      let end;
-      if (i < dd.entries.length - 1) {
-        const [nh, nm] = dd.entries[i + 1].time.split(':').map(Number);
-        end = nh * 60 + nm;
-      } else if (dd.closedAt) {
-        const [ch, cm] = dd.closedAt.split(':').map(Number);
-        end = ch * 60 + cm;
-      } else {
-        end = start + 30;
+  // Summary
+  if (booksMode === 'year') {
+    const yearCompleted = data.books.filter(b => b.endDate && b.endDate.startsWith(String(booksYear)));
+    if (yearCompleted.length > 0) {
+      const totalDays = yearCompleted.reduce((s, b) => {
+        return s + Math.max(1, Math.ceil((new Date(b.endDate) - new Date(b.startDate)) / 86400000) + 1);
+      }, 0);
+      const avgDays = Math.round(totalDays / yearCompleted.length);
+      let text = t('books.yearSummary').replace('{n}', yearCompleted.length).replace('{avg}', avgDays);
+      if (booksYear === new Date().getFullYear() && reading.length > 0) {
+        text += ' · ' + t('books.yearSummaryReading').replace('{r}', reading.length);
       }
-      if (end > start) totalMin += end - start;
+      summary.textContent = text;
+    } else {
+      summary.textContent = reading.length > 0 && booksYear === new Date().getFullYear()
+        ? t('books.yearSummaryReading').replace('{r}', reading.length) : '';
+    }
+  } else {
+    if (completed.length > 0) {
+      const totalDays = completed.reduce((s, b) => {
+        return s + Math.max(1, Math.ceil((new Date(b.endDate) - new Date(b.startDate)) / 86400000) + 1);
+      }, 0);
+      const avgDays = Math.round(totalDays / completed.length);
+      summary.textContent = `${completed.length}${t('books.booksUnit')} · ${t('books.avgDays').replace('{avg}', avgDays)}`;
+    } else {
+      summary.textContent = '';
     }
   }
-  return totalMin;
+
+  // Chart
+  renderBooksChart();
 }
 
-function changeBookYear(delta) {
-  booksYear += delta;
+function renderBooksChart() {
+  const ctx = document.getElementById('books-chart');
+  if (!ctx) return;
+  if (booksChart) booksChart.destroy();
+
+  if (booksMode === 'year') {
+    // Monthly bar chart for the year
+    const labels = [];
+    const counts = [];
+    for (let m = 1; m <= 12; m++) {
+      const prefix = `${booksYear}-${String(m).padStart(2,'0')}`;
+      const count = data.books.filter(b => b.endDate && b.endDate.startsWith(prefix)).length;
+      labels.push(`${m}${t('books.monthUnit')}`);
+      counts.push(count);
+    }
+    const hasData = counts.some(c => c > 0);
+    if (!hasData) {
+      ctx.style.display = 'none';
+      return;
+    }
+    ctx.style.display = '';
+    booksChart = new Chart(ctx.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: t('books.completed'),
+          data: counts,
+          backgroundColor: 'rgba(16,185,129,0.6)',
+          borderColor: '#10b981',
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  } else {
+    // Weekly bar chart for the month
+    const daysInMonth = new Date(booksYear, booksMonth, 0).getDate();
+    const weeks = [];
+    let weekStart = 1;
+    while (weekStart <= daysInMonth) {
+      const weekEnd = Math.min(weekStart + 6, daysInMonth);
+      const prefix = `${booksYear}-${String(booksMonth).padStart(2,'0')}`;
+      const count = data.books.filter(b => {
+        if (!b.endDate || !b.endDate.startsWith(prefix)) return false;
+        const day = parseInt(b.endDate.slice(8, 10));
+        return day >= weekStart && day <= weekEnd;
+      }).length;
+      weeks.push({ label: `${weekStart}-${weekEnd}`, count });
+      weekStart = weekEnd + 1;
+    }
+    const hasData = weeks.some(w => w.count > 0);
+    if (!hasData) {
+      ctx.style.display = 'none';
+      return;
+    }
+    ctx.style.display = '';
+    booksChart = new Chart(ctx.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: weeks.map(w => w.label),
+        datasets: [{
+          label: t('books.completed'),
+          data: weeks.map(w => w.count),
+          backgroundColor: 'rgba(16,185,129,0.6)',
+          borderColor: '#10b981',
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+}
+
+function navigateBooks(delta) {
+  if (booksMode === 'month') {
+    booksMonth += delta;
+    if (booksMonth > 12) { booksMonth = 1; booksYear++; }
+    if (booksMonth < 1) { booksMonth = 12; booksYear--; }
+  } else {
+    booksYear += delta;
+  }
   renderBooks();
 }
 
@@ -4799,7 +4895,7 @@ function switchTab(tab) {
   if (tab === 'record') { renderBig3Mini(); renderGoalCards(); renderRecordPastBanner(); }
   if (tab === 'analysis') renderAnalysis();
   if (tab === 'history') renderHistory();
-  if (tab === 'goals') renderLifeGoals();
+  if (tab === 'goals') { renderLifeGoals(); renderBooks(); }
   if (tab === 'stats') renderStats();
   if (typeof gtag === 'function') gtag('event', 'tab_switch', { tab_name: tab });
 }
