@@ -444,6 +444,41 @@ body {
   background: none; border: none; padding: 0 2px; font-size: 12px; cursor: pointer; opacity: 0.5; vertical-align: middle;
 }
 
+/* Life Goals tab */
+.lg-card {
+  background: var(--card); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; cursor: pointer;
+  border-left: 4px solid var(--mint); transition: transform 0.1s;
+}
+.lg-card:active { transform: scale(0.98); }
+.lg-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.lg-card-icon { font-size: 24px; }
+.lg-card-title { font-size: 15px; font-weight: 700; flex: 1; }
+.lg-card-dday { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.lg-card-dday.safe { background: #10b98120; color: #10b981; }
+.lg-card-dday.warn { background: #f59e0b20; color: #f59e0b; }
+.lg-card-dday.over { background: #ef444420; color: #ef4444; }
+.lg-card-dday.today { background: #6366f120; color: #6366f1; }
+.lg-card-progress { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-sub); }
+.lg-card-progress-bar { flex: 1; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+.lg-card-progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.lg-completed-card { opacity: 0.7; }
+.lg-completed-card .lg-card-header { text-decoration: line-through; }
+.lg-medal { font-size: 20px; }
+.lg-section-title { font-size: 13px; font-weight: 700; color: var(--text-sub); margin: 16px 0 8px; cursor: pointer; }
+.lg-detail-back { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--mint); cursor: pointer; margin-bottom: 12px; font-weight: 600; }
+.lg-detail-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.lg-detail-deadline { font-size: 13px; color: var(--text-sub); margin-bottom: 16px; }
+.lg-task-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--bg); font-size: 14px; }
+.lg-task-item input[type="checkbox"] { accent-color: var(--mint); width: 18px; height: 18px; }
+.lg-task-item.done { text-decoration: line-through; color: var(--text-light); }
+.lg-task-priority { font-size: 10px; color: #f59e0b; margin-left: auto; }
+.lg-task-del { background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 14px; }
+.lg-obstacle-box { background: #fef3c720; border: 1px solid #f59e0b40; border-radius: var(--radius); padding: 10px 12px; font-size: 13px; margin-bottom: 12px; }
+.lg-action-input { width: 100%; padding: 8px 10px; border: 1px solid var(--bg); border-radius: 8px; font-size: 13px; background: var(--card); color: var(--text); box-sizing: border-box; }
+.lg-action-history { font-size: 12px; color: var(--text-sub); }
+.lg-action-history div { padding: 4px 0; border-bottom: 1px solid var(--bg); }
+.lg-action-date { color: var(--mint); font-weight: 600; margin-right: 6px; }
+
 .timeline-duration {
   font-size: 11px;
   color: var(--text-light);
@@ -923,6 +958,10 @@ body {
 .tab.active[data-tab="analysis"] {
   color: #FF7F7F;
   background: rgba(255, 127, 127, 0.15);
+}
+.tab.active[data-tab="goals"] {
+  color: #F59E0B;
+  background: rgba(245, 158, 11, 0.15);
 }
 .tab.active[data-tab="stats"] {
   color: #A78BFA;
@@ -1866,6 +1905,19 @@ body {
     </div>
   </div>
 
+  <!-- Section: Life Goals -->
+  <div id="sec-goals" class="section">
+    <div id="lg-list-view">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="margin:0;" data-i18n="lg.title">나의 목표</h3>
+      </div>
+      <div id="lg-active-goals"></div>
+      <div id="lg-completed-section"></div>
+      <button class="btn btn-primary btn-block" onclick="showAddLifeGoalModal()" style="margin-top:12px;">+ <span data-i18n="lg.add">새 목표 추가</span></button>
+    </div>
+    <div id="lg-detail-view" style="display:none;"></div>
+  </div>
+
   <!-- Section: Stats Dashboard -->
   <div id="sec-stats" class="section">
     <div class="card">
@@ -1949,6 +2001,9 @@ body {
     </button>
     <button class="tab" data-tab="analysis" onclick="switchTab('analysis')">
       <span class="tab-icon">📊</span><span data-i18n="tab.analysis">분석</span>
+    </button>
+    <button class="tab" data-tab="goals" onclick="switchTab('goals')">
+      <span class="tab-icon">🎯</span><span data-i18n="tab.goals">목표</span>
     </button>
     <button class="tab" data-tab="stats" onclick="switchTab('stats')">
       <span class="tab-icon">📈</span><span data-i18n="tab.stats">통계</span>
@@ -2073,7 +2128,7 @@ const TRANSLATIONS = {
     'month.1': '1월', 'month.2': '2월', 'month.3': '3월', 'month.4': '4월',
     'month.5': '5월', 'month.6': '6월', 'month.7': '7월', 'month.8': '8월',
     'month.9': '9월', 'month.10': '10월', 'month.11': '11월', 'month.12': '12월',
-    'tab.record': '기록', 'tab.classify': '분류', 'tab.analysis': '분석', 'tab.stats': '통계',
+    'tab.record': '기록', 'tab.classify': '분류', 'tab.analysis': '분석', 'tab.goals': '목표', 'tab.stats': '통계',
     'pwa.install': 'MyRoutine 설치', 'pwa.installDesc': '홈 화면에 추가하여 앱처럼 사용하세요', 'pwa.installBtn': '설치',
     'pwa.iosDesc': 'Safari 하단의 공유 버튼(□↑)을 누른 후 "홈 화면에 추가"를 선택하세요',
     'memo.title': '오늘의 메모', 'memo.placeholder': '오늘 하루를 돌아보며 간단한 메모를 남겨보세요...',
@@ -2107,6 +2162,17 @@ const TRANSLATIONS = {
     'goals.reminder': '오늘 아직 {activity} 기록이 없어요',
     'goals.delete': '이 목표를 삭제할까요?', 'goals.saved': '목표가 저장되었습니다',
     'goals.deleted': '목표가 삭제되었습니다', 'goals.active': '활성', 'goals.inactive': '비활성',
+    'lg.title': '나의 목표', 'lg.add': '새 목표 추가', 'lg.empty': '브라이언 트레이시의 목표 설정법으로\n인생 목표를 관리해보세요!',
+    'lg.goalTitle': '목표 제목', 'lg.description': '구체적인 설명', 'lg.deadline': '기한',
+    'lg.tasks': '할 일 목록', 'lg.addTask': '할 일 추가', 'lg.obstacles': '장애물 / 제약 요인',
+    'lg.obstaclesPlaceholder': '목표 달성을 가로막는 요인을 적어보세요',
+    'lg.dailyAction': '오늘의 행동', 'lg.dailyActionPlaceholder': '오늘 이 목표를 위해 한 일은?',
+    'lg.actionHistory': '행동 기록', 'lg.complete': '목표 달성 완료',
+    'lg.completed': '완료한 목표', 'lg.completedAt': '달성일',
+    'lg.deleteConfirm': '이 목표를 삭제할까요?', 'lg.saved': '목표가 저장되었습니다',
+    'lg.dDay': 'D-{n}', 'lg.dDayOver': 'D+{n}', 'lg.dDayToday': 'D-Day',
+    'lg.progress': '{done}/{total} 완료', 'lg.back': '목록으로',
+    'lg.editGoal': '목표 수정', 'lg.delete': '삭제',
     'auth.login': '로그인', 'auth.logout': '로그아웃',
     'auth.loginGoogle': 'Google로 로그인',
     'auth.profile': '내 계정', 'auth.lastSync': '마지막 동기화',
@@ -2206,7 +2272,7 @@ const TRANSLATIONS = {
     'month.1': '1月', 'month.2': '2月', 'month.3': '3月', 'month.4': '4月',
     'month.5': '5月', 'month.6': '6月', 'month.7': '7月', 'month.8': '8月',
     'month.9': '9月', 'month.10': '10月', 'month.11': '11月', 'month.12': '12月',
-    'tab.record': '記録', 'tab.classify': '分類', 'tab.analysis': '分析', 'tab.stats': '統計',
+    'tab.record': '記録', 'tab.classify': '分類', 'tab.analysis': '分析', 'tab.goals': '目標', 'tab.stats': '統計',
     'pwa.install': 'MyRoutine インストール', 'pwa.installDesc': 'ホーム画面に追加してアプリのように使いましょう', 'pwa.installBtn': 'インストール',
     'pwa.iosDesc': 'Safari下部の共有ボタン(□↑)をタップし「ホーム画面に追加」を選択してください',
     'memo.title': '今日のメモ', 'memo.placeholder': '今日一日を振り返りながら簡単なメモを残してみましょう...',
@@ -2240,6 +2306,17 @@ const TRANSLATIONS = {
     'goals.reminder': '今日まだ{activity}の記録がありません',
     'goals.delete': 'この目標を削除しますか？', 'goals.saved': '目標が保存されました',
     'goals.deleted': '目標が削除されました', 'goals.active': '有効', 'goals.inactive': '無効',
+    'lg.title': '目標管理', 'lg.add': '新しい目標を追加', 'lg.empty': 'ブライアン・トレーシーの目標設定法で\n人生の目標を管理しましょう！',
+    'lg.goalTitle': '目標タイトル', 'lg.description': '具体的な説明', 'lg.deadline': '期限',
+    'lg.tasks': 'やることリスト', 'lg.addTask': 'やることを追加', 'lg.obstacles': '障害物 / 制約要因',
+    'lg.obstaclesPlaceholder': '目標達成を妨げる要因を書いてみましょう',
+    'lg.dailyAction': '今日の行動', 'lg.dailyActionPlaceholder': '今日この目標のために何をしましたか？',
+    'lg.actionHistory': '行動記録', 'lg.complete': '目標達成完了',
+    'lg.completed': '完了した目標', 'lg.completedAt': '達成日',
+    'lg.deleteConfirm': 'この目標を削除しますか？', 'lg.saved': '目標が保存されました',
+    'lg.dDay': 'D-{n}', 'lg.dDayOver': 'D+{n}', 'lg.dDayToday': 'D-Day',
+    'lg.progress': '{done}/{total} 完了', 'lg.back': 'リストへ',
+    'lg.editGoal': '目標修正', 'lg.delete': '削除',
     'auth.login': 'ログイン', 'auth.logout': 'ログアウト',
     'auth.loginGoogle': 'Googleでログイン',
     'auth.profile': 'マイアカウント', 'auth.lastSync': '最終同期',
@@ -2339,7 +2416,7 @@ const TRANSLATIONS = {
     'month.1': 'Jan', 'month.2': 'Feb', 'month.3': 'Mar', 'month.4': 'Apr',
     'month.5': 'May', 'month.6': 'Jun', 'month.7': 'Jul', 'month.8': 'Aug',
     'month.9': 'Sep', 'month.10': 'Oct', 'month.11': 'Nov', 'month.12': 'Dec',
-    'tab.record': 'Record', 'tab.classify': 'Classify', 'tab.analysis': 'Analysis', 'tab.stats': 'Stats',
+    'tab.record': 'Record', 'tab.classify': 'Classify', 'tab.analysis': 'Analysis', 'tab.goals': 'Goals', 'tab.stats': 'Stats',
     'pwa.install': 'Install MyRoutine', 'pwa.installDesc': 'Add to home screen and use like an app', 'pwa.installBtn': 'Install',
     'pwa.iosDesc': 'Tap the share button (□↑) at the bottom of Safari, then select "Add to Home Screen"',
     'memo.title': "Today's Memo", 'memo.placeholder': 'Reflect on your day and leave a quick note...',
@@ -2373,6 +2450,17 @@ const TRANSLATIONS = {
     'goals.reminder': 'No {activity} recorded today yet',
     'goals.delete': 'Delete this goal?', 'goals.saved': 'Goal saved',
     'goals.deleted': 'Goal deleted', 'goals.active': 'Active', 'goals.inactive': 'Inactive',
+    'lg.title': 'My Goals', 'lg.add': 'Add New Goal', 'lg.empty': 'Manage your life goals with\nBrian Tracy\'s goal-setting formula!',
+    'lg.goalTitle': 'Goal Title', 'lg.description': 'Specific Description', 'lg.deadline': 'Deadline',
+    'lg.tasks': 'Task List', 'lg.addTask': 'Add Task', 'lg.obstacles': 'Obstacles / Limiting Factors',
+    'lg.obstaclesPlaceholder': 'What is blocking you from achieving this goal?',
+    'lg.dailyAction': "Today's Action", 'lg.dailyActionPlaceholder': 'What did you do for this goal today?',
+    'lg.actionHistory': 'Action History', 'lg.complete': 'Mark as Completed',
+    'lg.completed': 'Completed Goals', 'lg.completedAt': 'Completed on',
+    'lg.deleteConfirm': 'Delete this goal?', 'lg.saved': 'Goal saved',
+    'lg.dDay': 'D-{n}', 'lg.dDayOver': 'D+{n}', 'lg.dDayToday': 'D-Day',
+    'lg.progress': '{done}/{total} done', 'lg.back': 'Back',
+    'lg.editGoal': 'Edit Goal', 'lg.delete': 'Delete',
     'auth.login': 'Sign in', 'auth.logout': 'Sign out',
     'auth.loginGoogle': 'Sign in with Google',
     'auth.profile': 'My Account', 'auth.lastSync': 'Last synced',
@@ -2524,7 +2612,7 @@ function getPresetColor(activity) {
   }
   return null;
 }
-let data = { dates: {}, activityPresets: {}, customPresets: null, settings: {}, goals: [] };
+let data = { dates: {}, activityPresets: {}, customPresets: null, settings: {}, goals: [], lifeGoals: [] };
 let currentDate = getTodayStr();
 let donutChart = null;
 let calendarMonth = null;
@@ -3078,6 +3166,334 @@ function formatStatsPeriodLabel() {
   }
 }
 
+// ============== Life Goals ==============
+function initLifeGoals() {
+  if (!data.lifeGoals) data.lifeGoals = [];
+}
+
+function calcDDay(deadline) {
+  if (!deadline) return null;
+  const today = new Date(getTodayStr());
+  const dl = new Date(deadline);
+  return Math.ceil((dl - today) / (1000 * 60 * 60 * 24));
+}
+
+function getDDayText(dday) {
+  if (dday === null) return '';
+  if (dday === 0) return t('lg.dDayToday');
+  if (dday > 0) return t('lg.dDay', { n: dday });
+  return t('lg.dDayOver', { n: Math.abs(dday) });
+}
+
+function getDDayClass(dday) {
+  if (dday === null) return '';
+  if (dday === 0) return 'today';
+  if (dday < 0) return 'over';
+  if (dday <= 7) return 'warn';
+  return 'safe';
+}
+
+function getGoalMedal(goal) {
+  if (goal.status !== 'completed') return '';
+  if (!goal.deadline) return '🏅';
+  const dl = new Date(goal.deadline);
+  const completed = new Date(goal.completedAt);
+  const diff = Math.ceil((completed - dl) / (1000 * 60 * 60 * 24));
+  if (diff <= 0) return '🥇';
+  if (diff <= 7) return '🥈';
+  if (diff <= 30) return '🥉';
+  return '🏅';
+}
+
+function renderLifeGoals() {
+  initLifeGoals();
+  const listView = document.getElementById('lg-list-view');
+  const detailView = document.getElementById('lg-detail-view');
+  listView.style.display = '';
+  detailView.style.display = 'none';
+
+  const active = data.lifeGoals.filter(g => g.status === 'active');
+  const completed = data.lifeGoals.filter(g => g.status === 'completed');
+
+  const activeContainer = document.getElementById('lg-active-goals');
+  if (active.length === 0) {
+    activeContainer.innerHTML = `<div class="empty-state"><div class="emoji">🎯</div><p style="white-space:pre-line">${t('lg.empty')}</p></div>`;
+  } else {
+    activeContainer.innerHTML = active.map(g => {
+      const dday = calcDDay(g.deadline);
+      const ddayText = getDDayText(dday);
+      const ddayClass = getDDayClass(dday);
+      const tasks = g.tasks || [];
+      const done = tasks.filter(t => t.done).length;
+      const total = tasks.length;
+      const pct = total > 0 ? Math.round(done / total * 100) : 0;
+      const color = g.color || 'var(--mint)';
+      return `<div class="lg-card" style="border-left-color:${color}" onclick="showLifeGoalDetail('${g.id}')">
+        <div class="lg-card-header">
+          <span class="lg-card-icon">${g.icon || '🎯'}</span>
+          <span class="lg-card-title">${escHtml(g.title)}</span>
+          ${ddayText ? `<span class="lg-card-dday ${ddayClass}">${ddayText}</span>` : ''}
+        </div>
+        <div class="lg-card-progress">
+          <div class="lg-card-progress-bar"><div class="lg-card-progress-fill" style="width:${pct}%;background:${color}"></div></div>
+          <span>${t('lg.progress', { done, total })}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  const completedSection = document.getElementById('lg-completed-section');
+  if (completed.length === 0) {
+    completedSection.innerHTML = '';
+  } else {
+    completedSection.innerHTML = `
+      <div class="lg-section-title" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'">
+        ${t('lg.completed')} (${completed.length}) ▾
+      </div>
+      <div>
+        ${completed.map(g => {
+          const medal = getGoalMedal(g);
+          return `<div class="lg-card lg-completed-card" style="border-left-color:${g.color || 'var(--text-light)'}" onclick="showLifeGoalDetail('${g.id}')">
+            <div class="lg-card-header">
+              <span class="lg-medal">${medal}</span>
+              <span class="lg-card-title">${escHtml(g.title)}</span>
+              <span style="font-size:11px;color:var(--text-light)">${g.completedAt || ''}</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+  }
+}
+
+function showLifeGoalDetail(goalId) {
+  initLifeGoals();
+  const goal = data.lifeGoals.find(g => g.id === goalId);
+  if (!goal) return;
+
+  document.getElementById('lg-list-view').style.display = 'none';
+  const detailView = document.getElementById('lg-detail-view');
+  detailView.style.display = '';
+
+  const dday = calcDDay(goal.deadline);
+  const ddayText = getDDayText(dday);
+  const ddayClass = getDDayClass(dday);
+  const tasks = goal.tasks || [];
+  const isCompleted = goal.status === 'completed';
+  const medal = getGoalMedal(goal);
+  const today = getTodayStr();
+  const todayAction = (goal.dailyActions && goal.dailyActions[today]) || '';
+
+  // Sort action history descending
+  const actionDates = goal.dailyActions ? Object.keys(goal.dailyActions).sort().reverse() : [];
+
+  detailView.innerHTML = `
+    <div class="lg-detail-back" onclick="renderLifeGoals()">← ${t('lg.back')}</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <span style="font-size:28px">${goal.icon || '🎯'}</span>
+      ${isCompleted ? `<span class="lg-medal">${medal}</span>` : ''}
+    </div>
+    <div class="lg-detail-title">${escHtml(goal.title)}</div>
+    ${goal.description ? `<div style="font-size:13px;color:var(--text-sub);margin-bottom:8px;">${escHtml(goal.description)}</div>` : ''}
+    <div class="lg-detail-deadline">
+      ${goal.deadline ? `📅 ${goal.deadline} ${ddayText ? `<span class="lg-card-dday ${ddayClass}" style="margin-left:6px">${ddayText}</span>` : ''}` : ''}
+      ${isCompleted ? `<br>${t('lg.completedAt')}: ${goal.completedAt}` : ''}
+    </div>
+
+    ${!isCompleted ? `
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button class="btn btn-outline" style="flex:1;font-size:12px;" onclick="showEditLifeGoalModal('${goal.id}')">✏️ ${t('lg.editGoal')}</button>
+      <button class="btn btn-outline" style="flex:1;font-size:12px;color:#ef4444;border-color:#ef4444;" onclick="deleteLifeGoal('${goal.id}')">🗑️ ${t('lg.delete')}</button>
+    </div>` : ''}
+
+    <div class="card" style="margin-bottom:10px;">
+      <h4 style="font-size:14px;margin-bottom:8px;">📋 ${t('lg.tasks')}</h4>
+      <div id="lg-task-list">
+        ${tasks.map((tk, i) => `<div class="lg-task-item ${tk.done ? 'done' : ''}">
+          <input type="checkbox" ${tk.done ? 'checked' : ''} onchange="toggleLifeGoalTask('${goal.id}',${i})" ${isCompleted ? 'disabled' : ''}>
+          <span style="flex:1">${escHtml(tk.text)}</span>
+          ${tk.priority === 1 ? '<span class="lg-task-priority">★</span>' : ''}
+          ${!isCompleted ? `<button class="lg-task-del" onclick="deleteLifeGoalTask('${goal.id}',${i})">✕</button>` : ''}
+        </div>`).join('')}
+      </div>
+      ${!isCompleted ? `<div style="display:flex;gap:6px;margin-top:8px;">
+        <input type="text" id="lg-new-task" placeholder="${t('lg.addTask')}" class="lg-action-input" style="flex:1" onkeydown="if(event.key==='Enter')addLifeGoalTask('${goal.id}')">
+        <button class="btn btn-primary" style="padding:6px 12px;font-size:12px;" onclick="addLifeGoalTask('${goal.id}')">+</button>
+      </div>` : ''}
+    </div>
+
+    ${goal.obstacles ? `<div class="card" style="margin-bottom:10px;">
+      <h4 style="font-size:14px;margin-bottom:8px;">⚠️ ${t('lg.obstacles')}</h4>
+      <div class="lg-obstacle-box">${escHtml(goal.obstacles)}</div>
+    </div>` : ''}
+
+    ${!isCompleted ? `<div class="card" style="margin-bottom:10px;">
+      <h4 style="font-size:14px;margin-bottom:8px;">🚀 ${t('lg.dailyAction')}</h4>
+      <input type="text" class="lg-action-input" value="${escAttr(todayAction)}" placeholder="${t('lg.dailyActionPlaceholder')}"
+        onchange="saveLifeGoalDailyAction('${goal.id}', this.value)">
+    </div>` : ''}
+
+    ${actionDates.length > 0 ? `<div class="card" style="margin-bottom:10px;">
+      <h4 style="font-size:14px;margin-bottom:8px;">📅 ${t('lg.actionHistory')}</h4>
+      <div class="lg-action-history">
+        ${actionDates.slice(0, 14).map(d => `<div><span class="lg-action-date">${d}</span>${escHtml(goal.dailyActions[d])}</div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    ${!isCompleted ? `<button class="btn btn-primary btn-block" style="margin-top:12px;" onclick="completeLifeGoal('${goal.id}')">🏅 ${t('lg.complete')}</button>` : ''}
+  `;
+}
+
+function showAddLifeGoalModal(editId) {
+  initLifeGoals();
+  const goal = editId ? data.lifeGoals.find(g => g.id === editId) : null;
+  const title = goal ? goal.title : '';
+  const desc = goal ? (goal.description || '') : '';
+  const deadline = goal ? (goal.deadline || '') : '';
+  const obstacles = goal ? (goal.obstacles || '') : '';
+  const selIcon = goal ? (goal.icon || '🎯') : '🎯';
+  const selColor = goal ? (goal.color || null) : null;
+
+  const icons = ['🎯','🚀','💼','📚','💪','🏠','💰','🎨','✈️','🎓','❤️','🌱','🏆','⭐','🔥','💎'];
+  const colors = ['#7ECEC1','#6366F1','#F59E0B','#EF4444','#10B981','#EC4899','#8B5CF6','#F97316'];
+
+  showModal(`
+    <h3>${goal ? t('lg.editGoal') : t('lg.add')}</h3>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${t('lg.goalTitle')}</div>
+      <input type="text" id="lg-modal-title" value="${escAttr(title)}" class="lg-action-input" autofocus>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${t('lg.description')}</div>
+      <textarea id="lg-modal-desc" class="lg-action-input" rows="2" style="resize:vertical">${escHtml(desc)}</textarea>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${t('lg.deadline')}</div>
+      <input type="date" id="lg-modal-deadline" value="${deadline}" class="lg-action-input">
+    </div>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${t('lg.obstacles')}</div>
+      <textarea id="lg-modal-obstacles" class="lg-action-input" rows="2" placeholder="${t('lg.obstaclesPlaceholder')}" style="resize:vertical">${escHtml(obstacles)}</textarea>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">아이콘</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;" id="lg-icon-grid">
+        ${icons.map(ic => `<button style="font-size:20px;padding:4px 6px;border:2px solid ${ic === selIcon ? 'var(--mint)' : 'transparent'};border-radius:8px;background:none;cursor:pointer" onclick="document.querySelectorAll('#lg-icon-grid button').forEach(b=>b.style.borderColor='transparent');this.style.borderColor='var(--mint)';this.dataset.sel='1'" data-icon="${ic}" ${ic === selIcon ? 'data-sel="1"' : ''}>${ic}</button>`).join('')}
+      </div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">색상</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;" id="lg-color-grid">
+        ${colors.map(c => `<button style="width:28px;height:28px;border-radius:50%;background:${c};border:3px solid ${c === selColor ? '#fff' : 'transparent'};outline:${c === selColor ? '2px solid var(--mint)' : 'none'};cursor:pointer" onclick="document.querySelectorAll('#lg-color-grid button').forEach(b=>{b.style.borderColor='transparent';b.style.outline='none'});this.style.borderColor='#fff';this.style.outline='2px solid var(--mint)';this.dataset.sel='1'" data-color="${c}" ${c === selColor ? 'data-sel="1"' : ''}></button>`).join('')}
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">${t('modal.cancel')}</button>
+      <button class="btn btn-primary" onclick="saveLifeGoal('${editId || ''}')">${t('modal.confirm')}</button>
+    </div>
+  `);
+}
+
+function showEditLifeGoalModal(goalId) {
+  showAddLifeGoalModal(goalId);
+}
+
+function saveLifeGoal(editId) {
+  initLifeGoals();
+  const title = document.getElementById('lg-modal-title').value.trim();
+  if (!title) { showToast(t('lg.goalTitle')); return; }
+
+  const desc = document.getElementById('lg-modal-desc').value.trim();
+  const deadline = document.getElementById('lg-modal-deadline').value;
+  const obstacles = document.getElementById('lg-modal-obstacles').value.trim();
+
+  const iconBtn = document.querySelector('#lg-icon-grid button[data-sel="1"]');
+  const icon = iconBtn ? iconBtn.dataset.icon : '🎯';
+  const colorBtn = document.querySelector('#lg-color-grid button[data-sel="1"]');
+  const color = colorBtn ? colorBtn.dataset.color : '#7ECEC1';
+
+  if (editId) {
+    const goal = data.lifeGoals.find(g => g.id === editId);
+    if (goal) {
+      goal.title = title;
+      goal.description = desc;
+      goal.deadline = deadline;
+      goal.obstacles = obstacles;
+      goal.icon = icon;
+      goal.color = color;
+    }
+  } else {
+    data.lifeGoals.push({
+      id: 'lg_' + Date.now(),
+      title, description: desc, deadline, obstacles,
+      tasks: [], dailyActions: {},
+      status: 'active', completedAt: null,
+      createdAt: getTodayStr(), icon, color
+    });
+  }
+  saveData();
+  closeModal();
+  renderLifeGoals();
+  showToast(t('lg.saved'));
+}
+
+function deleteLifeGoal(goalId) {
+  showConfirm(t('lg.deleteConfirm'), () => {
+    data.lifeGoals = data.lifeGoals.filter(g => g.id !== goalId);
+    saveData();
+    renderLifeGoals();
+  });
+}
+
+function completeLifeGoal(goalId) {
+  const goal = data.lifeGoals.find(g => g.id === goalId);
+  if (!goal) return;
+  goal.status = 'completed';
+  goal.completedAt = getTodayStr();
+  saveData();
+  renderLifeGoals();
+}
+
+function toggleLifeGoalTask(goalId, taskIdx) {
+  const goal = data.lifeGoals.find(g => g.id === goalId);
+  if (!goal || !goal.tasks[taskIdx]) return;
+  goal.tasks[taskIdx].done = !goal.tasks[taskIdx].done;
+  saveData();
+  showLifeGoalDetail(goalId);
+}
+
+function addLifeGoalTask(goalId) {
+  const input = document.getElementById('lg-new-task');
+  const text = input.value.trim();
+  if (!text) return;
+  const goal = data.lifeGoals.find(g => g.id === goalId);
+  if (!goal) return;
+  if (!goal.tasks) goal.tasks = [];
+  goal.tasks.push({ id: 't_' + Date.now(), text, done: false, priority: 0 });
+  saveData();
+  showLifeGoalDetail(goalId);
+}
+
+function deleteLifeGoalTask(goalId, taskIdx) {
+  const goal = data.lifeGoals.find(g => g.id === goalId);
+  if (!goal) return;
+  goal.tasks.splice(taskIdx, 1);
+  saveData();
+  showLifeGoalDetail(goalId);
+}
+
+function saveLifeGoalDailyAction(goalId, value) {
+  const goal = data.lifeGoals.find(g => g.id === goalId);
+  if (!goal) return;
+  if (!goal.dailyActions) goal.dailyActions = {};
+  const today = getTodayStr();
+  if (value.trim()) {
+    goal.dailyActions[today] = value.trim();
+  } else {
+    delete goal.dailyActions[today];
+  }
+  saveData();
+}
+
 function renderStats() {
   if (!statsPeriod) initStatsPeriod();
   document.getElementById('stats-period-label').textContent = formatStatsPeriodLabel();
@@ -3430,6 +3846,7 @@ function switchTab(tab) {
   if (tab === 'classify') renderClassify();
   if (tab === 'analysis') renderAnalysis();
   if (tab === 'history') renderHistory();
+  if (tab === 'goals') renderLifeGoals();
   if (tab === 'stats') renderStats();
   if (typeof gtag === 'function') gtag('event', 'tab_switch', { tab_name: tab });
 }
@@ -5811,7 +6228,7 @@ function endTour() {
 
 // ============== Touch Swipe ==============
 (function() {
-  const TAB_ORDER = ['record', 'classify', 'analysis', 'stats'];
+  const TAB_ORDER = ['record', 'classify', 'analysis', 'goals', 'stats'];
   let touchStartX = 0, touchStartY = 0;
   document.addEventListener('touchstart', e => {
     touchStartX = e.changedTouches[0].screenX;
