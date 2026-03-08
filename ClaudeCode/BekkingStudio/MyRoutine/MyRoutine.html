@@ -6819,9 +6819,22 @@ async function shareDaily() {
 
 // ============== Excel Export ==============
 function exportExcel() {
+  if (typeof XLSX === 'undefined') {
+    showToast('Excel 라이브러리 로딩 중... 잠시 후 다시 시도해주세요.');
+    // Try to load SheetJS dynamically
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    s.onload = () => showToast('로딩 완료! 다시 버튼을 눌러주세요.');
+    s.onerror = () => showToast('Excel 라이브러리를 불러올 수 없습니다.');
+    document.head.appendChild(s);
+    return;
+  }
+  const btn = document.getElementById('stats-export-excel-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ ' + (currentLang === 'ja' ? 'エクスポート中...' : currentLang === 'en' ? 'Exporting...' : '내보내는 중...'); }
+  try {
   const dates = getStatsPeriodDates();
   const periodLabel = formatStatsPeriodLabel();
-  if (!dates || dates.length === 0) { showToast(t('analysis.noData')); return; }
+  if (!dates || dates.length === 0) { showToast(t('analysis.noData')); if (btn) { btn.disabled = false; btn.innerHTML = '📊 <span data-i18n="stats.exportExcel">' + t('stats.exportExcel') + '</span>'; } return; }
 
   const wb = XLSX.utils.book_new();
 
@@ -7001,6 +7014,12 @@ function exportExcel() {
     setTimeout(() => URL.revokeObjectURL(url), 5000);
   }
   if (typeof gtag === 'function') gtag('event', 'export_excel');
+  } catch (e) {
+    console.error('Excel export error:', e);
+    showToast('엑셀 내보내기 실패: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '📊 <span data-i18n="stats.exportExcel">' + t('stats.exportExcel') + '</span>'; }
+  }
 }
 
 async function shareStats() {
