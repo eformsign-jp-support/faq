@@ -7005,14 +7005,21 @@ function exportExcel() {
   const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
   const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
-  if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], fileName)] })) {
-    navigator.share({ files: [new File([blob], fileName, { type: blob.type })], title: 'MyRoutine' }).catch(() => {});
-  } else {
+  const downloadFile = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = fileName; a.click();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
-  }
+    showToast(currentLang === 'ja' ? 'ダウンロード完了' : currentLang === 'en' ? 'Download complete' : '다운로드 완료');
+  };
+  if (navigator.share && navigator.canShare) {
+    try {
+      const file = new File([blob], fileName, { type: blob.type });
+      if (navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'MyRoutine' }).catch(() => downloadFile());
+      } else { downloadFile(); }
+    } catch(_) { downloadFile(); }
+  } else { downloadFile(); }
   if (typeof gtag === 'function') gtag('event', 'export_excel');
   } catch (e) {
     console.error('Excel export error:', e);
