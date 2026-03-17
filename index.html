@@ -2300,6 +2300,10 @@ body {
             <div style="font-size:10px;color:var(--text-sub)" data-i18n="stats.freeTime">나의 자유시간</div>
             <div id="stats-168-center-val" style="font-size:20px;font-weight:800;color:var(--mint);line-height:1.2">-</div>
           </div>
+          <div id="stats-168-overlay" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-58%);text-align:center;pointer-events:none;background:var(--card);border-radius:8px;padding:4px 8px;z-index:2">
+            <div id="stats-168-overlay-label" style="font-size:11px;color:var(--text-sub);font-weight:600"></div>
+            <div id="stats-168-overlay-val" style="font-size:18px;font-weight:800;line-height:1.2"></div>
+          </div>
         </div>
       </div>
 
@@ -4121,10 +4125,12 @@ function render168Chart(days, dates) {
 
   document.getElementById('stats-168-center-val').textContent = formatMin(freeMin);
 
-  const centerLabel = document.querySelector('#stats-168-center > div:first-child');
-  const centerVal = document.getElementById('stats-168-center-val');
-  const defaultLabel = centerLabel.textContent;
-  const defaultVal = formatMin(freeMin);
+  const overlay = document.getElementById('stats-168-overlay');
+  const overlayLabel = document.getElementById('stats-168-overlay-label');
+  const overlayVal = document.getElementById('stats-168-overlay-val');
+  const colors = ['#6366F1', '#8E9AAF', '#FF7F7F', '#7ECEC1', '#E5E7EB'];
+
+  document.getElementById('stats-168-center-val').textContent = formatMin(freeMin);
 
   stats168Chart = new Chart(ctx, {
     type: 'doughnut',
@@ -4132,7 +4138,7 @@ function render168Chart(days, dates) {
       labels: [t('stats.sleep'), t('stats.fixed'), t('stats.dream'), t('stats.otherFlex'), t('stats.unrecorded')],
       datasets: [{
         data: [totalSleepMin, Math.max(0, totalFixedNoSleep), totalDesiredMin, Math.max(0, otherFlexMin), unrecordedMin],
-        backgroundColor: ['#6366F1', '#8E9AAF', '#FF7F7F', '#7ECEC1', '#E5E7EB'],
+        backgroundColor: colors,
         borderWidth: 2,
         borderColor: 'var(--card)',
         cutout: '68%'
@@ -4147,11 +4153,12 @@ function render168Chart(days, dates) {
           const label = stats168Chart.data.labels[i];
           const val = stats168Chart.data.datasets[0].data[i];
           const pct = Math.round(val / totalWeekMin * 100);
-          centerLabel.textContent = label;
-          centerVal.textContent = formatMin(val) + ' (' + pct + '%)';
+          overlayLabel.textContent = label;
+          overlayVal.textContent = formatMin(val) + ' (' + pct + '%)';
+          overlayVal.style.color = colors[i];
+          overlay.style.display = '';
         } else {
-          centerLabel.textContent = defaultLabel;
-          centerVal.textContent = defaultVal;
+          overlay.style.display = 'none';
         }
       },
       plugins: {
