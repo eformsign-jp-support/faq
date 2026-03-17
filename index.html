@@ -2293,12 +2293,12 @@ body {
 
     <div id="stats-charts-area">
       <div class="card" id="stats-168-card">
-        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.168title">나의 168시간</h3>
-        <div style="position:relative;width:100%;max-width:260px;margin:0 auto">
-          <canvas id="stats-168-chart" style="width:100%!important;max-height:260px"></canvas>
-          <div id="stats-168-center" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);text-align:center;pointer-events:none">
-            <div style="font-size:11px;color:var(--text-sub)" data-i18n="stats.freeTime">나의 자유시간</div>
-            <div id="stats-168-center-val" style="font-size:26px;font-weight:800;color:var(--mint)">-</div>
+        <h3 style="font-size:15px;margin-bottom:12px" id="stats-168-title">나의 168시간</h3>
+        <div style="position:relative;width:100%;max-width:240px;margin:0 auto">
+          <canvas id="stats-168-chart" style="width:100%!important;max-height:240px"></canvas>
+          <div id="stats-168-center" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-58%);text-align:center;pointer-events:none">
+            <div style="font-size:10px;color:var(--text-sub)" data-i18n="stats.freeTime">나의 자유시간</div>
+            <div id="stats-168-center-val" style="font-size:20px;font-weight:800;color:var(--mint);line-height:1.2">-</div>
           </div>
         </div>
       </div>
@@ -4102,6 +4102,14 @@ function render168Chart(days, dates) {
 
   const numDays = dates.length;
   const totalWeekMin = numDays * 24 * 60;
+  const totalHours = numDays * 24;
+
+  // Dynamic title: "나의 168시간" for weekly, "나의 720시간" for monthly, etc.
+  const titleEl = document.getElementById('stats-168-title');
+  const prefix = currentLang === 'ja' ? '私の' : currentLang === 'en' ? 'My ' : '나의 ';
+  const suffix = currentLang === 'ja' ? '時間' : currentLang === 'en' ? ' Hours' : '시간';
+  titleEl.textContent = prefix + totalHours + suffix;
+
   const totalSleepMin = days.reduce((s, d) => s + (d.sleepMin || 0), 0);
   const totalFixedNoSleep = days.reduce((s, d) => s + d.fixedMin - (d.sleepMin || 0), 0);
   const totalDesiredMin = days.reduce((s, d) => s + d.desiredMin, 0);
@@ -4122,14 +4130,14 @@ function render168Chart(days, dates) {
         backgroundColor: ['#6366F1', '#8E9AAF', '#FF7F7F', '#7ECEC1', '#E5E7EB'],
         borderWidth: 2,
         borderColor: 'var(--card)',
-        cutout: '62%'
+        cutout: '68%'
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: true,
       plugins: {
-        legend: { position: 'bottom', labels: { font: { size: 11 }, usePointStyle: true, pointStyleWidth: 10, padding: 10 } },
+        legend: { position: 'bottom', labels: { font: { size: 10 }, usePointStyle: true, pointStyleWidth: 8, padding: 8 } },
         tooltip: { callbacks: { label: ctx => ctx.label + ': ' + formatMin(ctx.raw) + ' (' + Math.round(ctx.raw / totalWeekMin * 100) + '%)' } }
       }
     }
