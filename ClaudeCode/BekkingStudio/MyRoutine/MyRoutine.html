@@ -2239,11 +2239,11 @@ body {
     <div class="card" id="books-card" style="margin-top:16px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <h3 style="margin:0">📚 <span data-i18n="books.title">독서 기록</span></h3>
-        <button class="icon-btn" onclick="showAddBookModal()" style="font-size:18px">+</button>
+        <button class="icon-btn" id="books-add-btn" onclick="showAddBookModal()" style="font-size:18px">+</button>
       </div>
       <div id="books-mode-toggle" style="display:flex;gap:4px;margin-bottom:12px">
-        <button class="stats-mode-btn active" onclick="setBookMode('year')" data-bmode="year" data-i18n="books.yearly">연간</button>
-        <button class="stats-mode-btn" onclick="setBookMode('month')" data-bmode="month" data-i18n="books.monthly">월간</button>
+        <button class="stats-mode-btn active" onclick="setBookMode('month')" data-bmode="month" data-i18n="books.monthly">월간</button>
+        <button class="stats-mode-btn" onclick="setBookMode('year')" data-bmode="year" data-i18n="books.yearly">연간</button>
       </div>
       <div id="books-reading-list"></div>
       <div id="books-completed-section"></div>
@@ -4562,7 +4562,7 @@ function renderStatsPlan(dates) {
 // ============== Books (Reading Log) ==============
 let booksYear = new Date().getFullYear();
 let booksMonth = new Date().getMonth() + 1; // 1-12
-let booksMode = 'year'; // 'year' or 'month'
+let booksMode = 'month'; // 'year' or 'month'
 let booksChart = null;
 
 function setBookMode(mode) {
@@ -4570,6 +4570,8 @@ function setBookMode(mode) {
   document.querySelectorAll('#books-mode-toggle .stats-mode-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.bmode === mode);
   });
+  const addBtn = document.getElementById('books-add-btn');
+  if (addBtn) addBtn.style.display = mode === 'month' ? '' : 'none';
   renderBooks();
 }
 
