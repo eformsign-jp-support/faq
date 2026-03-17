@@ -4138,7 +4138,7 @@ function render168Chart(days, dates) {
       maintainAspectRatio: true,
       plugins: {
         legend: { position: 'bottom', labels: { font: { size: 10 }, usePointStyle: true, pointStyleWidth: 8, padding: 8 } },
-        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + formatMin(ctx.raw) + ' (' + Math.round(ctx.raw / totalWeekMin * 100) + '%)' } }
+        tooltip: { position: 'nearest', callbacks: { label: ctx => ctx.label + ': ' + formatMin(ctx.raw) + ' (' + Math.round(ctx.raw / totalWeekMin * 100) + '%)' } }
       }
     }
   });
@@ -4594,21 +4594,21 @@ function renderBooks() {
     periodLabel = `${booksYear}.${String(booksMonth).padStart(2,'0')}`;
   } else {
     completed = data.books.filter(b => b.endDate && b.endDate.startsWith(String(booksYear)))
-      .sort((a, b) => b.endDate.localeCompare(a.endDate));
+      .sort((a, b) => (b.rating || 0) - (a.rating || 0) || b.endDate.localeCompare(a.endDate));
     periodLabel = String(booksYear);
   }
 
-  // Reading list
+  // Reading list (hide in yearly mode)
   if (reading.length === 0 && completed.length === 0 && data.books.length === 0) {
     readingList.innerHTML = `<div style="text-align:center;color:var(--text-light);padding:16px;font-size:13px">${t('books.noBooks')}</div>`;
-  } else if (reading.length === 0) {
+  } else if (reading.length === 0 || booksMode === 'year') {
     readingList.innerHTML = '';
   } else {
-    const today = new Date();
+    const today = new Date(); today.setHours(0,0,0,0);
     readingList.innerHTML = `<div class="book-section-title">📖 ${t('books.reading')} (${reading.length})</div><div class="book-list-scroll">` +
       reading.map(b => {
-        const start = new Date(b.startDate);
-        const dayCount = Math.max(1, Math.ceil((today - start) / 86400000) + 1);
+        const start = new Date(b.startDate); start.setHours(0,0,0,0);
+        const dayCount = Math.max(1, Math.floor((today - start) / 86400000) + 1);
         const dayStr = t('books.dayCount').replace('{n}', dayCount);
         return `<div class="book-item" onclick="showEditBookModal('${escAttr(b.id)}')">
           <div>
