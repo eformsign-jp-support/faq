@@ -1796,8 +1796,8 @@ body {
 }
 .stats-summary-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
   margin-bottom: 16px;
 }
 .stats-summary-card {
@@ -2269,16 +2269,20 @@ body {
 
     <div class="stats-summary-row" id="stats-summary-row">
       <div class="stats-summary-card">
-        <div class="stats-summary-value" id="stats-total-time">-</div>
-        <div class="stats-summary-label" data-i18n="stats.totalTime">총 시간</div>
+        <div class="stats-summary-value" id="stats-free-time" style="color:var(--mint)">-</div>
+        <div class="stats-summary-label" data-i18n="stats.freeTime">나의 자유시간</div>
       </div>
       <div class="stats-summary-card">
-        <div class="stats-summary-value" id="stats-avg-desired">-</div>
-        <div class="stats-summary-label" data-i18n="stats.avgDesired">평균 달성률</div>
+        <div class="stats-summary-value" id="stats-dream-time" style="color:var(--coral)">-</div>
+        <div class="stats-summary-label" data-i18n="stats.dreamTime">꿈 투자 시간</div>
       </div>
       <div class="stats-summary-card">
-        <div class="stats-summary-value" id="stats-avg-flex">-</div>
-        <div class="stats-summary-label" data-i18n="stats.avgFlex">평균 유동 비율</div>
+        <div class="stats-summary-value" id="stats-dream-rate" style="color:#F59E0B">-</div>
+        <div class="stats-summary-label" data-i18n="stats.dreamRate">꿈 투자율</div>
+      </div>
+      <div class="stats-summary-card">
+        <div class="stats-summary-value" id="stats-fixed-sleep" style="color:#8E9AAF">-</div>
+        <div class="stats-summary-label" data-i18n="stats.fixedSleep">고정+수면</div>
       </div>
     </div>
 
@@ -2288,8 +2292,19 @@ body {
     </div>
 
     <div id="stats-charts-area">
+      <div class="card" id="stats-168-card">
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.168title">나의 168시간</h3>
+        <div style="position:relative;width:100%;max-width:260px;margin:0 auto">
+          <canvas id="stats-168-chart" style="width:100%!important;max-height:260px"></canvas>
+          <div id="stats-168-center" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);text-align:center;pointer-events:none">
+            <div style="font-size:11px;color:var(--text-sub)" data-i18n="stats.freeTime">나의 자유시간</div>
+            <div id="stats-168-center-val" style="font-size:26px;font-weight:800;color:var(--mint)">-</div>
+          </div>
+        </div>
+      </div>
+
       <div class="card" id="stats-desired-card">
-        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.desiredTrend">원하는 삶 달성률 추이</h3>
+        <h3 style="font-size:15px;margin-bottom:12px" data-i18n="stats.dreamTrend">꿈 투자 시간 추이</h3>
         <div class="stats-chart-container"><canvas id="stats-desired-chart"></canvas></div>
       </div>
 
@@ -2517,8 +2532,12 @@ const TRANSLATIONS = {
     'stats.period': '기간', 'stats.recordedDays': '기록일',
     'stats.noData': '이 기간에는 기록이 없어요',
     'stats.activityRanking': '활동 TOP 5', 'stats.desiredTrend': '원하는 삶 달성률 추이',
+    'stats.dreamTrend': '꿈 투자 시간 추이',
     'stats.fixedFlexTrend': '고정/유동 시간 비율', 'stats.activityTrend': '활동별 시간 추이',
     'stats.totalTime': '총 시간', 'stats.avgDesired': '평균 달성률', 'stats.avgFlex': '평균 유동 비율',
+    'stats.freeTime': '나의 자유시간', 'stats.dreamTime': '꿈 투자 시간', 'stats.dreamRate': '꿈 투자율', 'stats.fixedSleep': '고정+수면',
+    'stats.168title': '나의 168시간', 'stats.sleep': '수면', 'stats.fixed': '고정(업무 등)', 'stats.dream': '꿈(원하는 삶)', 'stats.otherFlex': '기타 자유시간', 'stats.unrecorded': '미기록',
+    'stats.allActivities': '전체',
     'stats.selectActivity': '활동을 선택하세요',
     'stats.excludeFixed': '고정 활동 제외', 'stats.exportPdf': 'PDF로 내보내기', 'stats.exportExcel': '엑셀로 내보내기', 'stats.pdfTitle': 'MyRoutine - 기간별 통계',
     'stats.planTitle': '계획 실행 통계', 'stats.planTaskAvg': '할 일 완료율', 'stats.planBig3Avg': 'Big 3 달성률',
@@ -2698,8 +2717,12 @@ const TRANSLATIONS = {
     'stats.period': '期間', 'stats.recordedDays': '記録日',
     'stats.noData': 'この期間には記録がありません',
     'stats.activityRanking': '活動 TOP 5', 'stats.desiredTrend': '理想達成率の推移',
+    'stats.dreamTrend': '夢の投資時間推移',
     'stats.fixedFlexTrend': '固定/自由時間の割合', 'stats.activityTrend': '活動別時間の推移',
     'stats.totalTime': '合計時間', 'stats.avgDesired': '平均達成率', 'stats.avgFlex': '平均自由比率',
+    'stats.freeTime': '自由時間', 'stats.dreamTime': '夢の投資時間', 'stats.dreamRate': '夢の投資率', 'stats.fixedSleep': '固定+睡眠',
+    'stats.168title': '私の168時間', 'stats.sleep': '睡眠', 'stats.fixed': '固定(仕事等)', 'stats.dream': '夢(理想の人生)', 'stats.otherFlex': 'その他自由時間', 'stats.unrecorded': '未記録',
+    'stats.allActivities': '全体',
     'stats.selectActivity': '活動を選択してください',
     'stats.excludeFixed': '固定活動を除外', 'stats.exportPdf': 'PDFにエクスポート', 'stats.exportExcel': 'Excelにエクスポート', 'stats.pdfTitle': 'MyRoutine - 期間統計',
     'stats.planTitle': '計画実行統計', 'stats.planTaskAvg': 'タスク完了率', 'stats.planBig3Avg': 'Big 3 達成率',
@@ -2879,8 +2902,12 @@ const TRANSLATIONS = {
     'stats.period': 'Period', 'stats.recordedDays': 'Recorded',
     'stats.noData': 'No records for this period',
     'stats.activityRanking': 'Top 5 Activities', 'stats.desiredTrend': 'Desired Life Achievement Trend',
+    'stats.dreamTrend': 'Dream Investment Trend',
     'stats.fixedFlexTrend': 'Fixed/Flexible Ratio', 'stats.activityTrend': 'Activity Time Trend',
     'stats.totalTime': 'Total Time', 'stats.avgDesired': 'Avg Achievement', 'stats.avgFlex': 'Avg Flexible',
+    'stats.freeTime': 'My Free Time', 'stats.dreamTime': 'Dream Time', 'stats.dreamRate': 'Dream Rate', 'stats.fixedSleep': 'Fixed+Sleep',
+    'stats.168title': 'My 168 Hours', 'stats.sleep': 'Sleep', 'stats.fixed': 'Fixed (Work etc.)', 'stats.dream': 'Dream (Desired Life)', 'stats.otherFlex': 'Other Free Time', 'stats.unrecorded': 'Unrecorded',
+    'stats.allActivities': 'All',
     'stats.selectActivity': 'Select an activity',
     'stats.excludeFixed': 'Exclude fixed', 'stats.exportPdf': 'Export as PDF', 'stats.exportExcel': 'Export as Excel', 'stats.pdfTitle': 'MyRoutine - Period Stats',
     'stats.planTitle': 'Plan Execution Stats', 'stats.planTaskAvg': 'Task Completion', 'stats.planBig3Avg': 'Big 3 Rate',
@@ -3083,6 +3110,7 @@ let statsDesiredChart = null;
 let statsRatioChart = null;
 let statsActivityChart = null;
 let statsPlanChart = null;
+let stats168Chart = null;
 let statsSelectedActivity = null;
 let statsExcludeFixed = false;
 let statsCachedDays = [];
@@ -4043,7 +4071,8 @@ function renderStats() {
   if (pdfBtn) pdfBtn.style.display = '';
   if (shareBtn) shareBtn.style.display = '';
 
-  renderStatsSummaryCards(days);
+  renderStatsSummaryCards(days, dates);
+  render168Chart(days, dates);
   renderStatsDesiredChart(days, dates);
   renderStatsRatioChart(days, dates);
   renderStatsRanking(days);
@@ -4052,18 +4081,59 @@ function renderStats() {
   renderStatsPlan(dates);
 }
 
-function renderStatsSummaryCards(days) {
-  const totalMin = days.reduce((s, d) => s + d.totalMin, 0);
-  const avgDesired = days.length > 0
-    ? Math.round(days.reduce((s, d) => s + (d.flexMin > 0 ? (d.desiredMin / d.flexMin * 100) : 0), 0) / days.length)
-    : 0;
-  const avgFlex = days.length > 0
-    ? Math.round(days.reduce((s, d) => s + (d.totalMin > 0 ? (d.flexMin / d.totalMin * 100) : 0), 0) / days.length)
-    : 0;
+function renderStatsSummaryCards(days, dates) {
+  const totalFixedMin = days.reduce((s, d) => s + d.fixedMin, 0);
+  const totalFlexMin = days.reduce((s, d) => s + d.flexMin, 0);
+  const totalDesiredMin = days.reduce((s, d) => s + d.desiredMin, 0);
+  const numDays = dates.length;
+  const totalWeekMin = numDays * 24 * 60; // 168h for 7 days
+  const freeMin = totalWeekMin - totalFixedMin;
+  const dreamRate = totalFlexMin > 0 ? Math.round(totalDesiredMin / totalFlexMin * 100) : 0;
 
-  document.getElementById('stats-total-time').textContent = formatMin(totalMin);
-  document.getElementById('stats-avg-desired').textContent = avgDesired + '%';
-  document.getElementById('stats-avg-flex').textContent = avgFlex + '%';
+  document.getElementById('stats-free-time').textContent = formatMin(freeMin > 0 ? freeMin : 0);
+  document.getElementById('stats-dream-time').textContent = formatMin(totalDesiredMin);
+  document.getElementById('stats-dream-rate').textContent = dreamRate + '%';
+  document.getElementById('stats-fixed-sleep').textContent = formatMin(totalFixedMin);
+}
+
+function render168Chart(days, dates) {
+  const ctx = document.getElementById('stats-168-chart').getContext('2d');
+  if (stats168Chart) stats168Chart.destroy();
+
+  const numDays = dates.length;
+  const totalWeekMin = numDays * 24 * 60;
+  const totalSleepMin = days.reduce((s, d) => s + (d.sleepMin || 0), 0);
+  const totalFixedNoSleep = days.reduce((s, d) => s + d.fixedMin - (d.sleepMin || 0), 0);
+  const totalDesiredMin = days.reduce((s, d) => s + d.desiredMin, 0);
+  const totalFlexMin = days.reduce((s, d) => s + d.flexMin, 0);
+  const otherFlexMin = totalFlexMin - totalDesiredMin;
+  const recordedMin = days.reduce((s, d) => s + d.totalMin, 0);
+  const unrecordedMin = Math.max(0, totalWeekMin - recordedMin);
+  const freeMin = Math.max(0, totalWeekMin - totalSleepMin - totalFixedNoSleep);
+
+  document.getElementById('stats-168-center-val').textContent = formatMin(freeMin);
+
+  stats168Chart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: [t('stats.sleep'), t('stats.fixed'), t('stats.dream'), t('stats.otherFlex'), t('stats.unrecorded')],
+      datasets: [{
+        data: [totalSleepMin, Math.max(0, totalFixedNoSleep), totalDesiredMin, Math.max(0, otherFlexMin), unrecordedMin],
+        backgroundColor: ['#6366F1', '#8E9AAF', '#FF7F7F', '#7ECEC1', '#E5E7EB'],
+        borderWidth: 2,
+        borderColor: 'var(--card)',
+        cutout: '62%'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, usePointStyle: true, pointStyleWidth: 10, padding: 10 } },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + formatMin(ctx.raw) + ' (' + Math.round(ctx.raw / totalWeekMin * 100) + '%)' } }
+      }
+    }
+  });
 }
 
 function renderStatsDesiredChart(days, dates) {
@@ -4074,33 +4144,55 @@ function renderStatsDesiredChart(days, dates) {
     const parts = d.split('-');
     return parseInt(parts[1]) + '/' + parseInt(parts[2]);
   });
-  const values = dates.map(dateStr => {
+  const timeValues = dates.map(dateStr => {
+    const day = days.find(d => d.date === dateStr);
+    return day ? day.desiredMin : 0;
+  });
+  const pctValues = dates.map(dateStr => {
     const day = days.find(d => d.date === dateStr);
     if (!day || day.flexMin === 0) return null;
     return Math.round(day.desiredMin / day.flexMin * 100);
   });
 
   statsDesiredChart = new Chart(ctx, {
-    type: 'line',
+    type: 'bar',
     data: {
       labels,
-      datasets: [{
-        data: values,
-        borderColor: 'rgba(255,127,127,0.9)',
-        backgroundColor: 'rgba(255,127,127,0.15)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 3,
-        pointBackgroundColor: 'rgba(255,127,127,1)',
-        spanGaps: true
-      }]
+      datasets: [
+        {
+          label: t('stats.dreamTime'),
+          data: timeValues,
+          backgroundColor: 'rgba(255,127,127,0.5)',
+          borderColor: 'rgba(255,127,127,1)',
+          borderWidth: 1,
+          borderRadius: 3,
+          yAxisID: 'y'
+        },
+        {
+          label: t('stats.dreamRate'),
+          data: pctValues,
+          type: 'line',
+          borderColor: '#F59E0B',
+          backgroundColor: 'rgba(245,158,11,0.1)',
+          fill: false,
+          tension: 0.3,
+          pointRadius: 3,
+          pointBackgroundColor: '#F59E0B',
+          spanGaps: true,
+          yAxisID: 'y1'
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y + '%' } } },
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, usePointStyle: true, pointStyleWidth: 10, padding: 12 } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.yAxisID === 'y1' ? ctx.parsed.y + '%' : formatMin(ctx.parsed.y) } }
+      },
       scales: {
-        y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } },
+        y: { beginAtZero: true, position: 'left', ticks: { callback: v => Math.floor(v/60) > 0 ? Math.floor(v/60) + 'h' : v + 'm', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } },
+        y1: { beginAtZero: true, max: 100, position: 'right', ticks: { callback: v => v + '%', font: { size: 11 } }, grid: { display: false } },
         x: { ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }, grid: { display: false } }
       }
     }
@@ -4177,25 +4269,20 @@ function renderStatsRanking(days) {
 }
 
 function renderStatsActivityTrend(days, dates) {
-  // Collect all activities
   const actSet = new Set();
   days.forEach(d => d.activities.forEach(a => actSet.add(a.activity)));
   const allActivities = [...actSet].sort();
 
   const chipsEl = document.getElementById('stats-activity-chips');
-  if (!statsSelectedActivity || !actSet.has(statsSelectedActivity)) {
-    statsSelectedActivity = allActivities[0] || null;
+  const ALL_KEY = '__all__';
+  if (!statsSelectedActivity || (statsSelectedActivity !== ALL_KEY && !actSet.has(statsSelectedActivity))) {
+    statsSelectedActivity = ALL_KEY;
   }
 
-  chipsEl.innerHTML = allActivities.map(a =>
-    `<button class="stats-activity-chip${a === statsSelectedActivity ? ' active' : ''}" onclick="selectStatsActivity('${a.replace(/'/g, "\\'")}')">${a}</button>`
+  const allChip = `<button class="stats-activity-chip${statsSelectedActivity === ALL_KEY ? ' active' : ''}" data-key="${ALL_KEY}" onclick="selectStatsActivity('${ALL_KEY}')">${t('stats.allActivities')}</button>`;
+  chipsEl.innerHTML = allChip + allActivities.map(a =>
+    `<button class="stats-activity-chip${a === statsSelectedActivity ? ' active' : ''}" data-key="${a.replace(/"/g, '&quot;')}" onclick="selectStatsActivity('${a.replace(/'/g, "\\'")}')">${a}</button>`
   ).join('');
-
-  if (!statsSelectedActivity) {
-    const ctx = document.getElementById('stats-activity-chart').getContext('2d');
-    if (statsActivityChart) { statsActivityChart.destroy(); statsActivityChart = null; }
-    return;
-  }
 
   const ctx = document.getElementById('stats-activity-chart').getContext('2d');
   if (statsActivityChart) statsActivityChart.destroy();
@@ -4204,40 +4291,73 @@ function renderStatsActivityTrend(days, dates) {
     const parts = d.split('-');
     return parseInt(parts[1]) + '/' + parseInt(parts[2]);
   });
-  const values = dates.map(dateStr => {
-    const day = days.find(d => d.date === dateStr);
-    if (!day) return 0;
-    return day.activities.filter(a => a.activity === statsSelectedActivity).reduce((s, a) => s + a.minutes, 0);
-  });
 
-  statsActivityChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        data: values,
-        backgroundColor: 'rgba(126,206,193,0.6)',
-        borderColor: 'rgba(126,206,193,1)',
-        borderWidth: 1,
-        borderRadius: 3
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => formatMin(ctx.parsed.y) } } },
-      scales: {
-        y: { beginAtZero: true, ticks: { callback: v => Math.floor(v/60) > 0 ? Math.floor(v/60) + 'h' : v + 'm', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } },
-        x: { ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }, grid: { display: false } }
+  if (statsSelectedActivity === ALL_KEY) {
+    // Stacked bar: fixed / dream / other flex
+    const fixedData = dates.map(dateStr => { const day = days.find(d => d.date === dateStr); return day ? day.fixedMin : 0; });
+    const dreamData = dates.map(dateStr => { const day = days.find(d => d.date === dateStr); return day ? day.desiredMin : 0; });
+    const otherFlexData = dates.map(dateStr => { const day = days.find(d => d.date === dateStr); return day ? Math.max(0, day.flexMin - day.desiredMin) : 0; });
+
+    statsActivityChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: t('stats.fixed'), data: fixedData, backgroundColor: 'rgba(142,154,175,0.7)', borderRadius: 2 },
+          { label: t('stats.dream'), data: dreamData, backgroundColor: 'rgba(255,127,127,0.7)', borderRadius: 2 },
+          { label: t('stats.otherFlex'), data: otherFlexData, backgroundColor: 'rgba(126,206,193,0.5)', borderRadius: 2 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { size: 11 }, usePointStyle: true, pointStyleWidth: 10, padding: 12 } },
+          tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + formatMin(ctx.parsed.y) } }
+        },
+        scales: {
+          x: { stacked: true, ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }, grid: { display: false } },
+          y: { stacked: true, ticks: { callback: v => Math.floor(v/60) + 'h', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } }
+        }
       }
-    }
-  });
+    });
+  } else {
+    const values = dates.map(dateStr => {
+      const day = days.find(d => d.date === dateStr);
+      if (!day) return 0;
+      return day.activities.filter(a => a.activity === statsSelectedActivity).reduce((s, a) => s + a.minutes, 0);
+    });
+
+    statsActivityChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: 'rgba(126,206,193,0.6)',
+          borderColor: 'rgba(126,206,193,1)',
+          borderWidth: 1,
+          borderRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => formatMin(ctx.parsed.y) } } },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: v => Math.floor(v/60) > 0 ? Math.floor(v/60) + 'h' : v + 'm', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } },
+          x: { ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }, grid: { display: false } }
+        }
+      }
+    });
+  }
 }
 
 function selectStatsActivity(activity) {
   statsSelectedActivity = activity;
   document.querySelectorAll('.stats-activity-chip').forEach(chip => {
-    chip.classList.toggle('active', chip.textContent === activity);
+    const chipKey = chip.getAttribute('data-key') || chip.textContent;
+    chip.classList.toggle('active', chipKey === activity);
   });
   const dates = getStatsPeriodDates();
   const days = aggregateStatsData(dates);
