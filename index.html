@@ -4121,6 +4121,11 @@ function render168Chart(days, dates) {
 
   document.getElementById('stats-168-center-val').textContent = formatMin(freeMin);
 
+  const centerLabel = document.querySelector('#stats-168-center > div:first-child');
+  const centerVal = document.getElementById('stats-168-center-val');
+  const defaultLabel = centerLabel.textContent;
+  const defaultVal = formatMin(freeMin);
+
   stats168Chart = new Chart(ctx, {
     type: 'doughnut',
     data: {
@@ -4136,9 +4141,22 @@ function render168Chart(days, dates) {
     options: {
       responsive: true,
       maintainAspectRatio: true,
+      onHover: (evt, elements) => {
+        if (elements.length > 0) {
+          const i = elements[0].index;
+          const label = stats168Chart.data.labels[i];
+          const val = stats168Chart.data.datasets[0].data[i];
+          const pct = Math.round(val / totalWeekMin * 100);
+          centerLabel.textContent = label;
+          centerVal.textContent = formatMin(val) + ' (' + pct + '%)';
+        } else {
+          centerLabel.textContent = defaultLabel;
+          centerVal.textContent = defaultVal;
+        }
+      },
       plugins: {
         legend: { position: 'bottom', labels: { font: { size: 10 }, usePointStyle: true, pointStyleWidth: 8, padding: 8 } },
-        tooltip: { position: 'nearest', callbacks: { label: ctx => ctx.label + ': ' + formatMin(ctx.raw) + ' (' + Math.round(ctx.raw / totalWeekMin * 100) + '%)' } }
+        tooltip: { enabled: false }
       }
     }
   });
