@@ -2584,7 +2584,7 @@ const TRANSLATIONS = {
     'auth.downloadComplete': '클라우드 데이터 적용 완료',
     'auth.syncNow': '지금 동기화', 'auth.never': '없음',
     'support.coffee': '개발자 응원하기',
-    'life.setup': '남은 시간 설정', 'life.birthDate': '생년월일', 'life.gender': '성별',
+    'life.setup': '남은 시간 설정', 'life.country': '거주 국가', 'life.birthDate': '생년월일', 'life.gender': '성별',
     'life.male': '남성', 'life.female': '여성',
     'life.save': '저장', 'life.reset': '초기화',
     'life.remaining': '남은 시간',
@@ -2775,7 +2775,7 @@ const TRANSLATIONS = {
     'auth.downloadComplete': 'ダウンロード完了',
     'auth.syncNow': '今すぐ同期', 'auth.never': 'なし',
     'support.coffee': '開発者を応援する',
-    'life.setup': '残り時間設定', 'life.birthDate': '生年月日', 'life.gender': '性別',
+    'life.setup': '残り時間設定', 'life.country': '居住国', 'life.birthDate': '生年月日', 'life.gender': '性別',
     'life.male': '男性', 'life.female': '女性',
     'life.save': '保存', 'life.reset': 'リセット',
     'life.remaining': '残り時間',
@@ -2966,7 +2966,7 @@ const TRANSLATIONS = {
     'auth.downloadComplete': 'Download complete',
     'auth.syncNow': 'Sync now', 'auth.never': 'Never',
     'support.coffee': 'Buy us a coffee',
-    'life.setup': 'Life Timer Setup', 'life.birthDate': 'Date of birth', 'life.gender': 'Gender',
+    'life.setup': 'Life Timer Setup', 'life.country': 'Country', 'life.birthDate': 'Date of birth', 'life.gender': 'Gender',
     'life.male': 'Male', 'life.female': 'Female',
     'life.save': 'Save', 'life.reset': 'Reset',
     'life.remaining': 'Time remaining',
@@ -7276,38 +7276,68 @@ function showAboutModal() {
 
 // ============== Life Counter ==============
 const LIFE_EXPECTANCY = {
-  ko: { male: 80.6, female: 86.6 },
-  ja: { male: 81.5, female: 87.6 },
-  en: { male: 76.3, female: 81.4 },
+  KR: { male: 80.6, female: 86.6, name: '🇰🇷 한국', nameJa: '🇰🇷 韓国', nameEn: '🇰🇷 South Korea' },
+  JP: { male: 81.5, female: 87.6, name: '🇯🇵 일본', nameJa: '🇯🇵 日本', nameEn: '🇯🇵 Japan' },
+  US: { male: 74.8, female: 80.2, name: '🇺🇸 미국', nameJa: '🇺🇸 アメリカ', nameEn: '🇺🇸 United States' },
+  GB: { male: 79.0, female: 82.9, name: '🇬🇧 영국', nameJa: '🇬🇧 イギリス', nameEn: '🇬🇧 United Kingdom' },
+  DE: { male: 78.7, female: 83.4, name: '🇩🇪 독일', nameJa: '🇩🇪 ドイツ', nameEn: '🇩🇪 Germany' },
+  FR: { male: 79.5, female: 85.3, name: '🇫🇷 프랑스', nameJa: '🇫🇷 フランス', nameEn: '🇫🇷 France' },
+  CA: { male: 79.8, female: 84.1, name: '🇨🇦 캐나다', nameJa: '🇨🇦 カナダ', nameEn: '🇨🇦 Canada' },
+  AU: { male: 81.3, female: 85.4, name: '🇦🇺 호주', nameJa: '🇦🇺 オーストラリア', nameEn: '🇦🇺 Australia' },
+  CN: { male: 75.0, female: 80.5, name: '🇨🇳 중국', nameJa: '🇨🇳 中国', nameEn: '🇨🇳 China' },
+  IN: { male: 69.4, female: 72.0, name: '🇮🇳 인도', nameJa: '🇮🇳 インド', nameEn: '🇮🇳 India' },
+  BR: { male: 72.0, female: 79.4, name: '🇧🇷 브라질', nameJa: '🇧🇷 ブラジル', nameEn: '🇧🇷 Brazil' },
+  SG: { male: 81.4, female: 85.7, name: '🇸🇬 싱가포르', nameJa: '🇸🇬 シンガポール', nameEn: '🇸🇬 Singapore' },
+  TW: { male: 77.3, female: 83.7, name: '🇹🇼 대만', nameJa: '🇹🇼 台湾', nameEn: '🇹🇼 Taiwan' },
+  TH: { male: 73.2, female: 80.7, name: '🇹🇭 태국', nameJa: '🇹🇭 タイ', nameEn: '🇹🇭 Thailand' },
+  WW: { male: 70.8, female: 75.6, name: '🌍 세계 평균', nameJa: '🌍 世界平均', nameEn: '🌍 World Average' },
 };
+
+const LANG_TO_COUNTRY = { ko: 'KR', ja: 'JP', en: 'US' };
 
 let lifeCounterInterval = null;
 
 function getLifeExpectancy() {
-  const lang = currentLang || 'en';
-  return LIFE_EXPECTANCY[lang] || LIFE_EXPECTANCY.en;
+  const country = data.country || LANG_TO_COUNTRY[currentLang] || 'WW';
+  return LIFE_EXPECTANCY[country] || LIFE_EXPECTANCY.WW;
+}
+
+function getCountryName(code) {
+  const le = LIFE_EXPECTANCY[code];
+  if (!le) return code;
+  return currentLang === 'ja' ? le.nameJa : currentLang === 'en' ? le.nameEn : le.name;
 }
 
 function showLifeSetup() {
   const bd = data.birthDate || '';
   const gen = data.gender || 'male';
-  const le = getLifeExpectancy();
+  const selCountry = data.country || LANG_TO_COUNTRY[currentLang] || 'WW';
+  const countryOptions = Object.keys(LIFE_EXPECTANCY).map(code =>
+    `<option value="${code}" ${code === selCountry ? 'selected' : ''}>${getCountryName(code)}</option>`
+  ).join('');
+  const le = LIFE_EXPECTANCY[selCountry];
   showModal(`
     <h3>⏳ ${t('life.setup')}</h3>
-    <p style="font-size:12px;color:var(--text-sub);margin-bottom:14px;line-height:1.6;text-align:center">
+    <div style="margin-bottom:12px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">${t('life.country')}</label>
+      <select id="life-country-input" class="input" style="width:100%;padding:10px 12px" onchange="updateLifeExpLabel()">
+        ${countryOptions}
+      </select>
+    </div>
+    <p id="life-exp-label" style="font-size:12px;color:var(--text-sub);margin-bottom:14px;line-height:1.6;text-align:center">
       ${currentLang === 'ja' ? '平均寿命: 男性 ' + le.male + '歳 / 女性 ' + le.female + '歳' :
         currentLang === 'en' ? 'Life expectancy: M ' + le.male + 'y / F ' + le.female + 'y' :
         '평균 수명: 남성 ' + le.male + '세 / 여성 ' + le.female + '세'}
     </p>
-    <div style="margin-bottom:14px">
+    <div style="margin-bottom:12px">
       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">${t('life.birthDate')}</label>
       <input type="date" id="life-birth-input" class="input" value="${bd}" style="width:100%">
     </div>
     <div style="margin-bottom:18px">
       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">${t('life.gender')}</label>
       <div style="display:flex;gap:8px">
-        <button id="life-gender-male" class="btn ${gen === 'male' ? '' : 'btn-outline'}" onclick="document.getElementById('life-gender-male').className='btn';document.getElementById('life-gender-female').className='btn btn-outline'" style="flex:1">${t('life.male')}</button>
-        <button id="life-gender-female" class="btn ${gen === 'female' ? '' : 'btn-outline'}" onclick="document.getElementById('life-gender-female').className='btn';document.getElementById('life-gender-male').className='btn btn-outline'" style="flex:1">${t('life.female')}</button>
+        <button id="life-gender-male" class="btn ${gen === 'male' ? '' : 'btn-outline'}" onclick="document.getElementById('life-gender-male').className='btn';document.getElementById('life-gender-female').className='btn btn-outline';updateLifeExpLabel()" style="flex:1">${t('life.male')}</button>
+        <button id="life-gender-female" class="btn ${gen === 'female' ? '' : 'btn-outline'}" onclick="document.getElementById('life-gender-female').className='btn';document.getElementById('life-gender-male').className='btn btn-outline';updateLifeExpLabel()" style="flex:1">${t('life.female')}</button>
       </div>
     </div>
     <button class="btn btn-block" onclick="saveLifeSetup()" style="background:linear-gradient(135deg,#6366F1,#8B5CF6);color:white;font-weight:700">${t('life.save')}</button>
@@ -7318,12 +7348,24 @@ function showLifeSetup() {
   `);
 }
 
+function updateLifeExpLabel() {
+  const code = document.getElementById('life-country-input').value;
+  const le = LIFE_EXPECTANCY[code];
+  if (!le) return;
+  const label = document.getElementById('life-exp-label');
+  if (!label) return;
+  label.textContent = currentLang === 'ja' ? '平均寿命: 男性 ' + le.male + '歳 / 女性 ' + le.female + '歳' :
+    currentLang === 'en' ? 'Life expectancy: M ' + le.male + 'y / F ' + le.female + 'y' :
+    '평균 수명: 남성 ' + le.male + '세 / 여성 ' + le.female + '세';
+}
+
 function saveLifeSetup() {
   const bd = document.getElementById('life-birth-input').value;
   if (!bd) return;
   const isFemale = document.getElementById('life-gender-female').className === 'btn';
   data.birthDate = bd;
   data.gender = isFemale ? 'female' : 'male';
+  data.country = document.getElementById('life-country-input').value;
   saveData();
   closeModal();
   startLifeCounter();
@@ -7332,6 +7374,7 @@ function saveLifeSetup() {
 function resetLifeSetup() {
   delete data.birthDate;
   delete data.gender;
+  delete data.country;
   saveData();
   closeModal();
   stopLifeCounter();
