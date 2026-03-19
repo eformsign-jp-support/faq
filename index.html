@@ -2051,6 +2051,10 @@ body {
     <div id="life-counter" style="display:none;text-align:center;padding:10px 14px;margin-bottom:8px;cursor:pointer;border-radius:var(--radius-sm)" onclick="showLifeSetup()">
       <div style="font-size:11px;color:var(--text-sub);margin-bottom:4px;letter-spacing:0.5px" id="life-counter-label">⏳</div>
       <div id="life-counter-text" style="font-size:16px;font-weight:700;color:var(--coral);font-variant-numeric:tabular-nums;letter-spacing:0.3px"></div>
+      <div id="dream-counter-row" style="display:none;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text-sub);margin-bottom:3px;letter-spacing:0.5px" id="dream-counter-label"></div>
+        <div id="dream-counter-text" style="font-size:15px;font-weight:700;color:#6366F1;font-variant-numeric:tabular-nums;letter-spacing:0.3px"></div>
+      </div>
     </div>
 
     <!-- Record Past Date Banner -->
@@ -2591,6 +2595,7 @@ const TRANSLATIONS = {
     'life.remaining': '남은 시간',
     'life.tapToSet': '⏳ 터치하여 남은 시간 설정',
     'life.years': '년', 'life.days': '일', 'life.hours': '시간', 'life.minutes': '분', 'life.seconds': '초',
+    'life.dreamProjected': '꿈 투자 예상 시간', 'life.dreamRatio': '일평균 투자율',
     'share.daily': '공유하기', 'share.stats': '통계 공유하기',
     'share.shareText': 'MyRoutine으로 분석한 나의 하루',
     'share.generating': '이미지 생성 중...', 'share.shared': '공유 완료!',
@@ -2782,6 +2787,7 @@ const TRANSLATIONS = {
     'life.remaining': '残り時間',
     'life.tapToSet': '⏳ タップして残り時間を設定',
     'life.years': '年', 'life.days': '日', 'life.hours': '時間', 'life.minutes': '分', 'life.seconds': '秒',
+    'life.dreamProjected': '夢の投資予想時間', 'life.dreamRatio': '日平均投資率',
     'share.daily': 'シェアする', 'share.stats': '統計をシェアする',
     'share.shareText': 'MyRoutineで分析した一日',
     'share.generating': '画像を生成中...', 'share.shared': 'シェア完了！',
@@ -2973,6 +2979,7 @@ const TRANSLATIONS = {
     'life.remaining': 'Time remaining',
     'life.tapToSet': '⏳ Tap to set your life timer',
     'life.years': 'y', 'life.days': 'd', 'life.hours': 'h', 'life.minutes': 'm', 'life.seconds': 's',
+    'life.dreamProjected': 'Dream Investment Time', 'life.dreamRatio': 'Daily avg ratio',
     'share.daily': 'Share', 'share.stats': 'Share Stats',
     'share.shareText': 'My day analyzed with MyRoutine',
     'share.generating': 'Generating image...', 'share.shared': 'Shared!',
@@ -7439,6 +7446,49 @@ function updateLifeCounter() {
 
   labelEl.textContent = '⏳ ' + t('life.remaining');
   textEl.textContent = `${years}${t('life.years')} ${days}${t('life.days')} ${hours}${t('life.hours')} ${minutes}${t('life.minutes')} ${String(seconds).padStart(2,'0')}${t('life.seconds')}`;
+
+  // Dream projected time
+  const dreamRow = document.getElementById('dream-counter-row');
+  const dreamLabel = document.getElementById('dream-counter-label');
+  const dreamText = document.getElementById('dream-counter-text');
+  if (!dreamRow || !dreamLabel || !dreamText) return;
+
+  const dreamRatio = calcDreamRatio();
+  if (dreamRatio <= 0) { dreamRow.style.display = 'none'; return; }
+
+  dreamRow.style.display = '';
+  const dreamSec = Math.floor(totalSec * dreamRatio);
+  const dYears = Math.floor(dreamSec / (365.25 * 24 * 3600));
+  const dRem = dreamSec - dYears * Math.floor(365.25 * 24 * 3600);
+  const dDays = Math.floor(dRem / (24 * 3600));
+  const dHours = Math.floor((dRem % (24 * 3600)) / 3600);
+
+  const pct = Math.round(dreamRatio * 100);
+  dreamLabel.textContent = `✨ ${t('life.dreamProjected')} (${t('life.dreamRatio')} ${pct}%)`;
+  dreamText.textContent = `${dYears}${t('life.years')} ${dDays}${t('life.days')} ${dHours}${t('life.hours')}`;
+}
+
+function calcDreamRatio() {
+  // Calculate average dream time ratio from all recorded & classified days
+  const allDates = Object.keys(data.dates || {});
+  let totalRecordedMin = 0;
+  let totalDreamMin = 0;
+  let dayCount = 0;
+
+  allDates.forEach(dateStr => {
+    const dd = data.dates[dateStr];
+    if (!dd || !dd.entries || dd.entries.length === 0) return;
+    if (!dd.entries.every(e => e.category)) return; // skip unclassified days
+    const stats = calcStats(dd);
+    if (stats.totalMin <= 0) return;
+    totalRecordedMin += stats.totalMin;
+    totalDreamMin += stats.desiredMin;
+    dayCount++;
+  });
+
+  if (dayCount === 0 || totalRecordedMin === 0) return 0;
+  // ratio = dream time / total recorded time (which represents a full day)
+  return totalDreamMin / totalRecordedMin;
 }
 
 // ============== Helpers ==============
