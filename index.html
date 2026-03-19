@@ -2052,11 +2052,13 @@ body {
       <div id="life-counter-grid" style="display:grid;grid-template-columns:1fr;gap:6px">
         <div style="text-align:center;padding:8px 10px;background:var(--card);border-radius:var(--radius-sm);box-shadow:var(--shadow)">
           <div style="font-size:10px;color:var(--text-sub);margin-bottom:3px" id="life-counter-label">⏳</div>
-          <div id="life-counter-text" style="font-size:14px;font-weight:700;color:var(--coral);font-variant-numeric:tabular-nums"></div>
+          <div id="life-counter-line1" style="font-size:15px;font-weight:800;color:var(--coral);font-variant-numeric:tabular-nums"></div>
+          <div id="life-counter-line2" style="font-size:12px;font-weight:600;color:var(--coral);font-variant-numeric:tabular-nums;opacity:0.8"></div>
         </div>
         <div id="dream-counter-row" style="display:none;text-align:center;padding:8px 10px;background:var(--card);border-radius:var(--radius-sm);box-shadow:var(--shadow)">
           <div style="font-size:10px;color:var(--text-sub);margin-bottom:3px" id="dream-counter-label"></div>
-          <div id="dream-counter-text" style="font-size:14px;font-weight:700;color:#6366F1;font-variant-numeric:tabular-nums"></div>
+          <div id="dream-counter-line1" style="font-size:15px;font-weight:800;color:#6366F1;font-variant-numeric:tabular-nums"></div>
+          <div id="dream-counter-line2" style="font-size:12px;font-weight:600;color:#6366F1;font-variant-numeric:tabular-nums;opacity:0.8"></div>
         </div>
       </div>
     </div>
@@ -7401,9 +7403,10 @@ function startLifeCounter() {
     if (el) {
       el.style.display = 'block';
       el.querySelector('#life-counter-label').textContent = '';
-      el.querySelector('#life-counter-text').style.fontSize = '13px';
-      el.querySelector('#life-counter-text').style.color = 'var(--text-sub)';
-      el.querySelector('#life-counter-text').textContent = t('life.tapToSet');
+      el.querySelector('#life-counter-line1').style.fontSize = '13px';
+      el.querySelector('#life-counter-line1').style.color = 'var(--text-sub)';
+      el.querySelector('#life-counter-line1').textContent = t('life.tapToSet');
+      el.querySelector('#life-counter-line2').textContent = '';
     }
     return;
   }
@@ -7421,9 +7424,10 @@ function updateLifeCounter() {
   el.style.display = 'block';
 
   const labelEl = el.querySelector('#life-counter-label');
-  const textEl = el.querySelector('#life-counter-text');
-  textEl.style.fontSize = '14px';
-  textEl.style.color = 'var(--coral)';
+  const line1 = el.querySelector('#life-counter-line1');
+  const line2 = el.querySelector('#life-counter-line2');
+  line1.style.fontSize = '15px';
+  line1.style.color = 'var(--coral)';
 
   const birth = new Date(data.birthDate);
   const le = getLifeExpectancy();
@@ -7436,7 +7440,8 @@ function updateLifeCounter() {
   const diff = deathDate.getTime() - now.getTime();
   if (diff <= 0) {
     labelEl.textContent = '⏳ ' + t('life.remaining');
-    textEl.textContent = '--';
+    line1.textContent = '--';
+    line2.textContent = '';
     return;
   }
 
@@ -7449,13 +7454,15 @@ function updateLifeCounter() {
   const seconds = totalSec % 60;
 
   labelEl.textContent = '⏳ ' + t('life.remaining');
-  textEl.textContent = `${years}${t('life.years')} ${days}${t('life.days')} ${hours}${t('life.hours')} ${minutes}${t('life.minutes')} ${String(seconds).padStart(2,'0')}${t('life.seconds')}`;
+  line1.textContent = `${years}${t('life.years')} ${days}${t('life.days')}`;
+  line2.textContent = `${hours}${t('life.hours')} ${minutes}${t('life.minutes')} ${String(seconds).padStart(2,'0')}${t('life.seconds')}`;
 
   // Dream projected time
   const dreamRow = document.getElementById('dream-counter-row');
   const dreamLabel = document.getElementById('dream-counter-label');
-  const dreamText = document.getElementById('dream-counter-text');
-  if (!dreamRow || !dreamLabel || !dreamText) return;
+  const dreamLine1 = document.getElementById('dream-counter-line1');
+  const dreamLine2 = document.getElementById('dream-counter-line2');
+  if (!dreamRow || !dreamLabel || !dreamLine1) return;
 
   const grid = document.getElementById('life-counter-grid');
   const dreamRatio = calcDreamRatio();
@@ -7473,9 +7480,11 @@ function updateLifeCounter() {
   const dDays = Math.floor(dRem / (24 * 3600));
   const dHours = Math.floor((dRem % (24 * 3600)) / 3600);
 
+  const dMinutes = Math.floor((dRem % (24 * 3600) % 3600) / 60);
   const pct = Math.round(dreamRatio * 100);
   dreamLabel.textContent = `✨ ${t('life.dreamProjected')} (${pct}%)`;
-  dreamText.textContent = `${dYears}${t('life.years')} ${dDays}${t('life.days')} ${dHours}${t('life.hours')}`;
+  dreamLine1.textContent = `${dYears}${t('life.years')} ${dDays}${t('life.days')}`;
+  if (dreamLine2) dreamLine2.textContent = `${dHours}${t('life.hours')} ${dMinutes}${t('life.minutes')}`;
 }
 
 function calcDreamRatio() {
